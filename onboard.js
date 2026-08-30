@@ -25,9 +25,6 @@ const announce = (m) => { $('live').textContent = m; };
 async function api(path, opts = {}) {
   return await window.OB.api(path, opts);
 }
-  if (!r.ok) throw new Error(`${r.status} ${await r.text().catch(() => '')}`.slice(0, 200));
-  return r.json();
-}
 const post = (path, body) => api(path, {
   method: 'POST', headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(body || {}),
