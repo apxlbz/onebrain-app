@@ -1038,7 +1038,7 @@ async function maybeForceSetup() {
   if (location.hash && location.hash !== '#overview') return false;
   try {
     const ob = await api('/v1/onboarding');
-    if (ob && !ob.completed_at) { location.href = '/onboarding'; return true; }
+    if (ob && !ob.completed_at) { location.href = './index.html#setup'; return true; }
   } catch { /* never block the dashboard on this */ }
   return false;
 }
