@@ -1,0 +1,484 @@
+/* OneBrain landing page — Dala style reference.
+ *
+ * Loaded AFTER app.css, which owns the token NAMES. This file declares the Dala
+ * palette under its own `--color-*` names and re-points app.css's semantic
+ * aliases at them, all scoped to `.home`. Nothing escapes: the dashboard stays
+ * on its own (Dub) system, which is correct — a dense operational surface and a
+ * marketing page want opposite things, and the split is deliberate.
+ *
+ * The rules that actually define this look, from the reference:
+ *   void        #000000 is the design. Not dark grey, and never a panel.
+ *   no chrome   no cards, no borders, no shadows, no elevation. Elements float
+ *               on black separated by whitespace alone.
+ *   scale       hierarchy comes from SIZE and TRACKING, never weight. Every
+ *               headline is weight 400 at 42-113px with -0.04em tracking.
+ *   weight 200  18px body copy is ultra-light. This is the signature and the
+ *               single easiest thing to get wrong.
+ *   one violet  #8052ff is the sole filled action colour, one per view.
+ *               #ffb829 amber carries emphasis labels. Neither is a surface.
+ */
+
+.home {
+  /* Monad palette (styles.refero.design) — warm parchment, editorial serif
+     headings, mono labels, one Lake Blue action. The Dala token NAMES stay and
+     are re-pointed, so every downstream rule retunes itself:
+       void -> parchment · bone-white -> ink · silver-mist -> graphite
+       ash-gray -> smoke · electric-iris & saffron-spark -> lake blue
+     One deliberate deviation: body copy stays Inter, not mono — paragraphs
+     here run long, and mono body is hostile to non-developer readers. Labels,
+     nav and buttons carry the mono voice, per the reference. */
+  --color-void:#f6f3f1;
+  --color-bone-white:#242424;
+  --color-ash-gray:#797776;
+  --color-silver-mist:#4e4d4d;
+  --color-electric-iris:#2b59d1;
+  --color-saffron-spark:#2b59d1;
+  --color-deep-verdant:#15846e;
+  --color-ash-line:#cecac8;
+  --color-periwinkle:#cfdaf5;
+  --color-coral:#ff9473;
+  --color-sky:#a0b5eb;
+
+  /* app.css's semantic aliases, re-pointed */
+  --bg:var(--color-void); --panel:var(--color-void); --sunk:var(--color-void);
+  --ink:var(--color-bone-white); --muted:var(--color-silver-mist);
+  --faint:var(--color-ash-gray);
+  --line:var(--color-ash-line); --line-strong:#b9b4b1; --hair:transparent;
+  --accent:var(--color-electric-iris); --focus:var(--color-electric-iris);
+
+  /* 6px base unit */
+  --u1:6px; --u2:12px; --u3:18px; --u4:24px; --u5:30px; --u6:36px;
+  --u10:60px; --u16:96px; --u20:120px;
+  --radius-cards:40px; --radius-buttons:100px; --radius-full:9999px;
+  --page-max:1280px;
+
+  /* app.css sets `html, body { height:100% }` for the dashboard's full-height
+     shell. On a long scrolling document that caps the body box at one viewport,
+     which is the containing block for position:sticky — so the nav scrolled
+     away the moment you passed the fold. */
+  height:auto; min-height:100vh;
+
+  background:var(--color-void); color:var(--color-bone-white);
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+              "Segoe UI", Roboto, sans-serif;
+  font-size:17px; font-weight:400; line-height:1.5;
+  font-feature-settings:"ss01" on;
+  -webkit-font-smoothing:antialiased;
+}
+.home .grow { flex:1; }
+
+/* Type scale. Weight 400 at every display size — the brand trusts scale, not
+   weight, and bolding a headline here breaks the whole system. */
+.home h1, .home h2, .home h3 { font-weight:400; color:var(--color-bone-white);
+  font-family:ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  text-wrap:balance; }
+/* The reference runs display type to 113px, but that assumes short lines. The
+   line-reveal mask below is `overflow:hidden`, so anything wider than its
+   column is CLIPPED rather than wrapped — sized to fit the widest line here. */
+.home h1 { font-size:clamp(38px, 5vw, 80px); line-height:1.14;
+  letter-spacing:-.02em; margin:0 0 var(--u5); }
+.home h2 { font-size:clamp(30px, 3.6vw, 48px); line-height:1.2;
+  letter-spacing:-.02em; margin:0 0 var(--u4); }
+.home h3 { font-size:27px; line-height:1.15; letter-spacing:-.02em;
+  margin:0 0 var(--u2); }
+/* A reset for unclassed paragraphs only — as `.home p` it outranked
+   `.lede` and `.eyebrow` and collapsed the gaps they set. */
+.home p:not([class]) { margin:0; }
+
+/* Amber, uppercase, above the body copy — the reference's section label. */
+.home .eyebrow { display:inline-flex; align-items:center; gap:9px;
+  font-size:14px; font-weight:600; letter-spacing:.35px; text-transform:uppercase;
+  color:var(--color-saffron-spark); margin:0 0 var(--u3); }
+.pulse { width:6px; height:6px; border-radius:50%;
+  background:var(--color-saffron-spark);
+  box-shadow:0 0 0 0 rgba(43,89,209,.4); animation:pulse 2.6s ease-out infinite; }
+@keyframes pulse { 70%,100% { box-shadow:0 0 0 8px rgba(43,89,209,0) } }
+
+.home .lede, .home .sub { font-size:17px; font-weight:400; line-height:1.55;
+  color:var(--color-bone-white); max-width:30em; text-wrap:pretty; margin:0; }
+.home .lede { color:var(--color-silver-mist); margin:0 0 var(--u4); }
+.home .lede + .lede { margin-top:0; }
+.lede em, .sub em { font-style:normal; color:var(--color-saffron-spark); }
+.home .note { font-size:12px; font-weight:400; line-height:1.5;
+  color:var(--color-ash-gray); margin:0; }
+
+/* ------------------------------------------------------------------ nav */
+
+/* Transparent, sitting directly on black. No border, no backdrop blur. */
+.nav { position:sticky; top:0; z-index:20; display:flex; align-items:center;
+  gap:var(--u6); padding:var(--u4) var(--u6);
+  max-width:var(--page-max); margin:0 auto; background:transparent; }
+.navbrand { display:flex; align-items:center; gap:10px; font-size:14px;
+  font-weight:400; letter-spacing:.01em; color:var(--color-bone-white); }
+/* Angular fragment, echoing the triangles in the constellation. */
+.navbrand .mark { width:16px; height:16px; flex:none;
+  background:linear-gradient(140deg, var(--color-electric-iris),
+                             var(--color-sky));
+  clip-path:polygon(50% 0%, 100% 86%, 0% 86%); }
+/* The links live in a pill (the reference's 24px nav radius) with an indicator
+   that slides to whichever section you are actually reading. Bare text links
+   gave no sense of place on a page this long. */
+.navlinks { position:relative; display:flex; align-items:center; gap:4px;
+  margin-left:auto; padding:5px;
+  border-radius:var(--radius-buttons);
+  background:rgba(255,255,255,.6);
+  box-shadow:inset 0 0 0 1px var(--color-ash-line); }
+.navpill { position:absolute; top:5px; bottom:5px; left:0; width:0;
+  border-radius:calc(var(--radius-buttons) - 5px);
+  background:var(--color-periwinkle);
+  box-shadow:inset 0 0 0 1px rgba(43,89,209,.3);
+  opacity:0; pointer-events:none;
+  transition:transform 380ms var(--ease-out), width 380ms var(--ease-out),
+             opacity 240ms ease; }
+.navpill.on { opacity:1; }
+.navlinks a { position:relative; z-index:1; padding:7px 12px; border-radius:14px;
+  font-size:13px; font-weight:600; letter-spacing:.025em; text-transform:uppercase;
+  color:var(--color-ash-gray); white-space:nowrap;
+  transition:color 200ms ease; }
+.navlinks a:hover { color:var(--color-bone-white); }
+.navlinks a[aria-current="true"] { color:var(--color-bone-white); }
+
+/* The one filled action. Violet pill, never anything else. */
+.cta, .home .btn.primary {
+  display:inline-flex; align-items:center; justify-content:center;
+  height:48px; padding:0 32px; border:none;
+  border-radius:var(--radius-buttons);
+  background:var(--color-electric-iris); color:#ffffff;
+  font-size:14px; font-weight:500; letter-spacing:.025em; text-transform:uppercase;
+  transition:box-shadow 260ms var(--ease-out), transform var(--t-press) var(--ease-out);
+}
+.js .cta[data-reveal-cta] { opacity:0; transform:translateY(-6px) scale(.94);
+  pointer-events:none;
+  transition:opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }
+.js .cta[data-reveal-cta].on { opacity:1; transform:none; pointer-events:auto; }
+.cta:hover, .home .btn.primary:hover {
+  background:var(--color-electric-iris);
+  box-shadow:0 0 24px -4px rgba(43,89,209,.5); opacity:1; }
+.cta:active, .home .btn.primary:active { transform:scale(.97); }
+
+/* The secondary action scrolls the page — so it is a link, not a button. Two
+   button-shaped things side by side made the reader pick between two CTAs. */
+.textlink { display:inline-flex; align-items:center; gap:8px; height:45px;
+  font-size:16px; font-weight:200; color:var(--color-bone-white);
+  transition:color 200ms ease; }
+.textlink .tl { border-bottom:1px solid var(--color-ash-line);
+  padding-bottom:2px; transition:border-color 200ms ease; }
+.textlink .tlarrow { transition:transform 240ms var(--ease-out); }
+.textlink:hover { color:var(--color-saffron-spark); }
+.textlink:hover .tl { border-bottom-color:var(--color-saffron-spark); }
+.textlink:hover .tlarrow { transform:translateX(4px); }
+
+/* ----------------------------------------------------------------- hero */
+
+.hero { position:relative; max-width:var(--page-max); margin:0 auto;
+  padding:var(--u10) var(--u6) var(--u10); display:grid; align-items:center;
+  gap:var(--u6); }
+.herotext { position:relative; z-index:1; }
+#brain { display:block; width:100%; height:min(52vh, 420px); }
+.herocta { display:flex; align-items:center; gap:var(--u4); flex-wrap:wrap;
+  margin-top:var(--u5); }
+.hero .note { margin-top:var(--u4); }
+
+@media (min-width:980px) {
+  .hero { grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);
+    padding-block:var(--u10) var(--u16); }
+  #brain { height:min(78vh, 660px); }
+}
+
+/* Ambient triangles drift behind everything. z-index:-1 puts the canvas behind
+   the content but still in front of .home's own background, so the children
+   need no stacking rule — and crucially do not get one, because a blanket
+   `.home > * { position:relative }` silently overrode the nav's sticky. */
+#ambient { position:fixed; inset:0; z-index:-1; pointer-events:none; }
+
+/* ------------------------------------------------------------- sections */
+
+.wrap { max-width:var(--page-max); margin:0 auto; }
+.wrap.narrow { max-width:760px; }
+.wrap.center { text-align:center; }
+.wrap.center .eyebrow { justify-content:center; }
+.wrap.center h2, .wrap.center .lede { margin-inline:auto; }
+.band { padding:var(--u16) var(--u6); }
+
+/* Zigzag: visual-left/text-right, then text-left/visual-right. */
+.zig { display:grid; gap:var(--u10); align-items:center; }
+@media (min-width:980px) {
+  .zig { grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
+    gap:clamp(48px, 7vw, 120px); }
+  .zig.flip .zigtext { order:2; }
+  .zig.flip .mock { order:1; }
+}
+
+.ticks { list-style:none; margin:var(--u4) 0 0; padding:0; display:grid;
+  gap:var(--u2); }
+.ticks li { position:relative; padding-left:26px; font-size:18px; font-weight:200;
+  color:var(--color-silver-mist); text-wrap:pretty; }
+/* Claim first, detail second — the bold clause is the answer and the rest is
+   the evidence, so a reader can take just the four bold lines and be right. */
+.ticks.big { gap:var(--u4); }
+.ticks.big li { font-size:17px; }
+.ticks.big b { display:block; font-weight:400; color:var(--color-bone-white);
+  margin-bottom:2px; }
+/* A triangle, not a bullet — the same glyph as the constellation. */
+.ticks li::before { content:""; position:absolute; left:0; top:.6em;
+  width:0; height:0; border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-bottom:9px solid var(--color-electric-iris); }
+
+/* ----------------------------------------------------------------- asks */
+
+/* Three jobs, in the words someone would actually type. "Organizational
+   memory" means nothing until you see your own question in the list. */
+.asks { display:grid; gap:var(--u10); margin-top:var(--u10); }
+@media (min-width:900px) { .asks { grid-template-columns:repeat(3,1fr);
+  gap:var(--u6); } }
+.askhead { font-size:12px; font-weight:600; letter-spacing:.35px;
+  text-transform:uppercase; color:var(--color-electric-iris);
+  margin:0 0 var(--u3); }
+.asks ul { list-style:none; margin:0; padding:0; display:grid; gap:var(--u3); }
+/* Set as quotes, so they read as things people say rather than feature bullets. */
+.asks li { position:relative; padding-left:18px; font-size:19px; font-weight:200;
+  line-height:1.35; letter-spacing:-.01em; color:var(--color-bone-white);
+  text-wrap:pretty; }
+.asks li::before { content:"\201C"; position:absolute; left:0; top:.06em;
+  font-size:26px; line-height:1; color:var(--color-electric-iris);
+  opacity:.65; }
+.asksrc { margin:var(--u3) 0 0; font-size:13px; font-weight:200;
+  color:var(--color-ash-gray); text-wrap:pretty; }
+.home .askfoot { margin:var(--u16) 0 0; max-width:60ch; }
+
+/* ----------------------------------------------------------- the mocks */
+
+/* A window from the actual product, floating on the void.
+ *
+ * The inside is not a lookalike: `.shot` re-points the semantic tokens back to
+ * the dashboard's light system, and the markup uses the dashboard's own class
+ * names, so app.css draws it. Change the real Search view and this changes with
+ * it. That is also why it is a bright panel on black — the app IS light, and a
+ * dark "screenshot" would be a lie about what you get after signing in.
+ *
+ * The reference forbids cards, and everywhere else on this page that holds. A
+ * product shot is the exception: it is a picture of a thing, not a container
+ * invented to hold text.
+ */
+.home .shot {
+  --bg:#f6f3f1; --panel:#f6f3f1; --sunk:#efeae7; --hair:#efeae7;
+  --ink:#242424; --muted:#4e4d4d; --faint:#797776;
+  --line:#cecac8; --line-strong:#b9b4b1; --accent:#2b59d1; --focus:#2b59d1;
+  --entity:#7c3aed; --product:#16a34a; --system:#ea580c; --topic:#ca8a04;
+  --source:#2563eb; --ok:#16a34a;
+  --r-input:6px; --r-btn:8px; --r-card:12px; --r-lg:16px; --r-pill:9999px;
+
+  background:#f6f3f1; color:#242424; border-radius:14px; overflow:hidden;
+  font-size:14px; font-weight:400; line-height:1.43;
+  /* Lifted off the void, with a faint violet spill so it belongs to this page. */
+  box-shadow:0 0 0 1px var(--color-ash-line),
+             rgba(0,0,0,.1) 0 0 10px 0,
+             0 30px 60px -30px rgba(36,36,36,.25);
+}
+.shotbar { display:flex; align-items:center; gap:14px;
+  padding:0 14px; height:40px; background:#f5f5f5;
+  border-bottom:1px solid #e5e5e5; }
+.dots { display:flex; gap:6px; flex:none; }
+.dots i { width:9px; height:9px; border-radius:50%; background:#d4d4d4; }
+.shoturl { flex:1; text-align:center; font-size:12px; color:#737373;
+  font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.shotbody { padding:18px; }
+.shot h4 { font-size:11px; font-weight:500; letter-spacing:.06em;
+  text-transform:uppercase; color:#737373; margin:0 0 12px; }
+
+/* A search field, without a real form control — this is a picture, and a
+   focusable input inside aria-hidden content is a keyboard trap. */
+.fauxinput { display:flex; align-items:center; gap:8px; height:40px;
+  padding:0 12px; border:1px solid #171717; border-radius:8px;
+  font-size:15px; color:#171717; }
+.fauxinput::after { content:""; width:1.5px; height:17px; background:#2563eb;
+  animation:caret 1.1s steps(1) infinite; }
+@keyframes caret { 50% { opacity:0 } }
+.fauxrow { display:flex; gap:8px; margin-bottom:14px; }
+.fauxgo { display:inline-flex; align-items:center; height:40px; padding:0 16px;
+  border-radius:8px; background:#171717; color:#fff; font-size:13px;
+  font-weight:500; flex:none; }
+
+/* ---------------------------------------------------------------- steps */
+
+.steps { list-style:none; margin:var(--u10) 0 0; padding:0; display:grid;
+  gap:var(--u10); }
+@media (min-width:900px) { .steps { grid-template-columns:repeat(3,1fr);
+  gap:var(--u6); } }
+.steps li { display:grid; gap:var(--u2); }
+.steps .num { font-size:12px; font-weight:600; letter-spacing:.35px;
+  color:var(--color-electric-iris); }
+.steps p { font-size:18px; font-weight:200; color:var(--color-silver-mist);
+  text-wrap:pretty; }
+
+/* --------------------------------------------------------------- agents */
+
+/* A terminal window, given the same weight as the product shots. Left as bare
+   monospace on black it read as unstyled text that had escaped its container. */
+.term { max-width:680px; margin:var(--u6) auto var(--u4);
+  background:#141414; border-radius:16px; overflow:hidden; text-align:left;
+  box-shadow:rgba(0,0,0,.1) 0 0 10px 0,
+             0 24px 50px -28px rgba(36,36,36,.35); }
+.termbar { display:flex; align-items:center; gap:2px; min-height:40px;
+  padding:0 10px; background:#1d1d1d; flex-wrap:wrap;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.07); }
+/* Tabs, because the answer differs by who is asking: a teammate on a laptop
+   and a job running in CI need different lines, and hiding one behind prose
+   makes the wrong reader think the product is not for them. */
+.tterm { height:28px; padding:0 11px; border:none; border-radius:var(--radius-full);
+  background:transparent; color:#9a9793; font:inherit;
+  font-size:12px; font-weight:600; letter-spacing:.02em; cursor:pointer;
+  transition:color 180ms ease, background-color 180ms ease; }
+.tterm:hover { color:#ffffff; }
+.tterm[aria-selected="true"] { color:#ffffff;
+  background:rgba(43,89,209,.4);
+  box-shadow:inset 0 0 0 1px rgba(90,130,230,.55); }
+.termpane[hidden] { display:none; }
+.termnote { margin:0; padding:0 var(--u4) var(--u4); font-size:13px;
+  font-weight:400; line-height:1.5; color:#9a9793;
+  text-wrap:pretty; }
+.copy { flex:none; height:24px; padding:0 10px; border-radius:var(--radius-full);
+  border:1px solid rgba(255,255,255,.25); background:transparent;
+  color:#b3b0ad; font:inherit; font-size:11px; font-weight:600;
+  letter-spacing:.04em; text-transform:uppercase; cursor:pointer;
+  transition:color 180ms ease, border-color 180ms ease; }
+.copy:hover { color:#ffffff; border-color:rgba(255,255,255,.55); }
+.copy[data-done="1"] { color:var(--color-mint, #a7fccd);
+  border-color:#6fae8d; }
+.snippet { margin:0; padding:var(--u3) var(--u4) var(--u4); background:none;
+  border:none; color:#e6e4e1; text-align:left;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:13.5px; font-weight:400; line-height:1.8; overflow-x:auto;
+  overscroll-behavior-x:contain; white-space:pre; }
+.prompt { color:#7ea2ff; user-select:none; }
+
+/* -------------------------------------------------------------- closing */
+
+.closing { position:relative; text-align:center; padding:var(--u20) var(--u6); }
+.closing h2 { margin-inline:auto; max-width:14ch; }
+.closing .btn.primary { margin-top:var(--u4); }
+
+.foot { display:flex; align-items:center; gap:var(--u4); flex-wrap:wrap;
+  max-width:var(--page-max); margin:0 auto;
+  padding:var(--u10) var(--u6) var(--u6);
+  color:var(--color-ash-gray); font-size:12px; }
+.foot a { color:var(--color-ash-gray); }
+.foot a:hover { color:var(--color-bone-white); }
+
+/* The shots reuse the dashboard's classes, which carry interactive affordances
+   (pointer cursor, hover fill). A picture must not pretend to be clickable. */
+.home .shot .hit { cursor:default; }
+.home .shot .hit:hover { background:transparent; }
+
+/* ---------------------------------------------------------- live pipeline */
+
+/* The Monad reference's signature — pill nodes joined by thin curved lines
+   with flow moving along them — in this system's tokens. One SVG, fixed
+   viewBox, so it scales as a unit; the "live" part is dashes travelling the
+   connectors plus a breathing hub, all CSS, all off under reduced motion. */
+.pipe { margin: var(--u10) 0 var(--u10); }
+.pipe svg { display: block; width: 100%; height: auto; }
+
+.pipe .pn rect { fill: #fdfcfa; stroke: var(--color-ash-line); }
+.pipe .pn text { fill: var(--color-ash-gray);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px; letter-spacing: .08em; }
+.pipe .pn .pn-sub { fill: var(--color-ash-gray); opacity: .7;
+  font-size: 10px; letter-spacing: .05em; }
+.pipe-dst .pn text { fill: var(--color-bone-white); }
+
+.pipe-hub rect { fill: #ffffff; stroke: rgba(43,89,209,.55); stroke-width: 1.2; }
+.pipe-hub .hub-t1 { fill: var(--color-bone-white);
+  font-family: ui-monospace, Menlo, monospace; font-size: 13px;
+  letter-spacing: .1em; }
+.pipe-hub .hub-t2 { fill: var(--color-ash-gray);
+  font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+  letter-spacing: .06em; }
+.pipe-hub circle { animation: hubbreathe 4.5s ease-in-out infinite; }
+@keyframes hubbreathe { 50% { opacity: .55 } }
+
+.pipe .pl path { fill: none; stroke: #d8d3d0; stroke-width: 1.2; }
+/* Flow: a second stroke of travelling dashes on the same path via CSS —
+   drawn with the path's own geometry, so the motion follows every curve. */
+.pipe .pl path { stroke-dasharray: 3 14; animation: flow 2.8s linear infinite; }
+.pipe .pl:nth-child(2) path { animation-delay: -.5s; }
+.pipe .pl:nth-child(3) path { animation-delay: -1.1s; }
+.pipe .pl:nth-child(4) path { animation-delay: -1.6s; }
+.pipe .pl:nth-child(5) path { animation-delay: -2.2s; }
+.pipe .pl:nth-child(6) path { animation-delay: -.8s; }
+.pipe .pl.out path { stroke: rgba(43,89,209,.5); animation-duration: 2.2s; }
+@keyframes flow { to { stroke-dashoffset: -170; } }
+
+/* Hovering a source pill lights the matching connector: the Nth source pill
+   maps to the Nth link group, same index, pure CSS. */
+.pipe-src .pn { cursor: default; }
+.pipe-src .pn:hover rect { stroke: rgba(43,89,209,.6); }
+.pipe:has(.pipe-src .pn:nth-child(1):hover) .pl:nth-child(1) path,
+.pipe:has(.pipe-src .pn:nth-child(2):hover) .pl:nth-child(2) path,
+.pipe:has(.pipe-src .pn:nth-child(3):hover) .pl:nth-child(3) path,
+.pipe:has(.pipe-src .pn:nth-child(4):hover) .pl:nth-child(4) path,
+.pipe:has(.pipe-src .pn:nth-child(5):hover) .pl:nth-child(5) path,
+.pipe:has(.pipe-src .pn:nth-child(6):hover) .pl:nth-child(6) path {
+  stroke: var(--color-coral); }
+
+/* ------------------------------------------------------------- responsive */
+
+/* Restored after being lost in the Dala rewrite — without it the nav pill
+   overflowed the viewport on phones and dragged the whole page sideways. */
+@media (max-width:1080px) {
+  .navlinks { display:none; }
+  .cta { margin-left:auto; }
+}
+@media (max-width:760px) {
+  .nav { padding:var(--u3) var(--u4); }
+  .hero { padding:var(--u6) var(--u4) var(--u10); gap:var(--u6); }
+  .band { padding:var(--u10) var(--u4); }
+  .closing { padding:var(--u16) var(--u4) var(--u10); }
+  .foot { padding:var(--u6) var(--u4); flex-wrap:wrap; gap:var(--u2); }
+  /* Display type set for a two-column desktop drowns a phone screen. */
+  .home h1 { font-size:clamp(34px, 11vw, 44px); }
+  .home h2 { font-size:clamp(28px, 8.5vw, 36px); }
+  .asks li { font-size:17px; }
+  #brain { height:44vh; }
+  /* The terminal tabs wrap; the copy button takes its own row gracefully. */
+  .termbar { padding:var(--u1) var(--u2); row-gap:2px; }
+  .snippet { font-size:12px; }
+  .shotbody { padding:14px; }
+}
+
+/* ------------------------------------------------------------ animation */
+
+/* Headline lines rise from behind a mask on load. Each line is wrapped by JS,
+   which is why the effect is gated on .js — no script, no mask, no risk of a
+   headline that never arrives. */
+.js .lift { display:block; overflow:hidden; padding-bottom:.06em;
+  margin-bottom:-.06em; }   /* room for descenders inside the mask */
+.js .lift > span { display:block; transform:translateY(102%);
+  animation:lift 900ms var(--ease-out) forwards; }
+.js .lift:nth-child(2) > span { animation-delay:90ms; }
+.js .lift:nth-child(3) > span { animation-delay:180ms; }
+@keyframes lift { to { transform:none } }
+
+/* Everything below the fold arrives on scroll. */
+.js .reveal { opacity:0; transform:translateY(22px);
+  transition:opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
+.js figure.reveal { transform:translateY(30px) scale(.975); }
+.js figure.reveal.in { transform:none; }
+.js .reveal.in { opacity:1; transform:none; }
+.js .reveal:nth-child(2) { transition-delay:90ms; }
+.js .reveal:nth-child(3) { transition-delay:180ms; }
+
+/* Word-level stagger for the two big statements. */
+.js .word { display:inline-block; opacity:0; transform:translateY(14px);
+  transition:opacity 560ms var(--ease-out), transform 560ms var(--ease-out); }
+.js .in .word { opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal, .js figure.reveal, .js .word { opacity:1; transform:none;
+    transition:none; }
+  .pipe .pl path, .pipe-hub circle { animation:none; }
+  .js .cta[data-reveal-cta] { opacity:1; transform:none; pointer-events:auto; }
+  .js .lift > span { transform:none; animation:none; }
+  .pulse, .mockbar::after { animation:none; }
+}

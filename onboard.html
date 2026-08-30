@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f6f3f1" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 30 27H2Z' fill='%232b59d1'/%3E%3C/svg%3E" />
+<title>Set up OneBrain</title>
+<meta name="description" content="Name your organization, connect your sources, and verify everything works before you rely on it." />
+<link rel="stylesheet" href="./app.css?v=3" />
+<link rel="stylesheet" href="./home.css?v=3" />
+<link rel="stylesheet" href="./onboard.css?v=3" />
+</head>
+<body class="home ob">
+
+<a class="skip" href="#stepmain">Skip to content</a>
+
+<header class="obnav">
+  <a class="navbrand" href="./index.html" translate="no">
+    <span class="mark" aria-hidden="true"></span>
+    <span>OneBrain</span>
+  </a>
+  <ol class="obrail" id="obrail" aria-label="Setup progress">
+    <li data-step="0"><span class="rdot" aria-hidden="true"></span><span class="rlab">Organization</span></li>
+    <li data-step="1"><span class="rdot" aria-hidden="true"></span><span class="rlab">Sources</span></li>
+    <li data-step="2"><span class="rdot" aria-hidden="true"></span><span class="rlab">Verify</span></li>
+    <li data-step="3"><span class="rdot" aria-hidden="true"></span><span class="rlab">Done</span></li>
+  </ol>
+  <a class="obskip" href="./app.html?skip=1" id="exit">Skip for now</a>
+</header>
+
+<main id="stepmain" tabindex="-1">
+
+  <!-- 1 ─────────────────────────────────────────────── organization -->
+  <section class="step" data-step="0" aria-labelledby="t0">
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step one</p>
+    <h1 id="t0" data-words>Let&rsquo;s set up your organization.</h1>
+    <p class="lede reveal">Everyone who signs in from your email domain shares one
+      memory. Nobody outside it can reach a single row &mdash; and only one person
+      needs to do this.</p>
+
+    <div class="fields reveal">
+      <label class="fl" for="ob-name">What should we call it?</label>
+      <input id="ob-name" class="fi" type="text" maxlength="120"
+             autocomplete="organization" spellcheck="false" />
+      <p class="fh">A display name. Membership stays keyed to
+        <b class="mono" id="ob-domain" translate="no"></b>, so renaming can never
+        move or hide anyone&rsquo;s memory.</p>
+
+      <label class="fl" for="ob-team">Roughly how many people will use it?</label>
+      <select id="ob-team" class="fi">
+        <option value="">Prefer not to say</option>
+        <option>1&ndash;5</option><option>6&ndash;20</option>
+        <option>21&ndash;100</option><option>100+</option>
+      </select>
+
+      <label class="fl" for="ob-goal">What do you most want it to remember?</label>
+      <input id="ob-goal" class="fi" type="text" maxlength="200"
+             autocomplete="off" spellcheck="true"
+             placeholder="decisions from meetings, customer commitments&hellip;" />
+      <p class="fh">Optional. It changes nothing automatically &mdash; it tells us
+        what to build next.</p>
+    </div>
+
+    <div class="acts reveal">
+      <button class="cta" data-next>Continue</button>
+    </div>
+  </section>
+
+  <!-- 2 ────────────────────────────────────────────────── sources -->
+  <section class="step" data-step="1" aria-labelledby="t1" hidden>
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step two &middot; optional</p>
+    <h1 id="t1" data-words>Connect what you want remembered.</h1>
+    <p class="lede reveal">Pick any of these, or none. With none, nothing ingests on
+      its own and you write memory through the MCP tools instead &mdash; a supported
+      way to run OneBrain, not a half-finished setup.</p>
+
+    <div class="srcgrid" id="srcgrid"></div>
+
+    <section class="wsteps reveal" id="trello-attach" hidden
+             aria-labelledby="tr-title" tabindex="-1">
+      <h2 id="tr-title">Connect Trello &mdash; five small steps</h2>
+      <p class="fh">Trello has no pop-up flow; its own authorize page hands
+        <em>you</em> a token, and you hand it to us. Your organization brings its
+        own app key &mdash; nothing rides on the deployment &mdash; and nothing is
+        saved until it is proven with a live call.</p>
+      <ol class="wlist">
+        <li>
+          <b>Get your organization&rsquo;s API key.</b>
+          <p class="fh">Sign in to Trello, open
+            <b class="mono" translate="no">trello.com/power-ups/admin</b>, create a
+            (free) Power-Up, and copy its API key. This key identifies
+            <em>your</em> app, stored encrypted for this organization only.</p>
+          <div class="mrow">
+            <input id="tr-key" class="fi" type="text"
+                   placeholder="paste your Trello API key"
+                   spellcheck="false" autocomplete="off"
+                   aria-label="Trello API key" />
+            <button class="ghostpill" id="tr-key-save">Save key</button>
+          </div>
+          <p class="fh" id="tr-key-out" role="status"></p>
+        </li>
+        <li>
+          <b>Open Trello&rsquo;s authorization page.</b>
+          <p class="fh">It opens in a new tab. Check the address bar says
+            <b class="mono" translate="no">trello.com</b> &mdash; you are approving
+            on Trello&rsquo;s site, never here.</p>
+          <a class="ghostpill" id="tr-open" href="#" target="_blank"
+             rel="noopener noreferrer">Open trello.com/1/authorize &#8599;</a>
+        </li>
+        <li>
+          <b>Review, then click <i>Allow</i> at the bottom.</b>
+          <p class="fh">The page says OneBrain wants to <b>read</b> your boards.
+            Read-only is all we ever request &mdash; the poller cannot change,
+            add or delete anything in Trello.</p>
+        </li>
+        <li>
+          <b>Copy the token Trello shows you.</b>
+          <p class="fh">After Allow, Trello displays a long code and tells you to
+            copy it. Select all of it &mdash; a partial paste is the most common
+            failure.</p>
+        </li>
+        <li>
+          <b>Paste it here.</b>
+          <div class="mrow">
+            <input id="tr-token" class="fi" type="text"
+                   placeholder="paste the Trello token"
+                   spellcheck="false" autocomplete="off" aria-label="Trello token" />
+            <button class="ghostpill" id="tr-save">Verify &amp; connect</button>
+          </div>
+          <p class="fh" id="tr-out" role="status"></p>
+        </li>
+      </ol>
+    </section>
+
+    <div class="acts reveal">
+      <button class="cta" data-next>Continue</button>
+      <button class="textlink" data-back><span class="tl">Back</span></button>
+    </div>
+  </section>
+
+  <!-- 3 ─────────────────────────────────────────────────── verify -->
+  <section class="step" data-step="2" aria-labelledby="t2" hidden>
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step three</p>
+    <h1 id="t2" data-words>Now let&rsquo;s prove it works.</h1>
+    <p class="lede reveal">Every line below is a real call to the real API &mdash; not
+      a check that a setting is non-empty. Once these are green you are done:
+      ingestion runs by itself every 30 seconds, and the first items reach the
+      Overview within a minute.</p>
+
+    <div class="vpanel reveal">
+      <div class="vhead">
+        <span id="vtitle">Checking&hellip;</span>
+        <button class="ghostpill" id="vrun">Run again</button>
+      </div>
+      <div id="vrows" class="vrows" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="acts reveal">
+      <button class="cta" data-next>Continue</button>
+      <button class="textlink" data-back><span class="tl">Back</span></button>
+    </div>
+  </section>
+
+  <!-- 4 ───────────────────────────────────────────────────── done -->
+  <section class="step" data-step="3" aria-labelledby="t3" hidden>
+    <div class="donemark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M14 25l7 7 14-16"/></svg></div>
+    <h1 id="t3" data-words>You&rsquo;re set up.</h1>
+    <p class="lede reveal" id="donesum"></p>
+    <p class="lede reveal">Your team signs in with Google and sees this memory
+      immediately &mdash; no consent screen, nothing to install. Send them the
+      invite link: it welcomes them, offers to connect <em>their own</em> mailbox,
+      and wires Claude up locally.</p>
+    <div class="term reveal"><div class="termbar">
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="shoturl">invite link &mdash; anyone on your domain</span></div>
+      <pre class="shot mono" id="done-invite" translate="no"></pre>
+    </div>
+    <p class="fh reveal">That page is for <em>you</em> too: it connects Claude
+      Code to this memory (one command, sign-in on first call) and installs the
+      automatic-memory hooks with one paste &mdash; mint your personal token
+      right on it.</p>
+    <div class="acts reveal">
+      <a class="cta" href="/welcome">Set up my own Claude</a>
+      <a class="textlink" href="./app.html"><span class="tl">Open the dashboard</span>
+        <span class="tlarrow" aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
+
+</main>
+
+<p id="live" class="visually-hidden" role="status" aria-live="polite"></p>
+
+<script type="module" src="./onboard.js?v=3"></script>
+</body>
+</html>

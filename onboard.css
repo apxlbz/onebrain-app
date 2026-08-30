@@ -1,0 +1,268 @@
+/* OneBrain onboarding — the Monad system, one step at a time.
+ *
+ * Loaded after app.css and home.css, so every Monad token (parchment canvas,
+ * serif display at weight 400, mono labels, one Lake Blue action) already
+ * applies via `.home`. This file adds only what a wizard needs that a landing
+ * page does not: a step machine, a progress rail, and source cards.
+ *
+ * Why this is not a dashboard tab. First run is the one moment a person has no
+ * idea what the product is. The dashboard's Dub system is built for density —
+ * seven tabs, hairline tables, 14px type — which is exactly right for someone
+ * who already knows what they are looking at, and exactly wrong for someone who
+ * does not. Here the page holds ONE question at a time at display size.
+ *
+ * Motion rules, inherited from the landing page and unchanged: transform and
+ * opacity only (never layout properties), ease-out only (ease-in delays the
+ * first frame, the moment the eye is on it), and everything collapses under
+ * prefers-reduced-motion.
+ */
+
+.ob { min-height:100vh; display:flex; flex-direction:column; }
+
+/* ------------------------------------------------------------------ nav */
+
+.obnav {
+  display:flex; align-items:center; gap:var(--u4);
+  padding:var(--u4) var(--u6); max-width:var(--page-max);
+  width:100%; margin:0 auto;
+}
+.ob .navbrand { display:inline-flex; align-items:center; gap:10px;
+  font-size:16px; letter-spacing:-.01em; }
+.ob .navbrand .mark { width:16px; height:16px; border-radius:5px;
+  background:var(--color-electric-iris); position:relative; }
+.ob .navbrand .mark::after { content:""; position:absolute; inset:4.5px;
+  border-radius:50%; background:var(--color-void); }
+
+/* The rail is a map, not a control: showing where you are matters more than
+   letting you jump, and a half-filled step 3 is not a place to land. */
+.obrail { display:flex; align-items:center; gap:var(--u4);
+  list-style:none; margin:0 auto; padding:0;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.obrail li { display:inline-flex; align-items:center; gap:8px;
+  color:var(--color-ash-gray); }
+.rdot { width:7px; height:7px; border-radius:50%;
+  background:var(--color-ash-line);
+  transition:transform 260ms var(--ease-out), background-color 260ms var(--ease-out); }
+.obrail li[data-on] { color:var(--color-bone-white); }
+.obrail li[data-on] .rdot { background:var(--color-electric-iris);
+  transform:scale(1.5); }
+.obrail li[data-done] .rdot { background:var(--color-deep-verdant); }
+.obskip { font-size:14px; color:var(--color-silver-mist);
+  transition:color 200ms ease; }
+.obskip:hover { color:var(--color-electric-iris); }
+
+/* ----------------------------------------------------------------- step */
+
+#stepmain, #wmain { flex:1; width:100%; max-width:760px; margin:0 auto;
+  padding:var(--u10) var(--u6) var(--u16); }
+#stepmain:focus-visible, #wmain:focus-visible { outline:none; }
+/* Step headings are focused programmatically on each swap so keyboard and
+   screen-reader users land in the content that changed. They are targets, not
+   controls, so they must not draw a focus ring — same treatment app.css gives
+   its own #view. Real controls keep theirs. */
+.step h1:focus, .step h1:focus-visible { outline:none; }
+
+.step { display:block; }
+.ob h1 { font-size:clamp(34px, 4.4vw, 58px); margin:0 0 var(--u4); }
+
+/* Steps swap by opacity+transform only, so nothing reflows mid-transition. */
+.js .step[data-anim="in"] { animation:obin 280ms var(--ease-out) both; }
+.js .step[data-anim="out"] { animation:obout 160ms var(--ease-out) both; }
+@keyframes obin  { from { opacity:0; transform:translateY(14px); } }
+@keyframes obout { to   { opacity:0; transform:translateY(-10px); } }
+
+/* --------------------------------------------------------------- fields */
+
+.fields { margin:var(--u5) 0 var(--u6); max-width:34em; }
+.fl { display:block; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-ash-gray); margin:var(--u4) 0 10px; }
+.fields .fl:first-child { margin-top:0; }
+.fi {
+  width:100%; height:52px; padding:0 18px;
+  background:transparent; color:var(--color-bone-white);
+  border:1px solid var(--color-ash-line); border-radius:14px;
+  font-family:inherit; font-size:16px;
+  transition:border-color 200ms ease, box-shadow 200ms var(--ease-out);
+}
+.fi:hover { border-color:var(--line-strong); }
+.fi:focus { outline:none; border-color:var(--color-electric-iris);
+  box-shadow:0 0 0 4px rgba(43,89,209,.12); }
+select.fi { appearance:none; cursor:pointer;
+  background-image:linear-gradient(45deg, transparent 50%, var(--color-ash-gray) 50%),
+                   linear-gradient(135deg, var(--color-ash-gray) 50%, transparent 50%);
+  background-position:calc(100% - 22px) 23px, calc(100% - 16px) 23px;
+  background-size:6px 6px, 6px 6px; background-repeat:no-repeat; }
+.fh { font-size:14px; color:var(--color-silver-mist); margin:10px 0 0;
+  max-width:38em; text-wrap:pretty; }
+
+.acts { display:flex; align-items:center; gap:var(--u4); flex-wrap:wrap;
+  margin-top:var(--u5); }
+button.textlink { background:none; border:none; cursor:pointer; padding:0; }
+
+.ghostpill {
+  display:inline-flex; align-items:center; justify-content:center;
+  height:40px; padding:0 20px; cursor:pointer;
+  background:transparent; color:var(--color-bone-white);
+  border:1px solid var(--color-ash-line); border-radius:var(--radius-buttons);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  transition:border-color 200ms ease, color 200ms ease, transform var(--t-press) var(--ease-out);
+}
+.ghostpill:hover:not(:disabled) { border-color:var(--color-electric-iris);
+  color:var(--color-electric-iris); }
+.ghostpill:active:not(:disabled) { transform:scale(.97); }
+.ghostpill:disabled { opacity:.45; cursor:default; }
+
+/* -------------------------------------------------------------- sources */
+
+.srcgrid { display:grid; gap:var(--u2); margin:var(--u5) 0 var(--u4);
+  grid-template-columns:repeat(auto-fill, minmax(232px, 1fr)); }
+.srccard {
+  /* app.css's base `button` rule is `height:32px; justify-content:center` — this
+     is a button, so both apply and the content overflowed a 32px box. Sharing a
+     stylesheet for its tokens means inheriting its element rules too. */
+  height:auto; justify-content:flex-start; align-items:stretch;
+  display:flex; flex-direction:column; gap:8px; text-align:left;
+  padding:var(--u3); cursor:pointer;
+  background:transparent; border:1px solid var(--color-ash-line);
+  border-radius:20px; color:inherit; font:inherit;
+  transition:border-color 220ms ease, transform 220ms var(--ease-out),
+             box-shadow 220ms var(--ease-out);
+}
+.srccard:hover:not(:disabled) { border-color:var(--line-strong);
+  transform:translateY(-2px); }
+.srccard[data-on="1"] { border-color:var(--color-deep-verdant); }
+.srccard[data-on="err"] { border-color:var(--color-coral); }
+.srcname { display:flex; align-items:center; gap:10px; font-size:17px; }
+/* The logo carries recognition, so the status dot moves to the end of the row
+   rather than competing with it for the leading position. */
+.srcicon { width:22px; height:22px; flex:none; display:block; }
+.srcicon svg { width:100%; height:100%; display:block; }
+.srcname .sd { margin-left:auto; }
+.srcwhat { font-size:14px; color:var(--color-silver-mist); text-wrap:pretty; }
+.srcstate { font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--color-ash-gray); }
+.srccard[data-on="1"] .srcstate { color:var(--color-deep-verdant); }
+.srccard[data-on="err"] .srcstate { color:var(--color-coral); }
+.sd { width:8px; height:8px; border-radius:50%; flex:none;
+  background:var(--color-ash-line);
+  transition:background-color 220ms ease, transform 220ms var(--ease-out); }
+.srccard[data-on="1"] .sd { background:var(--color-deep-verdant); transform:scale(1.15); }
+.srccard[data-on="err"] .sd { background:var(--color-coral); }
+
+.manual { margin-top:var(--u3); }
+.manual summary { cursor:pointer; font-size:15px;
+  color:var(--color-silver-mist); transition:color 200ms ease; }
+.manual summary:hover { color:var(--color-electric-iris); }
+.mrow { display:flex; gap:var(--u2); flex-wrap:wrap; margin-top:var(--u3); }
+.mrow .fi { flex:1 1 190px; width:auto; height:44px; }
+
+/* --------------------------------------------------------------- verify */
+
+.vpanel { border:1px solid var(--color-ash-line); border-radius:24px;
+  padding:var(--u4); margin:var(--u5) 0 0; }
+.vhead { display:flex; align-items:center; justify-content:space-between;
+  gap:var(--u3); margin-bottom:var(--u3); font-size:17px; }
+.vrows { display:flex; flex-direction:column; }
+.vrow { display:flex; align-items:flex-start; gap:10px;
+  padding:11px 0; border-top:1px solid var(--color-ash-line); }
+.vrows .vrow:first-child { border-top:0; }
+/* Rows arrive one after another so the eye tracks progress instead of being
+   handed a finished list; capped so a long list never feels slow. */
+.js .vrow { animation:obin 240ms var(--ease-out) both; }
+.js .vrow:nth-child(2) { animation-delay:60ms; }
+.js .vrow:nth-child(3) { animation-delay:120ms; }
+.js .vrow:nth-child(4) { animation-delay:180ms; }
+.js .vrow:nth-child(n+5) { animation-delay:240ms; }
+.vrow b { font-weight:500; }
+.vdetail { color:var(--color-silver-mist); font-size:15px; }
+.vfix { margin:6px 0 0 18px; font-size:14px; color:var(--color-silver-mist);
+  max-width:44em; text-wrap:pretty; }
+.vfetch { margin-top:var(--u4); padding-top:var(--u4);
+  border-top:1px solid var(--color-ash-line); }
+.vfetch .vrows { margin-top:var(--u3); }
+.spinner { display:inline-block; width:13px; height:13px; flex:none;
+  border:2px solid var(--color-ash-line);
+  border-top-color:var(--color-electric-iris); border-radius:50%;
+  animation:obspin 700ms linear infinite; }
+@keyframes obspin { to { transform:rotate(360deg); } }
+
+/* ----------------------------------------------------------------- done */
+
+.donemark { width:64px; height:64px; margin:0 0 var(--u4);
+  border-radius:50%; border:1px solid var(--color-deep-verdant);
+  display:grid; place-items:center; }
+.donemark svg { width:34px; height:34px; fill:none;
+  stroke:var(--color-deep-verdant); stroke-width:3;
+  stroke-linecap:round; stroke-linejoin:round; }
+.js .donemark svg path { stroke-dasharray:40; stroke-dashoffset:40;
+  animation:obtick 420ms var(--ease-out) 120ms forwards; }
+@keyframes obtick { to { stroke-dashoffset:0; } }
+
+/* ------------------------------------------------------------ responsive */
+
+@media (max-width: 720px) {
+  .obnav { flex-wrap:wrap; gap:var(--u3); padding:var(--u3) var(--u4); }
+  .obrail { order:3; width:100%; margin:0; gap:var(--u3);
+    justify-content:space-between; }
+  .obrail .rlab { display:none; }
+  .obrail li { flex:1; }
+  .rdot { width:100%; height:3px; border-radius:2px; }
+  .obrail li[data-on] .rdot { transform:none; }
+  #stepmain { padding:var(--u6) var(--u4) var(--u10); }
+}
+
+/* --------------------------------------------------------- reduced motion
+
+   Everything above is decoration on top of a page that already works. Under
+   reduced motion the steps still change and the rows still appear; they simply
+   stop moving. */
+@media (prefers-reduced-motion: reduce) {
+  .js .step[data-anim="in"], .js .step[data-anim="out"],
+  .js .vrow, .js .donemark svg path {
+    animation:none; opacity:1; transform:none; stroke-dashoffset:0; }
+  .spinner { animation:none; }
+  .rdot { transition:none; }
+}
+
+/* ------------------------------------------------- the Trello walkthrough
+
+   A numbered path, not a paragraph: the flow leaves this page (Trello's own
+   authorize screen) and comes back with something to paste, and each hand-off
+   is where people get lost. Mono numerals in a hairline gutter — the same voice
+   the progress rail uses for "where am I". */
+.wsteps { border:1px solid var(--color-ash-line); border-radius:24px;
+  padding:var(--u4); margin-top:var(--u3); }
+.wsteps:focus, .wsteps:focus-visible { outline:none; }  /* reveal target, not a control */
+.wsteps h2 { font-size:22px; margin:0 0 var(--u2); }
+.wlist { list-style:none; counter-reset:wstep; margin:var(--u3) 0 0; padding:0; }
+.wlist > li { counter-increment:wstep; position:relative;
+  padding:var(--u3) 0 var(--u3) 44px; border-top:1px solid var(--color-ash-line); }
+.wlist > li::before { content:counter(wstep);
+  position:absolute; left:0; top:var(--u3);
+  width:26px; height:26px; border-radius:50%;
+  border:1px solid var(--color-ash-line);
+  display:grid; place-items:center;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px; color:var(--color-silver-mist); }
+.wlist > li > b { font-weight:500; }
+.wlist .fh { margin-top:6px; }
+.wlist .ghostpill, .wlist .mrow { margin-top:12px; }
+a.ghostpill { text-decoration:none; }
+
+/* The platform group inside verify: same rows, different owner — the label is
+   the hand-off. Steps under a failed row are the operator walkthrough. */
+.vsub { font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-ash-gray); padding:14px 0 4px;
+  border-top:1px solid var(--color-ash-line); margin-top:6px; }
+.vsteps { margin:8px 0 2px; padding:0 0 0 20px; }
+.vsteps li { margin:6px 0; font-size:14px; color:var(--color-silver-mist);
+  max-width:52em; text-wrap:pretty; }
+
+/* The authorize link before a key exists: present (the path is visible from the
+   start) but plainly not ready. */
+a.ghostpill.disabled { opacity:.45; pointer-events:none; }

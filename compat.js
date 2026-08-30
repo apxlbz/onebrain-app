@@ -202,6 +202,13 @@ async function routeGet(path) {
       ...m, gmail_connected: mine.has(m.email) })) };
   }
   if (p === "/v1/preflight") return await fnCall("/v1/preflight", null, "GET");
+  if (p === "/v1/connect/config") return await fnCall("/v1/connect/config", null, "GET");
+  if (p === "/v1/connections") {
+    needAuth();
+    const { data } = await sb.from("connections")
+      .select("provider,member_email,connection_id,status,last_ok_at,last_error");
+    return { connections: data ?? [] };
+  }
   throw new Error(`this view isn't wired to the new engine yet (${p})`);
 }
 
@@ -214,6 +221,8 @@ window.OB = {
     if (path === "/v1/me/token") return await fnCall("/v1/me/token", body);
     if (path === "/v1/org/keys") return await fnCall("/v1/org/keys", body);
     if (path === "/v1/onboarding") return await fnCall("/v1/onboarding", body);
+    if (path === "/v1/connections/google") return await fnCall("/v1/connections/google", body);
+    if (path === "/v1/connections/trello") return await fnCall("/v1/connections/trello", body);
     throw new Error(`this action isn't wired to the new engine yet (${path})`);
   },
   signout() { sb.auth.signOut().then(() => { location.href = "./index.html"; }); },

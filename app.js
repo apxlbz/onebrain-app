@@ -265,7 +265,7 @@ async function boot() {
       const { data: ob } = await sb.from("onboarding").select("completed_at").maybeSingle();
       if (!(ob && ob.completed_at) && !sessionStorage.getItem("ob_nudged")) {
         sessionStorage.setItem("ob_nudged", "1");
-        showView("setup");
+        location.href = "./onboard.html"; return;
       }
     } catch { /* the overview still stands */ }
   }

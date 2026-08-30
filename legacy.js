@@ -131,7 +131,7 @@ async function viewOverview(root) {
       <h2 class="sec" id="h-setup">Finish setting up ${esc(ob.org || 'your organization')}</h2>
       <p style="margin:0 0 12px">Connect your sources and verify every key and
         connection with a live call. Until then this page mostly shows zeroes.</p>
-      <a class="btnlink primary" href="./index.html#setup">Open setup</a>
+      <a class="btnlink primary" href="./onboard.html">Open setup</a>
     </section>` : '';
 
   const issues = h.issues.length ? h.issues.map((i) => `
@@ -825,7 +825,7 @@ async function viewSettings(root) {
         <span class="k">Entities</span><span class="v num">${n(org.entities)}</span>
         <span class="k">API tokens</span><span class="v num">${n(org.tokens)}</span>
       </div>
-      <p style="margin:12px 0 0"><a class="btnlink" href="./index.html#setup">Re-run setup</a></p>
+      <p style="margin:12px 0 0"><a class="btnlink" href="./onboard.html">Re-run setup</a></p>
       <p class="dim" style="margin:12px 0 0">Membership is by email domain.
         Everyone signing in from your domain shares this memory; nobody outside
         it can reach a single row.</p>
@@ -1038,7 +1038,7 @@ async function maybeForceSetup() {
   if (location.hash && location.hash !== '#overview') return false;
   try {
     const ob = await api('/v1/onboarding');
-    if (ob && !ob.completed_at) { location.href = './index.html#setup'; return true; }
+    if (ob && !ob.completed_at) { location.href = './onboard.html'; return true; }
   } catch { /* never block the dashboard on this */ }
   return false;
 }
