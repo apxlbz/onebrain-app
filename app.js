@@ -214,6 +214,13 @@ async function loadSettings() {
     `claude mcp add --scope user --transport http \\\n  onebrain ${FN}/mcp`;
 }
 
+$("ob-done").addEventListener("click", async () => {
+  try {
+    await api("/v1/onboarding", { complete: true });
+    $("ob-status").textContent = "Setup marked complete.";
+  } catch (e) { $("ob-status").textContent = e.message; }
+});
+
 $("mint").addEventListener("click", async () => {
   try {
     const res = await api("/v1/me/token");

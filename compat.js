@@ -213,6 +213,7 @@ window.OB = {
     if (path === "/v1/who-knows") return await fnCall("/v1/who-knows", body);
     if (path === "/v1/me/token") return await fnCall("/v1/me/token", body);
     if (path === "/v1/org/keys") return await fnCall("/v1/org/keys", body);
+    if (path === "/v1/onboarding") return await fnCall("/v1/onboarding", body);
     throw new Error(`this action isn't wired to the new engine yet (${path})`);
   },
   signout() { sb.auth.signOut().then(() => { location.href = "./index.html"; }); },
