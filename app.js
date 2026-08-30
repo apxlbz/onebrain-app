@@ -256,7 +256,19 @@ async function boot() {
   $("signin").classList.add("hide");
   $("app").classList.remove("hide");
   $("me").textContent = session.user.email;
-  if (location.hash === "#setup") showView("setup");
+  if (location.hash === "#setup") {
+    showView("setup");
+  } else {
+    // First-run nudge: an org that hasn't finished setup lands on Setup,
+    // once per browser session (never a persistent gate).
+    try {
+      const { data: ob } = await sb.from("onboarding").select("completed_at").maybeSingle();
+      if (!(ob && ob.completed_at) && !sessionStorage.getItem("ob_nudged")) {
+        sessionStorage.setItem("ob_nudged", "1");
+        showView("setup");
+      }
+    } catch { /* the overview still stands */ }
+  }
   await handleGoogleReturn();
   await loadOverview();
   watchRealtime();
