@@ -9,177 +9,62 @@
 <title>OneBrain</title>
 <meta name="description" content="Your organization's shared memory." />
 <style>
-  :root{
-    --paper:#f6f3f1; --card:#fffdfb; --ink:#1f1d1a; --muted:#6f6a61;
-    --lake:#2b59d1; --lake-soft:#e8edfa; --line:#e2dcd3;
-    --good:#1c7c4a; --warn:#a85f10; --bad:#b3261e;
-    --serif:"Source Serif 4", Georgia, serif;
-    --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
-    --sans:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
-  header{display:flex;align-items:center;gap:24px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--card)}
-  .mark{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--lake);display:inline-block}
-  .brand{font:600 16px var(--sans);display:flex;align-items:center;gap:8px}
-  nav{display:flex;gap:4px;margin-left:12px}
-  nav button{border:0;background:none;font:500 13px var(--sans);color:var(--muted);padding:7px 12px;border-radius:5px;cursor:pointer}
-  nav button.on{background:var(--lake-soft);color:var(--lake)}
-  nav button:focus-visible{outline:2px solid var(--lake)}
-  .me{margin-left:auto;font:400 12px var(--mono);color:var(--muted)}
-  main{max-width:900px;margin:0 auto;padding:28px 24px 80px}
-  h1{font:400 30px/1.2 var(--serif);margin:8px 0 18px}
-  h2{font:400 21px/1.25 var(--serif);margin:30px 0 10px}
-  .eyebrow{font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--lake);margin:0 0 10px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin:0 0 16px}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:16px 0}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
-  .stat b{display:block;font:400 26px var(--serif);font-variant-numeric:tabular-nums}
-  .stat span{font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  ul.facts{list-style:none;padding:0;margin:0}
-  ul.facts li{padding:10px 0;border-bottom:1px solid var(--line)}
-  ul.facts li:last-child{border-bottom:0}
-  .tag{display:inline-block;font:500 10px var(--mono);letter-spacing:.05em;padding:3px 7px;border-radius:3px;background:var(--lake-soft);color:var(--lake);margin-right:8px;vertical-align:1px}
-  .dim{color:var(--muted);font-size:13px}
-  input[type=text],input[type=password]{font:14px var(--sans);padding:9px 12px;border:1px solid var(--line);border-radius:5px;background:var(--card);width:100%;max-width:460px}
-  input:focus-visible{outline:2px solid var(--lake);border-color:var(--lake)}
-  button.cta{font:600 13px var(--sans);background:var(--lake);color:#fff;border:0;border-radius:5px;padding:10px 18px;cursor:pointer}
-  button.ghost{font:500 12px var(--mono);letter-spacing:.04em;background:none;border:1px solid var(--lake);color:var(--lake);border-radius:5px;padding:8px 14px;cursor:pointer}
+  :root{--paper:#f6f3f1;--ink:#1f1d1a;--muted:#6f6a61;--lake:#2b59d1;
+    --serif:"Source Serif 4",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--sans)}
+  main{max-width:430px;margin:14vh auto;padding:0 24px;text-align:center}
+  .eyebrow{font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--lake)}
+  h1{font:400 38px/1.15 var(--serif);margin:14px 0 12px;text-wrap:balance}
+  p{color:var(--muted);font-size:15px}
+  button{font:600 14px var(--sans);background:var(--lake);color:#fff;border:0;border-radius:6px;
+    padding:12px 22px;cursor:pointer;margin-top:20px}
   button:focus-visible{outline:2px solid var(--lake);outline-offset:2px}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
-  .ok{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)}
-  table{border-collapse:collapse;width:100%;font-size:13px}
-  th{font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
-  td{padding:8px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
-  tr:last-child td{border-bottom:0}
-  .mono{font-family:var(--mono);font-size:.9em}
-  #signin{max-width:420px;margin:12vh auto;text-align:center}
-  #signin h1{font-size:36px}
-  .status{font-size:13px;color:var(--muted);min-height:1.2em;margin-top:8px}
-  .hide{display:none}
-  pre.tok{background:#1e1c19;color:#f3efe9;font:12px/1.6 var(--mono);padding:12px 14px;border-radius:6px;overflow-x:auto;user-select:all}
-  @media (prefers-reduced-motion: no-preference){
-    ul.facts li.new{animation:arrive .5s ease}
-    @keyframes arrive{from{background:var(--lake-soft)}to{background:transparent}}
-  }
+  .status{font-size:13px;color:var(--muted);min-height:1.2em;margin-top:12px}
 </style>
 </head>
 <body>
-
-<div id="signin">
+<main>
   <p class="eyebrow">OneBrain</p>
   <h1>Your organization's shared&nbsp;memory.</h1>
-  <p class="dim">Sign in with your work Google account. Everyone on your email
-    domain shares one memory; nobody outside it can reach a single row.</p>
-  <p style="margin-top:24px"><button class="cta" id="google">Continue with Google</button></p>
-  <p class="status" id="signin-status"></p>
-</div>
-
-<div id="app" class="hide">
-<header>
-  <span class="brand"><span class="mark"></span>OneBrain</span>
-  <nav id="nav">
-    <button data-v="overview" class="on">Overview</button>
-    <button data-v="search">Search</button>
-    <button data-v="setup">Setup</button>
-    <button data-v="settings">Settings</button>
-    <a href="./app.html" style="font:500 13px var(--sans);color:var(--muted);padding:7px 12px;text-decoration:none">Full dashboard ↗</a>
-  </nav>
-  <span class="me" id="me"></span>
-</header>
-<main>
-
-<section data-view="overview">
-  <h1 id="org-title">Overview</h1>
-  <div class="stats" id="stats"></div>
-  <h2>Latest memory <span class="dim" id="live-dot"></span></h2>
-  <ul class="facts" id="recent"></ul>
-</section>
-
-<section data-view="search" class="hide">
-  <h1>Search the memory</h1>
-  <div class="row">
-    <input type="text" id="q" placeholder="what did we decide about…" />
-    <button class="cta" id="go">Recall</button>
-  </div>
-  <p class="status" id="search-status"></p>
-  <ul class="facts" id="results"></ul>
-</section>
-
-<section data-view="setup" class="hide">
-  <h1>Setup</h1>
-  <div class="card">
-    <h2 style="margin-top:0">Sources</h2>
-    <p class="dim">Each connect opens the provider's own consent page — read-only
-      scopes, revocable any time. Nothing is saved until a live call proves it works.</p>
-    <div class="row">
-      <button class="ghost" data-g="gmail">Connect Gmail</button>
-      <button class="ghost" data-g="google_meet">Connect Meet transcripts</button>
-      <button class="ghost" data-g="google_calendar">Connect Calendar</button>
-    </div>
-    <div class="row">
-      <input type="text" id="trello-key" placeholder="Trello Power-Up API key (trello.com/power-ups/admin)" />
-      <button class="ghost" id="trello-key-save">Save key</button>
-    </div>
-    <div class="row">
-      <a class="ghost hide" id="trello-open" target="_blank" rel="noopener noreferrer">Open trello.com/1/authorize ↗</a>
-      <input type="text" id="trello-token" placeholder="paste the Trello token" />
-      <button class="ghost" id="trello-save">Verify &amp; connect</button>
-    </div>
-    <p class="status" id="setup-status"></p>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0">Bring your own keys <span class="dim">(optional)</span></h2>
-    <p class="dim">OneBrain includes a built-in engine — enrichment and search work
-      with no keys at all, metered to your organization. Add your own Anthropic /
-      Voyage keys to run independently instead.</p>
-    <div class="row"><input type="password" id="k-anthropic" placeholder="Anthropic API key" />
-      <input type="password" id="k-voyage" placeholder="Voyage API key" />
-      <button class="ghost" id="k-save">Verify &amp; store</button></div>
-    <p class="status" id="keys-status"></p>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0">Done?</h2>
-    <p class="dim">When your sources are connected and the checks are green,
-      finish setup — the dashboard stops nudging you here.</p>
-    <div class="row"><button class="cta" id="ob-done">Finish setup</button>
-      <span class="status" id="ob-status"></span></div>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0">Verify</h2>
-    <p class="dim">Every green row below is a real call to the real API that just worked.</p>
-    <div class="row"><button class="ghost" id="pf-run">Run checks</button></div>
-    <ul class="facts" id="pf-rows"></ul>
-  </div>
-</section>
-
-<section data-view="settings" class="hide">
-  <h1>Settings</h1>
-  <div class="card">
-    <h2 style="margin-top:0">People &amp; usage</h2>
-    <p class="dim">Who has shown up, and how they use the memory. Invite link:
-      <b class="mono" id="invite"></b></p>
-    <table><thead><tr><th>Member</th><th>Last seen</th><th>Via</th><th>Recalls</th><th>Captures</th></tr></thead>
-      <tbody id="people"></tbody></table>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0">Usage &amp; balance</h2>
-    <p class="dim" id="balance"></p>
-    <table><thead><tr><th>Day</th><th>Operation</th><th>Engine</th><th>Tokens in</th><th>Tokens out</th><th>Cost</th></tr></thead>
-      <tbody id="usage"></tbody></table>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0">Your Claude</h2>
-    <p class="dim">Connect Claude Code to this memory (sign-in on first call):</p>
-    <pre class="tok" id="mcp-cmd"></pre>
-    <p class="dim">Hooks token (automatic memory; shown once, minting again replaces it):</p>
-    <div class="row"><button class="ghost" id="mint">Mint my token</button></div>
-    <pre class="tok hide" id="hooks-cfg"></pre>
-  </div>
-</section>
-
+  <p>Sign in with your work Google account. Everyone on your email domain shares
+    one memory; nobody outside it can reach a single row.</p>
+  <button id="google">Continue with Google</button>
+  <p class="status" id="status"></p>
 </main>
-</div>
-<script type="module" src="./app.js?v=3"></script>
+<script type="module">
+  // Pure entrance: sign in, then route — unfinished org -> the setup wizard,
+  // established org -> the dashboard. One app, one look.
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  const SUPA = "https://epjkzltwyfexiunbmbel.supabase.co";
+  const cfg = await fetch(`${SUPA}/functions/v1/api/config`).then((r) => r.json());
+  const sb = createClient(cfg.supabase_url, cfg.supabase_anon_key);
+  const st = document.getElementById("status");
+
+  async function route() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return false;
+    st.textContent = "Signed in — loading…";
+    try {
+      const { data: ob } = await sb.from("onboarding").select("completed_at").maybeSingle();
+      location.replace(ob?.completed_at ? "./app.html" : "./onboard.html");
+    } catch {
+      location.replace("./app.html");
+    }
+    return true;
+  }
+
+  document.getElementById("google").addEventListener("click", async () => {
+    st.textContent = "Redirecting to Google…";
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: location.origin + location.pathname },
+    });
+    if (error) st.textContent = error.message;
+  });
+
+  if (!(await route())) sb.auth.onAuthStateChange((_e, s) => { if (s) route(); });
+</script>
 </body>
 </html>
