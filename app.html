@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f6f3f1" />
+<title>OneBrain</title>
+<link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+
+<a class="skip" href="#view">Skip to content</a>
+
+<nav id="rail" aria-label="Sections">
+  <div class="brand" translate="no">
+    <span class="mark" aria-hidden="true"></span>
+    <span class="bname">OneBrain</span>
+  </div>
+
+  <div class="navgroup">
+    <h2 class="navlabel" id="nav-memory">Memory</h2>
+    <div class="navlist" role="list" aria-labelledby="nav-memory">
+      <a class="navitem" role="listitem" data-tab="overview" href="#overview"><span class="ni" aria-hidden="true">◍</span>Overview</a>
+      <a class="navitem" role="listitem" data-tab="memories" href="#memories"><span class="ni" aria-hidden="true">≡</span>Memories</a>
+      <a class="navitem" role="listitem" data-tab="graph" href="#graph"><span class="ni" aria-hidden="true">⬡</span>Graph</a>
+      <a class="navitem" role="listitem" data-tab="people" href="#people"><span class="ni" aria-hidden="true">◎</span>People</a>
+    </div>
+  </div>
+
+  <div class="navgroup">
+    <h2 class="navlabel" id="nav-retrieval">Retrieval</h2>
+    <div class="navlist" role="list" aria-labelledby="nav-retrieval">
+      <a class="navitem" role="listitem" data-tab="search" href="#search"><span class="ni" aria-hidden="true">⌕</span>Search</a>
+      <a class="navitem" role="listitem" data-tab="ops" href="#ops"><span class="ni" aria-hidden="true">▤</span>Operations</a>
+      <a class="navitem" role="listitem" data-tab="settings" href="#settings"><span class="ni" aria-hidden="true">⚙</span>Settings</a>
+    </div>
+  </div>
+
+  <div class="railfoot">
+    <div id="orgline" class="orgline"></div>
+    <div id="account"></div>
+  </div>
+</nav>
+
+<main id="main">
+  <header id="topbar">
+    <div id="crumb" class="crumb">Overview</div>
+    <span class="grow"></span>
+    <button id="cmdk" class="kbdbtn" aria-label="Search everything">
+      <kbd translate="no">⌘&nbsp;K</kbd>
+    </button>
+  </header>
+
+  <div id="view" class="view" tabindex="-1"></div>
+  <p id="live" class="visually-hidden" role="status" aria-live="polite"></p>
+</main>
+
+<div id="palette" class="palette" hidden>
+  <div class="pbox" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input id="pq" type="text" role="combobox" aria-expanded="true" aria-controls="presults"
+           aria-label="Search memory or jump to a section"
+           placeholder="Search memory, jump to a section…"
+           autocomplete="off" spellcheck="false" />
+    <div id="presults" role="listbox" aria-label="Results"></div>
+  </div>
+</div>
+
+<div id="drawer" class="drawer" hidden>
+  <div class="dpanel" role="dialog" aria-modal="true" aria-labelledby="dtitle">
+    <button id="dclose" class="ghost dx" aria-label="Close details">✕</button>
+    <div id="dbody"></div>
+  </div>
+</div>
+
+<script type="module" src="./legacy.js"></script>
+</body>
+</html>

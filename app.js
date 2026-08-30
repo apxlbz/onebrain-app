@@ -249,6 +249,7 @@ async function boot() {
   $("signin").classList.add("hide");
   $("app").classList.remove("hide");
   $("me").textContent = session.user.email;
+  if (location.hash === "#setup") showView("setup");
   await handleGoogleReturn();
   await loadOverview();
   watchRealtime();

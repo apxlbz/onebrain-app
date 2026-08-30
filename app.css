@@ -1,0 +1,525 @@
+/* OneBrain dashboard.
+ *
+ * Visual system: the Dub design language (styles.refero.design) — a near-white
+ * canvas held together by HAIRLINE BORDERS rather than elevation. The one rule
+ * everything else follows from: containers are defined by a 1px #e5e5e5 border
+ * and a radius, never by a drop shadow. Shadow is reserved for things that
+ * genuinely float above the page (the drawer, the palette), because that is the
+ * only place depth carries information.
+ *
+ * Systems, so nothing is decided ad hoc at the call site:
+ *   colour   monochrome neutrals + exactly ONE accent per surface. Chromatic
+ *            colour is reserved for meaning — retrieval arm, node type,
+ *            severity — and never used as a surface fill.
+ *   radius   a closed four-tier vocabulary: input 6, button 8, card 12,
+ *            large 16, pill 9999. Nothing outside it.
+ *   type     Inter-class UI face, 4px-based scale, 14px canonical for dense
+ *            data (this is a data product, not a marketing page).
+ *   space    4px base unit; 16px card padding; 8px element gap.
+ *   motion   ease-out for enter/exit, nothing over 200ms, and never bare
+ *            ease-in — it delays the first frame, the moment the eye is on it.
+ *
+ * LIGHT ONLY, deliberately. The landing page and onboarding are parchment with
+ * no dark variant, so a dark-mode dashboard meant a viewer whose OS is dark went
+ * light -> light -> dark walking into the product. One surface, one scheme; the
+ * palette parity tests keep the graph, the sign-in pages and the product shot on
+ * it too.
+ */
+
+:root {
+  /* Neutral ramp — the whole system is built out of these.
+     WARM, not grey: these are the Monad parchment values the landing page and
+     onboarding already use, so signing up, setting up and using the product are
+     one continuous surface instead of three. Only the ramp moved; every
+     semantic alias below still points at it, so the structure — border-first,
+     no elevation, chroma reserved for meaning — is untouched. */
+  --white:#f6f3f1;      /* canvas, card surfaces (parchment) */
+  --mist:#efeae7;       /* nested surfaces, hover fills */
+  --ash:#cecac8;        /* THE structural hairline */
+  --smoke:#b9b4b1;      /* emphasis borders, secondary outlines */
+  --silver:#9a9694;     /* light dividers, disabled icons */
+  --fog:#797776;        /* placeholder, disabled text */
+  --steel:#4e4d4d;      /* muted body text, helper labels */
+  --graphite:#3a3938;   /* secondary text, icon strokes */
+  --charcoal:#242424;   /* body text, headings, button fills */
+
+  /* semantic aliases — views reference these, never the ramp directly */
+  --bg:var(--white); --panel:var(--white); --sunk:var(--mist);
+  --ink:var(--charcoal); --muted:var(--steel); --faint:var(--fog);
+  --line:var(--ash); --line-strong:var(--smoke); --hair:var(--mist);
+
+  /* the single accent — highlight only (links, focus, active nav), never a
+     surface fill. Data bars are deliberately monochrome: a full-width blue bar
+     IS a large fill, and the system reserves chroma for meaning. */
+  --accent:#2b59d1;     /* Lake Blue — the one action colour, shared with /home */
+  --focus:#2b59d1;
+  --chart:#4e4d4d;
+
+  /* meaning — one per component, never a surface fill. Shared with /graph so
+     a node keeps its colour across the two views. */
+  --fact:#737373; --entity:#7c3aed; --product:#16a34a; --system:#ea580c;
+  --topic:#ca8a04; --tag:#db2777; --source:#2563eb;
+  --ok:#16a34a; --warn:#ea580c; --err:#dc2626;
+  --tint-ok:#dcfce7; --tint-info:#dbeafe; --tint-warn:#ffedd5; --tint-err:#fee2e2;
+
+  /* space — 4px base */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s8:32px;
+
+  /* radius — closed vocabulary */
+  --r-input:6px; --r-btn:8px; --r-card:12px; --r-lg:16px; --r-pill:9999px;
+
+  --rail:224px; --top:52px; --measure:1200px;
+
+  /* elevation — only for surfaces that actually float */
+  --shadow-sm:rgba(0,0,0,.1) 0 4px 6px -1px, rgba(0,0,0,.1) 0 2px 4px -2px;
+  --shadow-md:rgba(0,0,0,.1) 0 10px 15px -3px, rgba(0,0,0,.1) 0 4px 6px -4px;
+  --shadow-lg:rgba(0,0,0,.09) 0 20px 20px 0;
+
+  /* motion */
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --t-press:110ms; --t-hover:140ms; --t-enter:190ms;
+}
+
+* { box-sizing:border-box; }
+html, body { margin:0; height:100%; }
+body {
+  background:var(--bg); color:var(--ink);
+  /* Inter is the system's UI face; it is used when installed and degrades to
+     the platform UI font otherwise. Nothing is fetched — a dashboard must not
+     block first paint on a font request, and the CSP forbids external hosts. */
+  font-family:Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+              "Helvetica Neue", sans-serif;
+  font-size:14px; line-height:1.43;
+  -webkit-font-smoothing:antialiased;
+  touch-action:manipulation;
+}
+a { color:inherit; text-decoration:none; }
+
+/* Numbers are compared down columns constantly here, so tabular figures are
+   the default and proportional is the exception. */
+body, table, .num, .tn, input, kbd { font-variant-numeric:tabular-nums; }
+
+/* Type scale. Display weight (500) starts at 24px and above; below that the
+   system stays at 400/500 body weights. */
+/* Serif display, weight 400 — the landing page's voice, at dashboard scale.
+   Hierarchy comes from size and tracking, never weight. */
+h1 { font-family:ui-serif, Georgia, Cambria, "Times New Roman", serif;
+     font-size:27px; font-weight:400; line-height:1.28; letter-spacing:-.02em;
+     margin:0 0 var(--s1); text-wrap:balance; }
+.sec { font-family:"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+       font-size:11px; font-weight:400; letter-spacing:.08em;
+       text-transform:uppercase; color:var(--faint); margin:0 0 var(--s3); }
+.grow { flex:1; }
+.mono { font-family:"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size:12px; }
+.dim { color:var(--muted); }
+.faint { color:var(--faint); }
+.lede { color:var(--muted); margin:0 0 var(--s4); max-width:70ch; text-wrap:pretty; }
+
+.visually-hidden {
+  position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+.skip {
+  position:absolute; left:var(--s3); top:-60px; z-index:100;
+  padding:var(--s2) var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-btn); background:var(--panel); box-shadow:var(--shadow-md);
+  transition:top var(--t-enter) var(--ease-out);
+}
+.skip:focus { top:var(--s3); }
+
+/* ---------------------------------------------------------------- focus ring
+
+   One ring, everywhere, on :focus-visible only — so it appears for keyboard
+   users and never as a click artefact. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline:2px solid var(--focus);
+  outline-offset:2px;
+  border-radius:var(--r-input);
+}
+#view:focus-visible { outline:none; }   /* programmatic focus target, not a control */
+
+/* ---------------------------------------------------------------- nav rail */
+
+#rail {
+  position:fixed; left:0; top:0; bottom:0; width:var(--rail); z-index:6;
+  background:var(--bg); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; padding-bottom:var(--s3);
+}
+.brand { display:flex; align-items:center; gap:var(--s2); height:var(--top);
+  padding:0 var(--s4); font-size:15px; font-weight:500; letter-spacing:-.01em; }
+/* Keyed to --ink/--bg rather than the fixed ramp so the mark inverts with the
+   theme; --charcoal on a #0a0a0a canvas is invisible. */
+.brand .mark { width:18px; height:18px; border-radius:var(--r-input); flex:none;
+  background:var(--ink); position:relative; }
+.brand .mark::after { content:""; position:absolute; inset:5px;
+  border-radius:50%; background:var(--bg); }
+.navgroup { padding:var(--s3) var(--s2) var(--s1); }
+.navlabel { font-size:11px; font-weight:500; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--faint); margin:0; padding:0 var(--s2) 6px; }
+.navitem {
+  display:flex; align-items:center; gap:var(--s2); height:32px; padding:0 var(--s2);
+  border-radius:var(--r-btn); color:var(--muted); font-size:14px; cursor:pointer;
+  transition:background-color var(--t-hover) ease, color var(--t-hover) ease;
+}
+.navitem .ni { width:15px; text-align:center; font-size:12px; opacity:.65; }
+.navitem:hover { background:var(--hair); color:var(--ink); }
+.navitem[aria-current="page"] { background:var(--tint-info); color:var(--ink);
+  font-weight:500; }
+.navitem[aria-current="page"] .ni { opacity:1; }
+.railfoot { margin-top:auto; padding:var(--s3) var(--s4) 0;
+  border-top:1px solid var(--line); font-size:13px; }
+.orgline { color:var(--muted); margin-bottom:2px; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; }
+#account a { color:var(--faint); font-size:13px; }
+#account a:hover { color:var(--ink); }
+
+/* -------------------------------------------------------------- main frame */
+
+#main { margin-left:var(--rail); min-height:100%; display:flex; flex-direction:column; }
+#topbar {
+  position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:var(--s2);
+  height:var(--top); padding:0 var(--s6);
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.crumb { font-size:14px; font-weight:500; }
+.view { flex:1; padding:var(--s6); max-width:var(--measure); width:100%; }
+.view.wide { max-width:none; padding:0; }
+
+.kbdbtn { display:inline-flex; align-items:center; height:28px; padding:0 var(--s2);
+  border:1px solid var(--line); border-radius:var(--r-input); background:var(--panel);
+  cursor:pointer; transition:border-color var(--t-hover) ease,
+  background-color var(--t-hover) ease; }
+.kbdbtn:hover { border-color:var(--line-strong); background:var(--hair); }
+kbd { font:inherit; font-size:12px; color:var(--faint); letter-spacing:.02em; }
+
+/* ------------------------------------------------------------- primitives */
+
+button, .btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  height:32px; padding:0 var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-btn); background:var(--panel); color:var(--ink);
+  font:inherit; font-size:13px; font-weight:500; cursor:pointer;
+  transition:border-color var(--t-hover) ease, background-color var(--t-hover) ease,
+             transform var(--t-press) var(--ease-out);
+}
+button:hover, .btn:hover { border-color:var(--line-strong); background:var(--hair); }
+/* Press feedback: the interface confirming it heard you. */
+button:active:not(:disabled), .btn:active { transform:scale(.975); }
+button:disabled { opacity:.45; cursor:default; }
+button.ghost { border-color:transparent; background:none; color:var(--muted);
+  border-radius:var(--r-pill); }
+button.ghost:hover { background:var(--hair); color:var(--ink); }
+/* Exactly one filled action per surface. Keyed to --ink/--bg so it inverts
+   with the theme instead of needing a dark-mode override. */
+button.primary, .btn.primary, .btnlink.primary { background:var(--ink);
+  color:var(--bg); border-color:var(--ink); }
+button.primary:hover, .btn.primary:hover, .btnlink.primary:hover { opacity:.88; }
+
+input, select, textarea {
+  height:32px; padding:0 10px; border:1px solid var(--line);
+  border-radius:var(--r-input); background:var(--panel); color:var(--ink);
+  font:inherit; font-size:13px;
+  transition:border-color var(--t-hover) ease;
+  min-width:0;   /* flex children must be shrinkable or text can't truncate */
+}
+input:hover, select:hover { border-color:var(--line-strong); }
+input:focus { border-color:var(--ink); }
+input::placeholder { color:var(--faint); }
+select { cursor:pointer; padding-right:6px; }
+label.field { display:flex; flex-direction:column; gap:var(--s1); font-size:11px;
+  color:var(--muted); }
+
+.row { display:flex; align-items:center; gap:var(--s2); flex-wrap:wrap; }
+/* Border, not shadow. This is the system's central rule. */
+.card { background:var(--panel); border:1px solid var(--line);
+  border-radius:var(--r-card); padding:var(--s4); }
+.split { display:grid; grid-template-columns:1fr 1fr; gap:var(--s3); }
+@media (max-width:900px) { .split { grid-template-columns:1fr; } }
+
+.pill { display:inline-flex; align-items:center; gap:5px; height:20px; padding:0 8px;
+  border-radius:var(--r-pill); background:var(--hair); color:var(--muted);
+  font-size:11px; white-space:nowrap; }
+.pill .dot { width:6px; height:6px; border-radius:50%; flex:none; }
+.chip { display:inline-flex; align-items:center; gap:5px; height:28px; padding:0 12px;
+  border:1px solid var(--line); border-radius:var(--r-pill); background:var(--panel);
+  font-size:13px; cursor:pointer; user-select:none;
+  transition:border-color var(--t-hover) ease, background-color var(--t-hover) ease; }
+.chip:hover { border-color:var(--line-strong); background:var(--hair); }
+.chip[aria-pressed="true"] { border-color:var(--ink); background:var(--sunk); }
+
+.empty { color:var(--muted); padding:var(--s6) 2px; max-width:64ch; text-wrap:pretty; }
+.empty b { display:block; color:var(--ink); font-weight:500; margin-bottom:2px; }
+.spin { color:var(--faint); padding:var(--s6) 2px; }
+
+/* ------------------------------------------------------------------ tables */
+
+table.t { width:100%; border-collapse:collapse; table-layout:fixed; }
+table.t th { text-align:left; font-size:11px; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--faint); font-weight:500;
+  padding:0 10px 8px; white-space:nowrap; }
+table.t td { padding:10px; border-top:1px solid var(--line); vertical-align:top;
+  overflow-wrap:anywhere; }
+table.t tbody tr { cursor:pointer; transition:background-color var(--t-hover) ease; }
+table.t tbody tr:hover td { background:var(--hair); }
+table.t tbody tr:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+table.t td.tight { white-space:nowrap; color:var(--muted); font-size:13px; }
+.clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; }
+
+/* ------------------------------------------------------------------- stats */
+
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:var(--s3); }
+.tile { background:var(--panel); border:1px solid var(--line);
+  border-radius:var(--r-card); padding:var(--s4); }
+.tile .tn { font-size:24px; font-weight:500; letter-spacing:-.02em; line-height:1.2; }
+.tile .tl { font-size:13px; color:var(--muted); margin-top:2px; }
+.tile .ts { font-size:12px; color:var(--faint); margin-top:6px; }
+
+/* Column chart / bar list — pure CSS, so there is no chart dependency to ship. */
+.spark { display:flex; align-items:flex-end; justify-content:space-between;
+  gap:3px; height:56px; margin-top:var(--s1); }
+/* Capped so a 14-day series in a wide card reads as a chart rather than a row
+   of slabs; flex-basis 0 keeps every column the same width either way. */
+.spark i { flex:1 1 0; min-width:2px; max-width:26px; border-radius:3px 3px 0 0;
+  background:var(--chart); opacity:.8;
+  transition:background-color var(--t-hover) ease, opacity var(--t-hover) ease; }
+.spark i:hover { background:var(--accent); opacity:1; }
+.spark i.zero { background:var(--line); opacity:1; }
+.barlist { display:grid; gap:var(--s2); }
+.barrow { display:grid; grid-template-columns:minmax(0,120px) 1fr 48px;
+  align-items:center; gap:10px; font-size:13px; border-radius:var(--r-input);
+  transition:background-color var(--t-hover) ease; }
+.barrow[data-bar] { cursor:pointer; }
+.barrow[data-bar]:hover { background:var(--hair); }
+.barrow .bar { height:8px; border-radius:var(--r-pill); background:var(--chart);
+  opacity:.75; min-width:3px;
+  transition:background-color var(--t-hover) ease, opacity var(--t-hover) ease; }
+.barrow[data-bar]:hover .bar { background:var(--accent); opacity:1; }
+.barrow .bn { text-align:right; color:var(--muted); }
+.barrow .bl { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* ------------------------------------------------------------------ health */
+
+.issue { display:flex; gap:var(--s3); align-items:flex-start; padding:var(--s3) 0;
+  border-top:1px solid var(--line); }
+.issue:first-of-type { border-top:none; padding-top:0; }
+/* Status uses a tinted badge, not a coloured surface. */
+.issue .sev { width:8px; height:8px; border-radius:50%; margin-top:6px; flex:none; }
+.issue .sev.error { background:var(--err); box-shadow:0 0 0 3px var(--tint-err); }
+.issue .sev.warn { background:var(--warn); box-shadow:0 0 0 3px var(--tint-warn); }
+.issue .itxt { min-width:0; }
+.issue .it { font-weight:500; }
+.issue .id2 { color:var(--muted); margin-top:2px; text-wrap:pretty; }
+.issue .ia { margin-left:auto; flex:none; }
+.allclear { display:flex; align-items:flex-start; gap:var(--s3); color:var(--muted);
+  text-wrap:pretty; }
+.allclear .sev { width:8px; height:8px; border-radius:50%; background:var(--ok);
+  box-shadow:0 0 0 3px var(--tint-ok); margin-top:6px; flex:none; }
+
+/* ------------------------------------------------------------------ search */
+
+.searchbar { display:flex; gap:var(--s2); margin-bottom:var(--s3); }
+/* The system's signature: the ONE primary input carries a full-contrast border
+   while every secondary filter stays on the hairline. */
+.searchbar input { flex:1; height:40px; font-size:15px; padding:0 var(--s3);
+  border-color:var(--ink); border-radius:var(--r-btn); }
+.searchbar button { height:40px; padding:0 var(--s4); }
+.knobs { display:flex; gap:var(--s4); flex-wrap:wrap; align-items:flex-end;
+  padding:var(--s3) var(--s4); background:var(--sunk);
+  border:1px solid var(--line); border-radius:var(--r-card);
+  margin-bottom:var(--s4); }
+.knobs .field input, .knobs .field select { height:28px; background:var(--panel); }
+.knobs .toggles { display:flex; gap:var(--s2); flex-wrap:wrap; }
+
+.hit { border-top:1px solid var(--line); padding:var(--s3) var(--s2) var(--s3) 2px;
+  border-radius:var(--r-input); cursor:pointer;
+  transition:background-color var(--t-hover) ease; }
+.hit:first-of-type { border-top:none; }
+.hit:hover { background:var(--hair); }
+.hit .hrank { float:left; width:26px; color:var(--faint); font-size:13px; padding-top:1px; }
+.hit .hbody { margin-left:26px; min-width:0; }
+.hit .hc { line-height:1.5; text-wrap:pretty; }
+.hit .hm { margin-top:var(--s2); display:flex; gap:5px; flex-wrap:wrap;
+  align-items:center; }
+.hit .hsum { margin-top:6px; font-size:12px; }
+
+/* Each chip gets exactly one accent — the arm that earned it. */
+.arm { font-size:11px; line-height:19px; padding:0 8px; border-radius:var(--r-pill);
+  border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
+.arm.semantic { border-color:var(--entity);  color:var(--entity); }
+.arm.lexical  { border-color:var(--product); color:var(--product); }
+.arm.graph    { border-color:var(--system);  color:var(--system); }
+.arm.edge     { border-color:var(--topic);   color:var(--topic); }
+.arm.moved    { border-color:var(--accent);  color:var(--accent); }
+
+/* ------------------------------------------------------------------ drawer */
+
+.drawer { position:fixed; inset:0; z-index:40; background:rgba(10,10,10,.3);
+  animation:fade var(--t-enter) var(--ease-out); }
+.drawer .dpanel {
+  position:absolute; right:0; top:0; bottom:0; width:min(600px,92vw);
+  background:var(--panel); border-left:1px solid var(--line);
+  box-shadow:var(--shadow-lg);
+  overflow:auto; overscroll-behavior:contain;   /* no scroll chaining to the page */
+  padding:var(--s6) var(--s6) 40px;
+  animation:slide-in var(--t-enter) var(--ease-out);
+}
+.dx { position:absolute; right:var(--s3); top:var(--s3); }
+.dsec { margin-top:var(--s6); }
+.kv { display:grid; grid-template-columns:110px minmax(0,1fr); gap:6px var(--s3);
+  font-size:13px; }
+.kv .k { color:var(--muted); }
+.kv .v { overflow-wrap:anywhere; }
+.raw { background:var(--sunk); border:1px solid var(--line);
+  border-radius:var(--r-card); padding:var(--s3);
+  white-space:pre-wrap; overflow-wrap:anywhere;
+  font-family:"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px; line-height:1.5; max-height:280px; overflow:auto;
+  overscroll-behavior:contain; }
+
+/* Supersession chain. The rail is the spine of the fact's life; the marker
+   colour is the only thing that says which state each entry is in. */
+.timeline { border-left:1px solid var(--line); padding-left:var(--s4); margin-left:4px; }
+.tnode { position:relative; padding:0 0 var(--s4); }
+.tnode:last-child { padding-bottom:0; }
+.tnode::before { content:""; position:absolute; left:-21px; top:5px;
+  width:7px; height:7px; border-radius:50%; background:var(--faint);
+  box-shadow:0 0 0 3px var(--panel); }
+.tnode.now::before { background:var(--ok); box-shadow:0 0 0 3px var(--tint-ok); }
+.tnode .tw { font-size:12px; color:var(--faint); margin-top:2px; }
+.tnode .tc { text-wrap:pretty; }
+.tnode.past .tc { color:var(--muted); }
+
+/* --------------------------------------------------------------- palette */
+
+.palette { position:fixed; inset:0; z-index:50; background:rgba(10,10,10,.32);
+  display:flex; justify-content:center; padding-top:14vh;
+  animation:fade var(--t-enter) var(--ease-out); }
+.pbox {
+  width:min(640px,92vw); height:max-content; max-height:66vh;
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:var(--r-lg); overflow:hidden;
+  box-shadow:var(--shadow-lg); display:flex; flex-direction:column;
+  /* Scales up from slightly-small, never from zero — nothing in the physical
+     world appears out of nothing. */
+  animation:pop var(--t-enter) var(--ease-out);
+}
+.pbox input { height:48px; border:none; border-radius:0;
+  border-bottom:1px solid var(--line); font-size:15px; padding:0 var(--s4); }
+.pbox input:hover, .pbox input:focus { border-color:var(--line); }
+.pbox input:focus-visible { outline:none; }
+#presults { overflow:auto; overscroll-behavior:contain; padding:var(--s1); }
+.pitem { display:flex; align-items:center; gap:var(--s2);
+  padding:var(--s2) var(--s3); border-radius:var(--r-btn); cursor:pointer; }
+.pitem[aria-selected="true"], .pitem:hover { background:var(--hair); }
+.pitem .pl { flex:1; min-width:0; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; }
+.pitem .pk { font-size:12px; color:var(--faint); flex:none; }
+
+@keyframes fade { from { opacity:0 } }
+@keyframes slide-in { from { transform:translateX(12px); opacity:0 } }
+@keyframes pop { from { transform:scale(.97) translateY(-4px); opacity:0 } }
+
+/* ------------------------------------------------------------------- graph */
+
+#gframe { width:100%; height:calc(100vh - var(--top)); border:none; display:block; }
+
+/* --------------------------------------------------------------- overrides */
+
+/* `display` on the overlays beats the `hidden` attribute's UA rule, so it has
+   to be restated — otherwise both render open on first paint. */
+[hidden] { display:none !important; }
+
+/* Motion here is feedback, not content: every animation above has a static end
+   state, so switching them off costs nothing but the transition. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:1ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:1ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+@media (max-width:760px) {
+  :root { --rail:0px; }
+  #rail { position:static; width:auto; flex-direction:row; flex-wrap:wrap;
+    align-items:center; gap:var(--s1); border-right:none;
+    border-bottom:1px solid var(--line); padding:0 var(--s3) var(--s2); }
+  .navgroup { padding:0; display:flex; gap:var(--s1); }
+  .navlabel { display:none; }
+  .railfoot { margin:0 0 0 auto; border:none; padding:0; }
+  .view { padding:var(--s4); }
+  #topbar { padding:0 var(--s4); }
+}
+
+/* ------------------------------------------------------------ danger zone */
+
+/* A destructive action has to look different from a safe one, and the panel it
+   lives in has to look different from the panels above it — otherwise "delete
+   everything" is one more grey button in a column of grey buttons. */
+.card.danger { border-color: color-mix(in srgb, var(--err) 45%, var(--line)); }
+.card.danger .sec { color: var(--err); }
+button.destructive { background: var(--err); color: #ffffff; border-color: var(--err); }
+button.destructive:hover:not(:disabled) { background: var(--err); opacity: .88; }
+button.destructive:disabled { background: transparent; color: var(--faint);
+  border-color: var(--line); opacity: 1; }
+
+/* ---------------------------------------------------------------- setup */
+
+/* The wizard reuses the system's meaning colours rather than inventing a
+   palette: a source dot means exactly what a health severity dot means, so a
+   green here and a green on Overview are the same claim. */
+.sdot { width:8px; height:8px; border-radius:50%; flex:none; margin-top:6px;
+  background:var(--err); box-shadow:0 0 0 3px var(--tint-err); }
+.sdot.ok   { background:var(--ok);   box-shadow:0 0 0 3px var(--tint-ok); }
+.sdot.warn { background:var(--warn); box-shadow:0 0 0 3px var(--tint-warn); }
+
+.srclist { display:flex; flex-direction:column; }
+.srcrow { display:flex; align-items:flex-start; justify-content:space-between;
+  gap:var(--s3); padding:var(--s3) 0; border-top:1px solid var(--hair); }
+.srcrow:first-child { border-top:0; }
+.srcmain { display:flex; align-items:flex-start; gap:var(--s2); min-width:0; }
+.srcstate { margin-top:2px; }
+.srcact { flex:none; }
+
+/* A failed check without its remedy is just an accusation, so .chkfix is part
+   of the row, not a tooltip. */
+.chk { padding:var(--s2) 0; border-top:1px solid var(--hair); }
+.chk:first-child { border-top:0; }
+.chkhead { display:flex; align-items:flex-start; gap:var(--s2); flex-wrap:wrap; }
+.chkfix { margin:6px 0 0 20px; color:var(--muted); }
+.pfhead { padding:var(--s2) 0 var(--s3); font-weight:600; }
+.pfhead.ok  { color:var(--ok); }
+.pfhead.bad { color:var(--err); }
+
+.setupcard { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+/* Shape only — the filled style itself is defined once, with button.primary. */
+.btnlink { display:inline-flex; align-items:center; height:32px; padding:0 14px;
+  border-radius:var(--r-btn); text-decoration:none; border:1px solid var(--line); }
+
+@media (max-width: 640px) {
+  .srcrow { flex-direction:column; align-items:stretch; }
+  .srcact { align-self:flex-start; }
+}
+
+/* Wizard form rows — labels above inputs, because a two-column form collapses
+   badly on a phone and setup is exactly when people are on one. */
+.fieldrow { margin-bottom:var(--s3); max-width:520px; }
+.fieldrow label { display:block; font-weight:500; margin-bottom:6px; }
+.fieldrow input, .fieldrow select { width:100%; }
+.fieldrow .dim { margin:6px 0 0; }
+
+/* Optional-but-unconfigured is not a failure; amber says "you could", red says
+   "this is broken". Keeping them distinct is what stops people ignoring red. */
+.chk.warn .chkfix { color: var(--muted); }
+
+/* Walkthrough steps under a failed service check — the Operations twin of the
+   wizard's Trello walkthrough. Only rendered on failure: a passing check has
+   nothing to walk through. */
+.chksteps { margin:8px 0 2px 18px; padding:0 0 0 14px; }
+.chksteps li { margin:6px 0; color:var(--muted); max-width:64ch; text-wrap:pretty; }
