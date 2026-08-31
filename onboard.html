@@ -24,8 +24,9 @@
   <ol class="obrail" id="obrail" aria-label="Setup progress">
     <li data-step="0"><span class="rdot" aria-hidden="true"></span><span class="rlab">Organization</span></li>
     <li data-step="1"><span class="rdot" aria-hidden="true"></span><span class="rlab">Sources</span></li>
-    <li data-step="2"><span class="rdot" aria-hidden="true"></span><span class="rlab">Verify</span></li>
-    <li data-step="3"><span class="rdot" aria-hidden="true"></span><span class="rlab">Done</span></li>
+    <li data-step="2"><span class="rdot" aria-hidden="true"></span><span class="rlab">Plan</span></li>
+    <li data-step="3"><span class="rdot" aria-hidden="true"></span><span class="rlab">Verify</span></li>
+    <li data-step="4"><span class="rdot" aria-hidden="true"></span><span class="rlab">Done</span></li>
   </ol>
   <a class="obskip" href="./app.html?skip=1" id="exit">Skip for now</a>
 </header>
@@ -109,9 +110,25 @@
     </div>
   </section>
 
-  <!-- 3 ─────────────────────────────────────────────────── verify -->
-  <section class="step" data-step="2" aria-labelledby="t2" hidden>
+  <!-- 3 ───────────────────────────────────────────────────── plan -->
+  <section class="step" data-step="2" aria-labelledby="tp" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step three</p>
+    <h1 id="tp" data-words>Choose your plan.</h1>
+    <p class="lede reveal">Consumption pricing, prepaid: every month your plan
+      adds tokens to the balance, and enrichment draws it down as it happens.
+      Unused tokens roll over. Your trial credit is already in the balance
+      &mdash; nothing is charged until billing activates.</p>
+    <div id="plangrid" class="srcgrid reveal" role="radiogroup" aria-label="Plans"></div>
+    <p class="fh reveal" id="plan-out" role="status"></p>
+    <div class="acts reveal">
+      <button class="cta" data-next id="plan-next" disabled>Continue</button>
+      <button class="textlink" data-back><span class="tl">Back</span></button>
+    </div>
+  </section>
+
+  <!-- 4 ─────────────────────────────────────────────────── verify -->
+  <section class="step" data-step="3" aria-labelledby="t2" hidden>
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step four</p>
     <h1 id="t2" data-words>Now let&rsquo;s prove it works.</h1>
     <p class="lede reveal">Every line below is a real call to the real API &mdash; not
       a check that a setting is non-empty. Once these are green you are done:
@@ -132,8 +149,8 @@
     </div>
   </section>
 
-  <!-- 4 ───────────────────────────────────────────────────── done -->
-  <section class="step" data-step="3" aria-labelledby="t3" hidden>
+  <!-- 5 ───────────────────────────────────────────────────── done -->
+  <section class="step" data-step="4" aria-labelledby="t3" hidden>
     <div class="donemark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M14 25l7 7 14-16"/></svg></div>
     <h1 id="t3" data-words>You&rsquo;re set up.</h1>
     <p class="lede reveal" id="donesum"></p>
@@ -165,6 +182,6 @@
    URL fragment, and module-land (supabase-js) may consume fragments. Stash
    it first so the wizard always receives it. */
 window.__ob_hash = location.hash;</script>
-<script type="module" src="./onboard.js?v=12"></script>
+<script type="module" src="./onboard.js?v=13"></script>
 </body>
 </html>

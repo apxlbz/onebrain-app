@@ -114,8 +114,9 @@ function show(next, { back = false } = {}) {
 
 function onEnter(i) {
   if (i === 1) renderSources();
-  if (i === 2) { runChecks(); }
-  if (i === 3) renderDone();
+  if (i === 2) renderPlans();
+  if (i === 3) { runChecks(); }
+  if (i === 4) renderDone();
 }
 
 // ------------------------------------------------------------------ step 1
@@ -227,6 +228,42 @@ async function connectTrello(btn) {
 async function connect(btn) {
   if (btn.dataset.src === 'trello') return connectTrello(btn);
   return connectGoogle(btn);
+}
+
+// ---------------------------------------------------------------- step 3
+// The plan is not optional: Continue stays disabled until a tier is chosen.
+// Choosing writes the subscription immediately (no payment yet — Stripe
+// activates it later), so a refresh or a return visit remembers it.
+
+async function renderPlans() {
+  const grid = $('plangrid'); const out = $('plan-out');
+  try {
+    const b = await api('/v1/billing');
+    const chosen = b.subscription?.plan_code || '';
+    grid.innerHTML = b.plans.map((pl) => `
+      <button class="srccard" role="radio" data-plan="${esc(pl.code)}"
+              aria-checked="${pl.code === chosen}" data-on="${pl.code === chosen ? '1' : '0'}">
+        <span class="srcname">${esc(pl.name)}<span class="sd" aria-hidden="true"></span></span>
+        <span class="srcwhat">$${Number(pl.usd_month)}/month &mdash; ${esc(pl.display_tokens)} included, rolls over</span>
+        <span class="srcstate">${pl.code === chosen ? 'Selected' : 'Choose'}</span>
+      </button>`).join('');
+    out.textContent = `Balance: $${Number(b.balance_usd).toFixed(2)} — this month’s use: `
+      + `${(b.month_tokens / 1e6).toFixed(2)}M tokens ($${Number(b.month_spend_usd).toFixed(4)})`;
+    $('plan-next').disabled = !chosen;
+    grid.querySelectorAll('[data-plan]').forEach((card) => {
+      card.addEventListener('click', async () => {
+        card.querySelector('.srcstate').textContent = 'Saving…';
+        try {
+          await post('/v1/billing/plan', { plan: card.dataset.plan });
+          await renderPlans();
+        } catch (e) {
+          card.querySelector('.srcstate').textContent = String(e.message || e).slice(0, 60);
+        }
+      });
+    });
+  } catch (e) {
+    out.textContent = String(e.message || e).slice(0, 120);
+  }
 }
 
 /* Returning from Google: Supabase puts the grant in the URL fragment. The
@@ -469,6 +506,7 @@ function wire() {
       b.disabled = false;
     }
     if (state.step === 1) { try { await refresh(); } catch { /* keep going */ } }
+    if (state.step === 2 && $('plan-next').disabled) return;
     show(Math.min(state.step + 1, steps.length - 1));
   }));
   document.querySelectorAll('[data-back]').forEach((b) =>
