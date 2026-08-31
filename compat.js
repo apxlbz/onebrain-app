@@ -264,12 +264,14 @@ async function routeGet(path) {
 }
 
 window.OB = {
+  token: () => session?.access_token ?? null,
   async api(path, opts = {}) {
     if (!opts.method || opts.method === "GET") return await routeGet(path);
     const body = opts.body ? JSON.parse(opts.body) : {};
     if (path === "/v1/recall") return await fnCall("/v1/recall", body);
     if (path === "/v1/who-knows") return await fnCall("/v1/who-knows", body);
     if (path === "/v1/me/token") return await fnCall("/v1/me/token", body);
+    if (path === "/v1/feedback") return await fnCall("/v1/feedback", body);
     if (path === "/v1/org/keys") return await fnCall("/v1/org/keys", body);
     if (path === "/v1/onboarding") return await fnCall("/v1/onboarding", body);
     if (path === "/v1/billing/plan") return await fnCall("/v1/billing/plan", body);

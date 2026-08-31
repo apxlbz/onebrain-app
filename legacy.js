@@ -1,4 +1,4 @@
-import "./compat.js?v=10";
+import "./compat.js?v=11";
 import { FN } from "./env.js?v=1";
 
 /* OneBrain dashboard.
@@ -438,6 +438,13 @@ async function openFact(id, opener) {
         <span class="k">Fact id</span><span class="v mono" translate="no">${esc(f.id)}</span>
       </div>
     </section>
+    <section class="dsec" aria-labelledby="h-fb">
+      <h2 class="sec" id="h-fb">Was this fact useful?</h2>
+      <p style="margin:0">
+        <button class="btnlink" id="fbup">Useful</button>
+        <button class="btnlink" id="fbdown" style="margin-left:8px">Not useful</button>
+        <span class="dim" id="fbout" role="status" style="margin-left:10px"></span></p>
+    </section>
     ${chain}
     ${f.relations.length ? `<section class="dsec" aria-labelledby="h-rel">
       <h2 class="sec" id="h-rel">Relationships asserted</h2>
@@ -454,6 +461,21 @@ async function openFact(id, opener) {
 
   body.querySelectorAll('[data-goto]').forEach((d) =>
     activate(d, () => openFact(d.dataset.goto)));
+
+  // The learning loop: a rating nudges this fact's feedback_weight (EWMA),
+  // which recall already folds into ranking.
+  const rate = async (rating) => {
+    $('fbup').disabled = $('fbdown').disabled = true;
+    try {
+      await post('/v1/feedback', { fact_ids: [f.id], rating });
+      $('fbout').textContent = 'Noted — recall learns from this.';
+    } catch (e) {
+      $('fbout').textContent = `Failed: ${e.message || e}`;
+      $('fbup').disabled = $('fbdown').disabled = false;
+    }
+  };
+  $('fbup').addEventListener('click', () => rate(5));
+  $('fbdown').addEventListener('click', () => rate(1));
 }
 
 // ------------------------------------------------------------------ search
@@ -875,8 +897,10 @@ async function viewSettings(root) {
     <section class="card" style="margin-bottom:14px" aria-labelledby="h-export">
       <h2 class="sec" id="h-export">Take your data</h2>
       <p class="dim" style="margin:-4px 0 12px">Everything, as portable JSON —
-        the raw record, the facts, the graph, ids preserved. Export is being
-        rebuilt on the new engine and returns shortly.</p>
+        the raw record, the facts, the graph, ids preserved. Embeddings are
+        omitted: model-specific and reproducible.</p>
+      <p style="margin:0"><button class="btnlink" id="expgo">Download export</button>
+        <span class="dim" id="expout" role="status" style="margin-left:10px"></span></p>
     </section>
 
 
@@ -924,6 +948,28 @@ async function viewSettings(root) {
       </div>
       <p id="delout" class="dim" style="margin:12px 0 0" role="status"></p>
     </section>`;
+
+  // Export: a raw fetch (not the json helper) so the response can stream to a
+  // Blob and land as a file download.
+  $('expgo').addEventListener('click', async () => {
+    const btn = $('expgo');
+    btn.disabled = true; $('expout').textContent = 'Preparing…';
+    try {
+      const r = await fetch(`${FN}/api/v1/export`, {
+        headers: { Authorization: `Bearer ${window.OB.token()}` },
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const blob = await r.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `onebrain-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      $('expout').textContent = 'Downloaded.';
+    } catch (e) {
+      $('expout').textContent = `Failed: ${e.message || e}`;
+    } finally { btn.disabled = false; }
+  });
 
   // Connect your tools: the MCP add command is plain text (public URL), the
   // personal token is fetched on demand and shown exactly once.
