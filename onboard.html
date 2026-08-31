@@ -83,10 +83,12 @@
       <h2 id="tr-title">Connect Trello &mdash; one-time setup</h2>
       <p class="fh">Your organization brings its own (free) app key: sign in to
         Trello, open <a class="mono" translate="no" href="https://trello.com/power-ups/admin" target="_blank" rel="noopener noreferrer">trello.com/power-ups/admin&nbsp;&#8599;</a>,
-        create a Power-Up, and copy its API key. Paste it once below &mdash;
-        you&rsquo;ll hop to Trello&rsquo;s own site to approve <b>read-only</b>
-        access and land straight back here, connected. Nothing is saved until a
-        live call proves it.</p>
+        create a Power-Up, and on its <b>API Key</b> tab copy the key <b>and
+        add</b> <b class="mono" translate="no">https://apxlbz.github.io</b> under
+        <b>Allowed Origins</b> &mdash; Trello refuses to send you back without
+        it. Paste the key once below; you&rsquo;ll hop to Trello&rsquo;s own
+        site to approve <b>read-only</b> access and land straight back here,
+        connected. Nothing is saved until a live call proves it.</p>
       <div class="mrow">
         <input id="tr-key" class="fi" type="text"
                placeholder="paste your Trello API key"
