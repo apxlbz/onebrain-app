@@ -10,7 +10,11 @@ const SUPA_ORIGIN = "https://epjkzltwyfexiunbmbel.supabase.co";
 const FN = `${SUPA_ORIGIN}/functions/v1`;
 
 const cfg = await fetch(`${FN}/api/config`).then((r) => r.json());
-const sb = createClient(cfg.supabase_url, cfg.supabase_anon_key);
+// detectSessionInUrl stays OFF here: the wizard's Google-connect return
+// carries a grant in the URL fragment that onboard.js must read itself —
+// supabase-js would consume and scrub it first. Only index.html detects.
+const sb = createClient(cfg.supabase_url, cfg.supabase_anon_key,
+                        { auth: { detectSessionInUrl: false } });
 let session = (await sb.auth.getSession()).data.session;
 sb.auth.onAuthStateChange((_e, s) => { session = s; });
 

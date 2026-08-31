@@ -1,4 +1,4 @@
-import "./compat.js?v=2";
+import "./compat.js?v=5";
 
 /* OneBrain dashboard.
  *
