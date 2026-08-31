@@ -514,10 +514,11 @@ function wire() {
 
   $('vrun').addEventListener('click', runChecks);
 
+  if ($('tr-origin')) $('tr-origin').firstChild.textContent = location.origin + ' ';
   $('tr-origin')?.addEventListener('click', async () => {
     const b = $('tr-origin');
     try {
-      await navigator.clipboard.writeText('https://apxlbz.github.io');
+      await navigator.clipboard.writeText(location.origin);
       const was = b.innerHTML;
       b.textContent = 'Copied \u2713';
       setTimeout(() => { b.innerHTML = was; }, 1600);
