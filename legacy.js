@@ -668,6 +668,16 @@ async function viewPeople(root, params) {
   if (initial) run();
 }
 
+// ------------------------------------------------------------------- graph
+
+/** The graph is a complete d3 application with its own layout, index and
+ *  inspector — embedded rather than forked; `?embed=1` drops its own header so
+ *  there is only one chrome on screen. */
+function viewGraph(root) {
+  root.classList.add('wide');
+  root.innerHTML = '<iframe id="gframe" src="./graph.html?embed=1" title="Knowledge graph"></iframe>';
+}
+
 // --------------------------------------------------------------- sources
 
 const SOURCE_LABEL = {
@@ -976,6 +986,7 @@ const VIEWS = {
   memories: { title: 'Knowledge', render: viewMemories },
   people: { title: 'People', render: viewPeople },
   search: { title: 'Search', render: viewSearch },
+  graph: { title: 'Graph', render: viewGraph },
   sources: { title: 'Sources', render: viewSources },
   usage: { title: 'Billing', render: viewUsage },
   settings: { title: 'Settings', render: viewSettings },
