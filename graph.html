@@ -176,12 +176,13 @@
       <div class="advlabel">Show node types</div>
       <div id="ctl">
         <span class="chip" data-type="fact" data-on="0"><i class="dot" style="background:var(--fact)"></i>facts</span>
-        <span class="chip" data-type="entity" data-on="1"><i class="dot" style="background:var(--entity)"></i>entity</span>
-        <span class="chip" data-type="product" data-on="1"><i class="dot" style="background:var(--product)"></i>product</span>
-        <span class="chip" data-type="system" data-on="1"><i class="dot" style="background:var(--system)"></i>system</span>
-        <span class="chip" data-type="topic" data-on="1"><i class="dot" style="background:var(--topic)"></i>topic</span>
-        <span class="chip" data-type="tag" data-on="0"><i class="dot" style="background:var(--tag)"></i>tag</span>
-        <span class="chip" data-type="source" data-on="0"><i class="dot" style="background:var(--source)"></i>source</span>
+        <span class="chip" data-type="entity" data-on="1"><i class="dot" style="background:var(--entity)"></i>people</span>
+        <span class="chip" data-type="company" data-on="1"><i class="dot" style="background:#0e7490"></i>companies</span>
+        <span class="chip" data-type="product" data-on="1"><i class="dot" style="background:var(--product)"></i>products</span>
+        <span class="chip" data-type="system" data-on="1"><i class="dot" style="background:var(--system)"></i>systems</span>
+        <span class="chip" data-type="topic" data-on="1"><i class="dot" style="background:var(--topic)"></i>topics</span>
+        <span class="chip" data-type="tag" data-on="0"><i class="dot" style="background:var(--tag)"></i>tags</span>
+        <span class="chip" data-type="source" data-on="0"><i class="dot" style="background:var(--source)"></i>sources</span>
       </div>
       <div class="advlabel" style="margin-top:12px">Filter by source</div>
       <div id="srcctl"></div>
@@ -199,8 +200,9 @@
 <div id="page" hidden></div>
 <script type="module">
 // Kept in lockstep with the :root tokens above and with web/app.css.
-const COL={fact:"#737373",entity:"#7c3aed",product:"#16a34a",system:"#ea580c",topic:"#ca8a04",tag:"#db2777",source:"#2563eb"};
-const HUB=new Set(["entity","product","system","topic","tag"]);
+const COL={fact:"#737373",entity:"#7c3aed",company:"#0e7490",product:"#16a34a",system:"#ea580c",topic:"#ca8a04",tag:"#db2777",source:"#2563eb"};
+const TYPE_LABEL={fact:"Facts",entity:"People",company:"Companies",product:"Products",system:"Systems",topic:"Topics",tag:"Tags",source:"Sources"};
+const HUB=new Set(["entity","company","product","system","topic","tag"]);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const svg=d3.select("#g"), root=svg.append("g");
@@ -225,8 +227,8 @@ function sideOverview(){
   const mx=Math.max(1,...srcs.map(s=>s[1]));
   const tile=(n,l,c,ty)=>`<div class="tile" data-drill="${ty}" title="View all ${l}"><div class="tnum"><span class="tdot" style="background:${c}"></span>${n}</div><div class="tlab">${l}</div></div>`;
   let h='<div class="ov"><div class="ovh">Overview</div><div class="tiles">'+
-    tile(facts.length,"facts",COL.fact,"fact")+tile(cnt("entity"),"entities",COL.entity,"entity")+tile(cnt("product"),"products",COL.product,"product")+
-    tile(cnt("system"),"systems",COL.system,"system")+tile(cnt("topic"),"topics",COL.topic,"topic")+tile(cnt("tag"),"tags",COL.tag,"tag")+'</div>';
+    tile(facts.length,"facts",COL.fact,"fact")+tile(cnt("entity"),"people",COL.entity,"entity")+tile(cnt("company"),"companies",COL.company,"company")+
+    tile(cnt("product"),"products",COL.product,"product")+tile(cnt("system"),"systems",COL.system,"system")+tile(cnt("topic"),"topics",COL.topic,"topic")+'</div>';
   if(top.length) h+='<div class="ovsec">Most connected</div>'+top.map(n=>
     `<div class="toprow" data-id="${esc(n.id)}"><span class="tdot" style="background:${COL[n.type]}"></span><span class="tlbl">${esc(n.label)}</span><span class="tdeg">${deg(n)}</span></div>`).join("");
   if(srcs.length) h+='<div class="ovsec" style="margin-top:16px">By source</div>'+srcs.map(([s,n])=>
@@ -247,7 +249,7 @@ function drill(type){
   if(type==="fact"){
     rows=DATA.nodes.filter(n=>n.type==="fact"&&factOK(n)).map(f=>({
       id:f.id, label:f.full||f.label, source:f.source||"", date:f.date||"",
-      facets:[f.entity,f.product,f.system,f.topic].filter(Boolean).concat((f.tags||[]).slice(0,3))
+      facets:[f.entity,f.company,f.product,f.system,f.topic].filter(Boolean).concat((f.tags||[]).slice(0,3))
     }));
   } else {
     rows=DATA.nodes.filter(n=>n.type===type).map(n=>{
@@ -329,7 +331,7 @@ function suggest(){
     .sort((a,b)=>(a.label.toLowerCase().startsWith(q)?0:1)-(b.label.toLowerCase().startsWith(q)?0:1) || b.deg-a.deg)
     .slice(0,10);
   if(!m.length){ box.style.display="none"; return; }
-  box.innerHTML=m.map(n=>`<div class="acitem" data-id="${esc(n.id)}"><span class="dot" style="background:${COL[n.type]||'#888'}"></span><span class="aclbl">${esc(n.label)}</span><span class="actype">${esc(n.type)}</span><span class="acdeg">${n.deg}</span></div>`).join("");
+  box.innerHTML=m.map(n=>`<div class="acitem" data-id="${esc(n.id)}"><span class="dot" style="background:${COL[n.type]||'#888'}"></span><span class="aclbl">${esc(n.label)}</span><span class="actype">${esc((TYPE_LABEL[n.type]||n.type).toLowerCase().replace(/s$/,""))}</span><span class="acdeg">${n.deg}</span></div>`).join("");
   box.style.display="block";
   box.querySelectorAll(".acitem").forEach(el=>el.onclick=()=>{
     $("search").value=NODE[el.dataset.id].label; box.style.display="none";
@@ -555,7 +557,7 @@ function centerOn(d){
 const COLLAPSED=new Set(["system","topic","tag","source"]);
 function buildIndex(){
   const q=($("search").value||"").toLowerCase();
-  const order=["entity","product","system","topic","tag","source"];
+  const order=["entity","company","product","system","topic","tag","source"];
   const groups={}; order.forEach(t=>groups[t]=[]);
   DATA.nodes.forEach(n=>{ if(groups[n.type]&&state.types.has(n.type)&&(DEG[n.id]>0||state.types.has("fact"))) groups[n.type].push(n); });
   let h="";
@@ -565,7 +567,7 @@ function buildIndex(){
     items.sort((a,b)=>(DEG[b.id]||0)-(DEG[a.id]||0));
     const open = q ? true : !COLLAPSED.has(t);
     h+=`<div class="igrp"><div class="ihead" data-t="${t}"><span class="chev">${open?"▾":"▸"}</span>`+
-       `<i class="idot" style="background:${COL[t]}"></i>${t}<span class="cnt">${items.length}</span></div>`+
+       `<i class="idot" style="background:${COL[t]}"></i>${TYPE_LABEL[t]||t}<span class="cnt">${items.length}</span></div>`+
        `<div class="ibody"${open?"":" hidden"}>`+
        items.slice(0,80).map(n=>`<div class="iitem" data-id="${esc(n.id)}" title="${esc(n.label)}">`+
          `<span class="ilbl">${esc(n.label)}</span><span class="ideg">${DEG[n.id]||0}</span></div>`).join("")+
