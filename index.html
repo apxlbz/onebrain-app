@@ -37,8 +37,8 @@
   // Pure entrance: sign in, then route — unfinished org -> the setup wizard,
   // established org -> the dashboard. One app, one look.
   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-  const SUPA = "https://epjkzltwyfexiunbmbel.supabase.co";
-  const cfg = await fetch(`${SUPA}/functions/v1/api/config`).then((r) => r.json());
+  import { FN } from "./env.js?v=1";
+  const cfg = await fetch(`${FN}/api/config`).then((r) => r.json());
   const sb = createClient(cfg.supabase_url, cfg.supabase_anon_key);
   const st = document.getElementById("status");
 

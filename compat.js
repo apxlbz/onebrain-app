@@ -6,8 +6,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPA_ORIGIN = "https://epjkzltwyfexiunbmbel.supabase.co";
-const FN = `${SUPA_ORIGIN}/functions/v1`;
+import { FN } from "./env.js?v=1";
 
 const cfg = await fetch(`${FN}/api/config`).then((r) => r.json());
 // detectSessionInUrl stays OFF here: the wizard's Google-connect return

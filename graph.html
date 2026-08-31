@@ -359,7 +359,7 @@ initAuth();
 let OB_FN="", OB_TOKEN="";
 async function initAuth(){
   const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-  const FN="https://epjkzltwyfexiunbmbel.supabase.co/functions/v1";
+  const { FN } = await import("./env.js?v=1");
   const cfg=await fetch(FN+"/api/config").then(r=>r.json());
   const sb=createClient(cfg.supabase_url,cfg.supabase_anon_key,{auth:{detectSessionInUrl:false}});
   const s=(await sb.auth.getSession()).data.session;
