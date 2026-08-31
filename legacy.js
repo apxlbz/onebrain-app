@@ -794,9 +794,60 @@ async function viewOps(root) {
  *  inspector. Re-implementing it inside the shell would fork 600 lines of
  *  working code, so it is embedded — `?embed=1` drops its own header so there
  *  is only one chrome on screen. */
-function viewGraph(root) {
-  root.classList.add('wide');
-  root.innerHTML = '<iframe id="gframe" src="/graph?embed=1" title="Knowledge graph"></iframe>';
+// --------------------------------------------------------------- sources
+
+const SOURCE_LABEL = {
+  gmail: 'Gmail', google_meet: 'Google Meet',
+  google_calendar: 'Google Calendar', trello: 'Trello',
+};
+
+async function viewSources(root) {
+  root.innerHTML = '<div class="spin">Loading…</div>';
+  let conns, types;
+  try {
+    [conns, types] = await Promise.all([api('/v1/connections'), api('/v1/memory-types')]);
+  } catch (e) { return fail(root, e); }
+  const counts = Object.fromEntries((types.sources || []).map((x) => [x.source, x.count]));
+  const rows = conns.connections || [];
+  const connected = new Set(rows.map((c) => c.provider));
+  const others = (types.sources || []).filter((x) => !connected.has(x.source));
+
+  root.innerHTML = `
+    <h1>Sources</h1>
+    <p class="lede">What feeds this memory. Every connection is verified with a
+      real call on every sweep — trouble is written here, not buried in a log.</p>
+
+    <section class="card" style="margin-bottom:14px" aria-labelledby="h-conn">
+      <h2 class="sec" id="h-conn">Connections</h2>
+      ${rows.length
+        ? `<table class="t"><thead><tr><th>Source</th><th>State</th>
+             <th>Last verified</th><th>Trouble</th><th class="num">Facts</th></tr></thead>
+           <tbody>${rows.map((c) => `<tr>
+             <td>${esc(SOURCE_LABEL[c.provider] || c.provider)}${c.member_email
+                 ? ` <span class="dim mono">${esc(c.member_email)}</span>` : ''}</td>
+             <td>${c.status === 'ok' ? '<span class="pill ok">verified</span>'
+                 : `<span class="pill">${esc(c.status || 'pending')}</span>`}</td>
+             <td>${c.last_ok_at ? esc(ago(c.last_ok_at)) : '—'}</td>
+             <td>${c.last_error ? `<span class="dim">${esc(String(c.last_error).slice(0, 90))}</span>` : ''}</td>
+             <td class="num">${n(counts[c.provider] || 0)}</td>
+           </tr>`).join('')}</tbody></table>`
+        : `<div class="empty"><b>Nothing is connected</b>Connect Gmail, Google Meet,
+             Calendar or Trello and ingestion starts within a minute.</div>`}
+      <p style="margin:12px 0 0"><a class="ghost" href="./onboard.html">Connect or
+        repair a source</a></p>
+    </section>
+
+    ${others.length ? `
+    <section class="card" aria-labelledby="h-oth">
+      <h2 class="sec" id="h-oth">Written directly</h2>
+      <p class="dim" style="margin:-4px 0 10px">Memory that arrives through the
+        MCP tools and hooks rather than a polled connection.</p>
+      <div class="barlist">${others.map((x) => `
+        <div class="barrow" style="grid-template-columns:minmax(0,160px) 1fr auto">
+          <span class="bl mono">${esc(x.source)}</span><span></span>
+          <span class="bn">${n(x.count || 0)}</span>
+        </div>`).join('')}</div>
+    </section>` : ''}`;
 }
 
 // -------------------------------------------------------------- settings
@@ -831,39 +882,14 @@ async function viewSettings(root) {
         it can reach a single row.</p>
     </section>
 
-    <section class="card" style="margin-bottom:14px" aria-labelledby="h-src">
-      <h2 class="sec" id="h-src">Connected sources</h2>
-      ${sources.length
-        ? `<div class="barlist">${sources.map((s) => `
-            <div class="barrow" style="grid-template-columns:minmax(0,160px) 1fr auto">
-              <span class="bl mono">${esc(s.source || s)}</span>
-              <span></span>
-              <span class="bn">${n(s.count || 0)}</span>
-            </div>`).join('')}</div>`
-        : `<div class="empty"><b>Nothing has arrived yet</b>Connectors write on a
-           five-minute cycle. If this stays empty, check Operations for failed
-           inputs.</div>`}
-    </section>
 
     <section class="card" style="margin-bottom:14px" aria-labelledby="h-export">
       <h2 class="sec" id="h-export">Take your data</h2>
       <p class="dim" style="margin:-4px 0 12px">Everything, as portable JSON —
-        the raw record, the facts, the graph, ids preserved.</p>
-      
+        the raw record, the facts, the graph, ids preserved. Export is being
+        rebuilt on the new engine and returns shortly.</p>
     </section>
 
-    <section class="card" style="margin-bottom:14px" aria-labelledby="h-people">
-      <h2 class="sec" id="h-people">People &amp; usage</h2>
-      <p class="dim" style="margin:0 0 12px">Everyone who has shown up — signing
-        in or calling through Claude — with whether their own mailbox feeds the
-        memory, and how much they use it. Only tokens minted by a signed-in
-        person carry that person; anonymous org tokens never appear here: this
-        table says who showed up, it never guesses.
-        Invite link: <b class="mono" id="invitelink" translate="no"></b> —
-        <a href="/welcome">it sets up your own Claude too</a> (MCP connect +
-        the memory hooks, personal token minted on the page).</p>
-      <div id="people"><div class="spin">Loading…</div></div>
-    </section>
 
     <section class="card danger" aria-labelledby="h-danger">
       <h2 class="sec" id="h-danger">Danger zone</h2>
@@ -909,24 +935,6 @@ async function viewSettings(root) {
       </div>
       <p id="delout" class="dim" style="margin:12px 0 0" role="status"></p>
     </section>`;
-
-  $('invitelink').textContent = `${location.origin}/welcome`;
-  api('/v1/members').then((res) => {
-    const rows = res.members || [];
-    $('people').innerHTML = rows.length ? `
-      <table class="t"><thead><tr><th>Member</th><th>Last seen</th>
-        <th>Via</th><th>Own Gmail</th><th class="num">Recalls</th>
-        <th class="num">Captures</th></tr></thead>
-      <tbody>${rows.map((m) => `<tr>
-        <td class="mono">${esc(m.email)}</td>
-        <td title="${esc(exact(m.last_seen))}">${esc(ago(m.last_seen))}</td>
-        <td>${esc(m.last_surface || '—')}</td>
-        <td>${m.gmail_connected ? '<span class="pill ok">connected</span>' : '—'}</td>
-        <td class="num">${n(m.recalls)}</td>
-        <td class="num">${n(m.remembers)}</td>
-      </tr>`).join('')}</tbody></table>`
-      : '<p class="dim">Nobody has signed in yet. Send the invite link above.</p>';
-  }).catch(() => { $('people').innerHTML = '<p class="dim">Could not load.</p>'; });
 
   const input = $('purgeconfirm');
   const go = $('purgego');
@@ -1050,6 +1058,14 @@ async function viewUsage(root) {
       ${breakdown(u.by_op, 'operations', 'operation')}
     </section>
 
+    <section class="card" style="margin-top:12px;margin-bottom:12px" aria-labelledby="h-um">
+      <h2 class="sec" id="h-um">By member</h2>
+      <p class="dim" style="margin:-4px 0 10px">Who showed up and how much they
+        use it. Only tokens minted by a signed-in person carry a name — this
+        table never guesses.</p>
+      <div id="umembers"><div class="spin">Loading…</div></div>
+    </section>
+
     <section class="card" style="margin-top:12px" aria-labelledby="h-ul">
       <h2 class="sec" id="h-ul">Credits</h2>
       ${u.ledger.length
@@ -1060,6 +1076,23 @@ async function viewUsage(root) {
           </tr>`).join('')}</tbody></table>`
         : '<p class="dim">No credits yet — the trial lands on first setup.</p>'}
     </section>`;
+
+  api('/v1/members').then((res) => {
+    const rows = res.members || [];
+    $('umembers').innerHTML = rows.length ? `
+      <table class="t"><thead><tr><th>Member</th><th>Last seen</th>
+        <th>Via</th><th>Own Gmail</th><th class="num">Recalls</th>
+        <th class="num">Captures</th></tr></thead>
+      <tbody>${rows.map((m) => `<tr>
+        <td class="mono">${esc(m.email)}</td>
+        <td title="${esc(exact(m.last_seen))}">${esc(ago(m.last_seen))}</td>
+        <td>${esc(m.last_surface || '—')}</td>
+        <td>${m.gmail_connected ? '<span class="pill ok">connected</span>' : '—'}</td>
+        <td class="num">${n(m.recalls)}</td>
+        <td class="num">${n(m.remembers)}</td>
+      </tr>`).join('')}</tbody></table>`
+      : '<p class="dim">Nobody has signed in yet.</p>';
+  }).catch(() => { $('umembers').innerHTML = '<p class="dim">Could not load.</p>'; });
 }
 
 // ------------------------------------------------------------------ router
@@ -1067,10 +1100,10 @@ async function viewUsage(root) {
 const VIEWS = {
   overview: { title: 'Overview', render: viewOverview },
   memories: { title: 'Memories', render: viewMemories },
-  graph: { title: 'Graph', render: viewGraph },
   people: { title: 'People', render: viewPeople },
   search: { title: 'Search', render: viewSearch },
   ops: { title: 'Operations', render: viewOps },
+  sources: { title: 'Sources', render: viewSources },
   usage: { title: 'Usage', render: viewUsage },
   settings: { title: 'Settings', render: viewSettings },
 };
