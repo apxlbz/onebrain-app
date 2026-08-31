@@ -1042,19 +1042,13 @@ async function viewUsage(root) {
       ${spark(u.daily, u.days, 'tokens')}
     </section>
 
-    <div class="split">
-      <section class="card" aria-labelledby="h-uop">
-        <h2 class="sec" id="h-uop">By operation</h2>
-        <p class="dim" style="margin:-4px 0 10px">Where the thinking goes:
-          enrichment turns raw inputs into facts; embeddings make them findable;
-          recall answers questions.</p>
-        ${breakdown(u.by_op, 'operations', 'operation')}
-      </section>
-      <section class="card" aria-labelledby="h-umod">
-        <h2 class="sec" id="h-umod">By model</h2>
-        ${breakdown(u.by_model, 'model spend', 'model')}
-      </section>
-    </div>
+    <section class="card" aria-labelledby="h-uop">
+      <h2 class="sec" id="h-uop">By operation</h2>
+      <p class="dim" style="margin:-4px 0 10px">Where the thinking goes:
+        enrichment turns raw inputs into facts; embeddings make them findable;
+        recall answers questions.</p>
+      ${breakdown(u.by_op, 'operations', 'operation')}
+    </section>
 
     <section class="card" style="margin-top:12px" aria-labelledby="h-ul">
       <h2 class="sec" id="h-ul">Credits</h2>
