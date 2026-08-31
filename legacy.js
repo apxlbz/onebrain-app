@@ -668,122 +668,6 @@ async function viewPeople(root, params) {
   if (initial) run();
 }
 
-// --------------------------------------------------------------------- ops
-
-async function viewOps(root) {
-  root.innerHTML = '<div class="spin">Loading…</div>';
-  let o;
-  try { o = await api('/v1/ops?days=14'); } catch (e) { return fail(root, e); }
-
-  const qtable = (rows, cols) => rows.length
-    ? `<table class="t"><tbody>${rows.map((r) => `<tr data-q="${esc(r.query)}"
-        tabindex="0" role="button" aria-label="Search for ${esc(r.query)}">
-        <td>${esc(r.query)}</td>${cols(r)}</tr>`).join('')}</tbody></table>`
-    : '<p class="dim">Nothing yet.</p>';
-
-  root.innerHTML = `
-    <h1>Health</h1>
-    <p class="lede">Retrieval health over the last 14 days, from every recall this
-      org has run.</p>
-
-    <section class="card" style="margin-bottom:14px" aria-labelledby="h-svc">
-      <h2 class="sec" id="h-svc">Service checks</h2>
-      <p class="dim" style="margin:0 0 12px">The database and the API keys this
-        deployment runs on — live calls, not config reads. Deliberately not in the
-        setup wizard: nobody onboarding their workspace can fix these, and a red
-        row they cannot act on just teaches them to ignore red rows.</p>
-      <button id="svc-run" class="ghost">Run service checks</button>
-      <div id="svc" style="margin-top:12px"></div>
-    </section>
-
-    <div class="tiles" style="margin-bottom:14px">
-      ${tile(n(o.recalls), 'recalls', 'last 14 days')}
-      ${tile(ms(o.p50_ms), 'median latency', `p95 ${ms(o.p95_ms)}`)}
-      ${tile(o.avg_results, 'results per recall', 'average')}
-      ${tile(`${(o.zero_rate * 100).toFixed(1)}%`, 'came back empty',
-             `${n(o.zero_results)} recalls`)}
-    </div>
-
-    <section class="card" style="margin-bottom:12px" aria-labelledby="h-vol">
-      <h2 class="sec" id="h-vol">Recalls per day</h2>
-      ${spark(o.daily, o.days, 'recalls')}
-    </section>
-
-    <div class="split">
-      <section class="card" aria-labelledby="h-empty">
-        <h2 class="sec" id="h-empty">Questions memory could not answer</h2>
-        <p class="dim" style="margin:-4px 0 10px">The highest-signal failure there
-          is: somebody asked and got nothing. These are the sources to connect next.</p>
-        ${qtable(o.empty, (r) => `<td class="tight num">${r.n}×</td>
-          <td class="tight">${ago(r.last_at)}</td>`)}
-      </section>
-      <section class="card" aria-labelledby="h-top">
-        <h2 class="sec" id="h-top">Most asked</h2>
-        ${qtable(o.top, (r) => `<td class="tight num">${r.n}×</td>
-          <td class="tight">${ago(r.last_at)}</td>`)}
-      </section>
-    </div>
-
-    <section class="card" style="margin-top:12px" aria-labelledby="h-slow">
-      <h2 class="sec" id="h-slow">Slowest recalls</h2>
-      ${qtable(o.slowest, (r) => `<td class="tight num">${ms(r.latency_ms)}</td>
-        <td class="tight num">${r.result_count} results</td>
-        <td class="tight">${ago(r.created_at)}</td>`)}
-    </section>
-
-    <section class="card" style="margin-top:12px" aria-labelledby="h-maint">
-      <h2 class="sec" id="h-maint">Maintenance</h2>
-      <p class="dim" style="margin:-4px 0 10px">Hygiene jobs. Safe to run any time,
-        and safe to run on a schedule.</p>
-      <div class="row">
-        <button data-run="/v1/maintain" data-confirm="Run maintenance? This retires near-duplicate facts and prunes orphaned graph nodes.">Run full maintenance</button>
-        <button data-run="/v1/reconcile">Retry failed inputs</button>
-        <button data-run="/v1/summaries">Refresh summaries</button>
-        
-      </div>
-      <pre id="orun" class="raw" style="margin-top:11px; display:none" tabindex="0"></pre>
-    </section>`;
-
-  // A failed query is a question to investigate, so every row jumps into Search.
-  root.querySelectorAll('[data-q]').forEach((tr) =>
-    activate(tr, () => go(`search?q=${encodeURIComponent(tr.dataset.q)}`)));
-
-  root.querySelectorAll('[data-run]').forEach((b) => {
-    b.addEventListener('click', async () => {
-      if (b.dataset.confirm && !confirm(b.dataset.confirm)) return;
-      const out = $('orun');
-      b.disabled = true; out.style.display = 'block'; out.textContent = 'Running…';
-      try { out.textContent = JSON.stringify(await post(b.dataset.run, {}), null, 2); }
-      catch (e) { out.textContent = `Failed: ${e.message}`; }
-      b.disabled = false;
-      announce('Maintenance job finished.');
-    });
-  });
-
-  // Server-scope preflight: the same live checks the wizard runs, shown to the
-  // person who can actually do something about a bad key.
-  $('svc-run').addEventListener('click', async () => {
-    const btn = $('svc-run'); const box = $('svc');
-    btn.disabled = true; box.innerHTML = '<div class="spin">Checking…</div>';
-    try {
-      const res = await api('/v1/preflight');
-      const svc = (res.checks || []).filter((c) => c.scope !== 'org');
-      const ok = svc.every((c) => c.ok || !c.required);
-      box.innerHTML = `<div class="pfhead ${ok ? 'ok' : 'bad'}">
-          ${ok ? 'Every service check passed.' : 'A service check failed.'}</div>
-        ${checkRows(svc)}`;
-      announce(ok ? 'Service checks passed' : 'A service check failed');
-    } catch (e) { box.innerHTML = `<div class="empty">${esc(e.message || e)}</div>`; }
-    finally { btn.disabled = false; }
-  });
-}
-
-// ------------------------------------------------------------------- graph
-
-/** The graph is a complete d3 application with its own layout, index and
- *  inspector. Re-implementing it inside the shell would fork 600 lines of
- *  working code, so it is embedded — `?embed=1` drops its own header so there
- *  is only one chrome on screen. */
 // --------------------------------------------------------------- sources
 
 const SOURCE_LABEL = {
@@ -1092,7 +976,6 @@ const VIEWS = {
   memories: { title: 'Knowledge', render: viewMemories },
   people: { title: 'People', render: viewPeople },
   search: { title: 'Search', render: viewSearch },
-  ops: { title: 'Health', render: viewOps },
   sources: { title: 'Sources', render: viewSources },
   usage: { title: 'Billing', render: viewUsage },
   settings: { title: 'Settings', render: viewSettings },
