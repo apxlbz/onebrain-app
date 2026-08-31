@@ -153,14 +153,6 @@ async function viewOverview(root) {
 
     ${setupPrompt}
 
-    <form id="askform" class="card" role="search"
-          style="margin-bottom:14px;display:flex;gap:10px;align-items:center">
-      <input id="askq" class="fi" style="flex:1" type="search"
-             placeholder="Ask your memory — decisions, people, deadlines…"
-             aria-label="Search memory" autocomplete="off" />
-      <button class="ghost" type="submit">Search</button>
-    </form>
-
     <div class="tiles" style="margin-bottom:14px">
       ${tile(n(s.facts_current), 'current facts',
              s.facts > s.facts_current ? `${n(s.facts - s.facts_current)} superseded`
@@ -197,12 +189,6 @@ async function viewOverview(root) {
       <h2 class="sec" id="h-daily">Facts added — last 30 days</h2>
       ${spark(s.daily, 30, 'facts')}
     </section>`;
-
-  $('askform').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const q = $('askq').value.trim();
-    if (q) go(`search?q=${encodeURIComponent(q)}`);
-  });
 
   $('srcbars').innerHTML = barlist(
     s.by_source.map((r) => ({ key: r.source, label: r.source, value: r.n })),
