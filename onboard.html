@@ -192,6 +192,10 @@
 
 <p id="live" class="visually-hidden" role="status" aria-live="polite"></p>
 
-<script type="module" src="./onboard.js?v=6"></script>
+<script>/* Runs before any module: the Google-connect grant arrives in the
+   URL fragment, and module-land (supabase-js) may consume fragments. Stash
+   it first so the wizard always receives it. */
+window.__ob_hash = location.hash;</script>
+<script type="module" src="./onboard.js?v=7"></script>
 </body>
 </html>

@@ -233,7 +233,11 @@ async function connect(btn) {
  * fragment is scrubbed from the URL and history BEFORE any network call, so
  * tokens never survive in the address bar, a bookmark, or a shared screen. */
 async function handleConnectReturn() {
-  const frag = new URLSearchParams(location.hash.slice(1));
+  // The inline stash in onboard.html wins over location.hash: by module
+  // time another consumer may already have scrubbed the URL.
+  const rawHash = window.__ob_hash || location.hash;
+  window.__ob_hash = '';
+  const frag = new URLSearchParams(rawHash.slice(1));
   const prt = frag.get('provider_refresh_token');
   const hadTokens = frag.has('access_token') || frag.has('provider_token');
   const provider = sessionStorage.getItem('ob_connect_provider');
