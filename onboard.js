@@ -177,7 +177,7 @@ async function connectGoogle(btn) {
     sessionStorage.setItem('ob_connect_provider', provider);
     const u = new URL(`${cfg.supabase_url}/auth/v1/authorize`);
     u.searchParams.set('provider', 'google');
-    u.searchParams.set('redirect_to', `${location.origin}/onboarding`);
+    u.searchParams.set('redirect_to', `${location.origin}${location.pathname}`);
     u.searchParams.set('scopes', cfg.google_scopes[provider]);
     u.searchParams.set('access_type', 'offline');
     u.searchParams.set('prompt', 'consent');
