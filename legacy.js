@@ -1,4 +1,5 @@
 import "./compat.js?v=10";
+import { FN } from "./env.js?v=1";
 
 /* OneBrain dashboard.
  *
@@ -845,6 +846,32 @@ async function viewSettings(root) {
     </section>
 
 
+    <section class="card" style="margin-bottom:14px" aria-labelledby="h-connect">
+      <h2 class="sec" id="h-connect">Connect your tools</h2>
+      <p class="dim" style="margin:-4px 0 14px">Two ways in: AI assistants speak
+        MCP; hooks and scripts authenticate with a personal token.</p>
+
+      <div class="it" style="font-weight:600">Claude and other MCP clients</div>
+      <div class="id2" style="margin:2px 0 8px">Run this once, then sign in with
+        Google on first use — recall and remember work mid-conversation from
+        then on.</div>
+      <pre class="raw mono" id="mcpsnip" tabindex="0"
+        style="white-space:pre-wrap;word-break:break-all"></pre>
+      <p style="margin:6px 0 20px">
+        <button class="btnlink" id="mcpcopy">Copy command</button></p>
+
+      <div class="it" style="font-weight:600">Personal token — hooks &amp; API</div>
+      <div class="id2" style="margin:2px 0 8px">Authenticates the capture hook and
+        the REST API as you. The token is shown once; minting again replaces the
+        previous one everywhere it's used.</div>
+      <p style="margin:0"><button class="btnlink" id="mintgo">Mint my token</button></p>
+      <pre class="raw mono" id="mintout" tabindex="0"
+        style="margin-top:10px;display:none;white-space:pre-wrap;word-break:break-all"></pre>
+      <p style="margin:6px 0 0;display:none" id="mintcopyrow">
+        <button class="btnlink" id="mintcopy">Copy token</button></p>
+    </section>
+
+
     <section class="card" style="margin-bottom:14px" aria-labelledby="h-export">
       <h2 class="sec" id="h-export">Take your data</h2>
       <p class="dim" style="margin:-4px 0 12px">Everything, as portable JSON —
@@ -897,6 +924,51 @@ async function viewSettings(root) {
       </div>
       <p id="delout" class="dim" style="margin:12px 0 0" role="status"></p>
     </section>`;
+
+  // Connect your tools: the MCP add command is plain text (public URL), the
+  // personal token is fetched on demand and shown exactly once.
+  const mcpCmd = `claude mcp add --transport http onebrain ${FN}/mcp`;
+  $('mcpsnip').textContent = mcpCmd;
+  $('mcpcopy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(mcpCmd);
+      $('mcpcopy').textContent = 'Copied';
+      setTimeout(() => { $('mcpcopy').textContent = 'Copy command'; }, 1800);
+    } catch { announce('Copy failed — select the command text instead.'); }
+  });
+  let mintedToken = '';
+  $('mintgo').addEventListener('click', async () => {
+    if (!confirm('Mint a personal token? Any previous token of yours stops '
+                 + 'working the moment this one is created.')) return;
+    const btn = $('mintgo');
+    btn.disabled = true; btn.textContent = 'Minting…';
+    const out = $('mintout');
+    try {
+      const res = await post('/v1/me/token');
+      mintedToken = res.token;
+      out.style.display = 'block';
+      out.textContent =
+        `# ~/.config/onebrain/config — for the capture hook\n` +
+        `ONEBRAIN_URL=${FN}/api\n` +
+        `ONEBRAIN_TOKEN=${res.token}\n\n` +
+        `# shown once — minting again replaces it`;
+      $('mintcopyrow').style.display = 'block';
+      announce('Token minted — shown once, copy it now.');
+      btn.textContent = 'Mint again';
+    } catch (e) {
+      out.style.display = 'block';
+      out.textContent = `Failed: ${e.message || e}`;
+      btn.textContent = 'Mint my token';
+    } finally { btn.disabled = false; }
+  });
+  $('mintcopy').addEventListener('click', async () => {
+    if (!mintedToken) return;
+    try {
+      await navigator.clipboard.writeText(mintedToken);
+      $('mintcopy').textContent = 'Copied';
+      setTimeout(() => { $('mintcopy').textContent = 'Copy token'; }, 1800);
+    } catch { announce('Copy failed — select the token text instead.'); }
+  });
 
   const input = $('purgeconfirm');
   const go = $('purgego');
