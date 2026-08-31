@@ -80,23 +80,27 @@
 
     <section class="wsteps reveal" id="trello-attach" hidden
              aria-labelledby="tr-title" tabindex="-1">
-      <h2 id="tr-title">Connect Trello &mdash; one-time setup</h2>
-      <p class="fh">Your organization brings its own (free) app key: sign in to
-        Trello, open <a class="mono" translate="no" href="https://trello.com/power-ups/admin" target="_blank" rel="noopener noreferrer">trello.com/power-ups/admin&nbsp;&#8599;</a>,
-        create a Power-Up, and on its <b>API Key</b> tab copy the key <b>and
-        add</b> <button type="button" class="mono" id="tr-origin" translate="no" title="Copy to clipboard" style="border:1px solid var(--color-line,#ccc);border-radius:6px;padding:1px 8px;background:transparent;cursor:pointer;font:inherit;font-family:inherit">https://apxlbz.github.io &#x2398;</button> under
-        <b>Allowed Origins</b> &mdash; Trello refuses to send you back without
-        it. Paste the key once below; you&rsquo;ll hop to Trello&rsquo;s own
-        site to approve <b>read-only</b> access and land straight back here,
-        connected. Nothing is saved until a live call proves it.</p>
-      <div class="mrow">
-        <input id="tr-key" class="fi" type="text"
-               placeholder="paste your Trello API key"
-               spellcheck="false" autocomplete="off"
-               aria-label="Trello API key" />
-        <button class="ghostpill" id="tr-key-save">Save &amp; approve on Trello</button>
-      </div>
-      <p class="fh" id="tr-key-out" role="status"></p>
+      <h2 id="tr-title">Connect Trello</h2>
+      <ol class="wlist">
+        <li><a class="mono" translate="no" href="https://trello.com/power-ups/admin"
+               target="_blank" rel="noopener noreferrer">Create a Power-Up&nbsp;&#8599;</a>
+            (free, one minute).</li>
+        <li>On its <b>API Key</b> tab: copy the key, and add
+            <button type="button" class="mono" id="tr-origin" translate="no"
+                    title="Copy to clipboard"
+                    style="border:1px solid var(--color-line,#ccc);border-radius:6px;padding:1px 8px;background:transparent;cursor:pointer;font:inherit;font-family:inherit">https://apxlbz.github.io &#x2398;</button>
+            to <b>Allowed Origins</b>.</li>
+        <li>Paste the key &mdash; the rest happens on Trello.
+          <div class="mrow">
+            <input id="tr-key" class="fi" type="text"
+                   placeholder="paste your Trello API key"
+                   spellcheck="false" autocomplete="off"
+                   aria-label="Trello API key" />
+            <button class="ghostpill" id="tr-key-save">Save &amp; approve on Trello</button>
+          </div>
+          <p class="fh" id="tr-key-out" role="status"></p>
+        </li>
+      </ol>
     </section>
 
     <div class="acts reveal">
@@ -161,6 +165,6 @@
    URL fragment, and module-land (supabase-js) may consume fragments. Stash
    it first so the wizard always receives it. */
 window.__ob_hash = location.hash;</script>
-<script type="module" src="./onboard.js?v=11"></script>
+<script type="module" src="./onboard.js?v=12"></script>
 </body>
 </html>
