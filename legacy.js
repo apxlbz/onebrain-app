@@ -149,7 +149,7 @@ async function viewOverview(root) {
        current.</div>`;
 
   root.innerHTML = `
-    <h1>Overview</h1>
+    <h1>Home</h1>
     <p class="lede">${n(s.facts_current)} current facts from ${n(s.raw)} inputs${
       s.last_ingest ? ` · last ingest ${ago(s.last_ingest)}` : ''}</p>
 
@@ -241,7 +241,7 @@ async function viewMemories(root, params) {
     }).join('');
 
   root.innerHTML = `
-    <h1>Memories</h1>
+    <h1>Knowledge</h1>
     <p class="lede">Everything stored, newest first. This is the log — no ranking,
       no embeddings. Open a row to see where it came from.</p>
 
@@ -692,7 +692,7 @@ async function viewOps(root) {
     : '<p class="dim">Nothing yet.</p>';
 
   root.innerHTML = `
-    <h1>Operations</h1>
+    <h1>Health</h1>
     <p class="lede">Retrieval health over the last 14 days, from every recall this
       org has run.</p>
 
@@ -1031,7 +1031,7 @@ async function viewUsage(root) {
     : `<p class="dim">No ${name} yet.</p>`;
 
   root.innerHTML = `
-    <h1>Usage</h1>
+    <h1>Billing</h1>
     <p class="lede">What the platform engine has thought on your behalf — every
       call metered as it happened, priced per token. An org running on its own
       API keys spends there, not here.</p>
@@ -1098,13 +1098,13 @@ async function viewUsage(root) {
 // ------------------------------------------------------------------ router
 
 const VIEWS = {
-  overview: { title: 'Overview', render: viewOverview },
-  memories: { title: 'Memories', render: viewMemories },
+  overview: { title: 'Home', render: viewOverview },
+  memories: { title: 'Knowledge', render: viewMemories },
   people: { title: 'People', render: viewPeople },
   search: { title: 'Search', render: viewSearch },
-  ops: { title: 'Operations', render: viewOps },
+  ops: { title: 'Health', render: viewOps },
   sources: { title: 'Sources', render: viewSources },
-  usage: { title: 'Usage', render: viewUsage },
+  usage: { title: 'Billing', render: viewUsage },
   settings: { title: 'Settings', render: viewSettings },
 };
 
