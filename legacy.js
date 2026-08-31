@@ -1006,7 +1006,12 @@ async function viewUsage(root) {
   root.innerHTML = '<div class="spin">Loading…</div>';
   let u;
   try { u = await api('/v1/usage'); } catch (e) { return fail(root, e); }
-  const usd = (x, d = 2) => `$${Number(x || 0).toFixed(d)}`;
+  // Sub-cent amounts get the decimals they need — a row reading $0.0000
+  // under a non-zero total is a lie of precision.
+  const usd = (x, d = 2) => {
+    const v = Number(x || 0);
+    return `$${v.toFixed(v && Math.abs(v) < 0.01 ? 6 : d)}`;
+  };
   const mt = (t) => (t >= 1e6 ? `${(t / 1e6).toFixed(2)}M` : n(t));
   const REASON = { trial: 'Trial credit', allowance: 'Plan allowance',
     purchase: 'Purchase', promo: 'Promo', adjustment: 'Adjustment' };
