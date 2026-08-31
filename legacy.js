@@ -1,4 +1,4 @@
-import "./compat.js?v=7";
+import "./compat.js?v=8";
 
 /* OneBrain dashboard.
  *
@@ -668,6 +668,84 @@ async function viewPeople(root, params) {
   if (initial) run();
 }
 
+// ---------------------------------------------------------------- insights
+
+async function viewInsights(root) {
+  root.innerHTML = `<div class="spin">Reading your memory\u2026 the first load
+    of the day synthesizes fresh insights and can take up to a minute.</div>`;
+  let d;
+  try { d = await api('/v1/insights'); } catch (e) { return fail(root, e); }
+  renderInsights(root, d);
+}
+
+function renderInsights(root, d) {
+  const item = (h) => `
+    <div class="issue">
+      <span class="sev" aria-hidden="true"></span>
+      <div class="itxt">
+        <div class="it">${esc(h.title)}</div>
+        <div class="id2">${esc(h.detail)}</div>
+      </div>
+    </div>`;
+  const chips = (rows, key, field) => rows.length
+    ? `<div class="barlist">${rows.map((r) => `
+        <div class="barrow" data-bar="${esc(r[field])}" tabindex="0" role="button"
+             style="grid-template-columns:minmax(0,220px) 1fr auto">
+          <span class="bl">${esc(r[field])}</span><span></span>
+          <span class="bn">${n(r.n)}</span>
+        </div>`).join('')}</div>`
+    : '<p class="dim">Nothing in the last 14 days.</p>';
+
+  root.innerHTML = `
+    <h1>Insights</h1>
+    <p class="lede">Your memory, reading itself: what moved in the last 14 days,
+      synthesized from every recorded fact — never invented.
+      <span class="dim">Generated ${d.generated_at ? ago(d.generated_at) : 'now'}.</span></p>
+
+    <section class="card" style="margin-bottom:14px" aria-labelledby="h-pulse">
+      <div style="display:flex;align-items:baseline;gap:12px;justify-content:space-between">
+        <h2 class="sec" id="h-pulse">The pulse</h2>
+        <button class="ghost" id="ins-refresh">Regenerate</button>
+      </div>
+      <p style="margin:6px 0 0;max-width:70ch">${esc(d.summary || 'Not enough recorded yet — connect sources and check back.')}</p>
+    </section>
+
+    <div class="split">
+      <section class="card" aria-labelledby="h-hl">
+        <h2 class="sec" id="h-hl">What matters</h2>
+        ${(d.highlights || []).length ? d.highlights.map(item).join('')
+          : '<p class="dim">Nothing stands out yet.</p>'}
+      </section>
+      <section class="card" aria-labelledby="h-watch">
+        <h2 class="sec" id="h-watch">Worth watching</h2>
+        ${(d.watch || []).length ? d.watch.map(item).join('')
+          : '<p class="dim">No open loops detected.</p>'}
+      </section>
+    </div>
+
+    <div class="split" style="margin-top:12px">
+      <section class="card" aria-labelledby="h-tt">
+        <h2 class="sec" id="h-tt">Trending topics</h2>
+        <div id="ins-topics">${chips(d.topics || [], 'topic', 'topic')}</div>
+      </section>
+      <section class="card" aria-labelledby="h-tp">
+        <h2 class="sec" id="h-tp">Most active subjects</h2>
+        <div id="ins-people">${chips(d.people || [], 'entity', 'entity')}</div>
+      </section>
+    </div>`;
+
+  $('ins-refresh').addEventListener('click', async () => {
+    const b = $('ins-refresh');
+    b.disabled = true; b.textContent = 'Thinking\u2026';
+    try { renderInsights(root, await post('/v1/insights', { refresh: true })); }
+    catch (e) { b.textContent = String(e.message || e).slice(0, 40); }
+  });
+  $('ins-topics').querySelectorAll('[data-bar]').forEach((r) =>
+    activate(r, () => go(`memories?q=${encodeURIComponent(r.dataset.bar)}`)));
+  $('ins-people').querySelectorAll('[data-bar]').forEach((r) =>
+    activate(r, () => go(`memories?q=${encodeURIComponent(r.dataset.bar)}`)));
+}
+
 // ------------------------------------------------------------------- graph
 
 /** The graph is a complete d3 application with its own layout, index and
@@ -985,6 +1063,7 @@ const VIEWS = {
   overview: { title: 'Home', render: viewOverview },
   memories: { title: 'Knowledge', render: viewMemories },
   people: { title: 'People', render: viewPeople },
+  insights: { title: 'Insights', render: viewInsights },
   search: { title: 'Search', render: viewSearch },
   graph: { title: 'Graph', render: viewGraph },
   sources: { title: 'Sources', render: viewSources },

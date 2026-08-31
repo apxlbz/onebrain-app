@@ -251,6 +251,7 @@ async function routeGet(path) {
       ...m, gmail_connected: mine.has(m.email) })) };
   }
   if (p === "/v1/billing") return await fnCall("/v1/billing", null, "GET");
+  if (p === "/v1/insights") return await fnCall("/v1/insights", null, "GET");
   if (p === "/v1/usage") return await usageSummary();
   if (p === "/v1/preflight") return await fnCall("/v1/preflight", null, "GET");
   if (p === "/v1/connect/config") return await fnCall("/v1/connect/config", null, "GET");
@@ -273,6 +274,7 @@ window.OB = {
     if (path === "/v1/org/keys") return await fnCall("/v1/org/keys", body);
     if (path === "/v1/onboarding") return await fnCall("/v1/onboarding", body);
     if (path === "/v1/billing/plan") return await fnCall("/v1/billing/plan", body);
+    if (path === "/v1/insights") return await fnCall("/v1/insights", body);
     if (path === "/v1/connections/google") return await fnCall("/v1/connections/google", body);
     if (path === "/v1/connections/trello") return await fnCall("/v1/connections/trello", body);
     throw new Error(`this action isn't wired to the new engine yet (${path})`);

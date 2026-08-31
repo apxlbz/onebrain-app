@@ -1,4 +1,4 @@
-import "./compat.js?v=7";
+import "./compat.js?v=8";
 
 /* OneBrain onboarding.
  *
