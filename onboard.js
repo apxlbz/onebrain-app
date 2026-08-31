@@ -476,6 +476,16 @@ function wire() {
 
   $('vrun').addEventListener('click', runChecks);
 
+  $('tr-origin')?.addEventListener('click', async () => {
+    const b = $('tr-origin');
+    try {
+      await navigator.clipboard.writeText('https://apxlbz.github.io');
+      const was = b.innerHTML;
+      b.textContent = 'Copied \u2713';
+      setTimeout(() => { b.innerHTML = was; }, 1600);
+    } catch { /* clipboard blocked: the text is still selectable */ }
+  });
+
   $('tr-key-save').addEventListener('click', async () => {
     const out = $('tr-key-out'); const btn = $('tr-key-save');
     const key = $('tr-key').value.trim();
