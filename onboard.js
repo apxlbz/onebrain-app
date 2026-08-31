@@ -181,7 +181,10 @@ async function connectGoogle(btn) {
     u.searchParams.set('scopes', cfg.google_scopes[provider]);
     u.searchParams.set('access_type', 'offline');
     u.searchParams.set('prompt', 'consent');
-    u.searchParams.set('include_granted_scopes', 'true');
+    /* include_granted_scopes is deliberately ABSENT: with it, Google's Allow
+     * click 500s ("Something went wrong") whenever the user already granted
+     * another scope — reproduced 2026-08-31. Each source keeps its own
+     * refresh token, so merged grants buy nothing anyway. */
     location.href = u.toString();
   } catch (e) {
     st.textContent = String(e.message || e).slice(0, 80);
