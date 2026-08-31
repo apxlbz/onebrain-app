@@ -1,4 +1,4 @@
-import "./compat.js?v=8";
+import "./compat.js?v=9";
 
 /* OneBrain dashboard.
  *
@@ -1007,6 +1007,12 @@ async function viewUsage(root) {
       ${tile(n(u.events), 'metered calls', `last ${u.days} days`)}
     </div>
 
+    <p style="margin:-4px 0 14px">
+      <button class="ghost" id="bill-act">${
+        u.plan && u.plan.status === 'active' ? 'Manage billing' : 'Activate billing'}</button>
+      <span class="dim" id="bill-out" role="status" style="margin-left:10px"></span>
+    </p>
+
     <section class="card" style="margin-bottom:12px" aria-labelledby="h-ud">
       <h2 class="sec" id="h-ud">Tokens per day</h2>
       ${spark(u.daily, u.days, 'tokens')}
@@ -1038,6 +1044,22 @@ async function viewUsage(root) {
           </tr>`).join('')}</tbody></table>`
         : '<p class="dim">No credits yet — the trial lands on first setup.</p>'}
     </section>`;
+
+  $('bill-act').addEventListener('click', async () => {
+    const b = $('bill-act'); const out = $('bill-out');
+    b.disabled = true; out.textContent = 'Opening Stripe…';
+    try {
+      const active = u.plan && u.plan.status === 'active';
+      const res = await post(active ? '/v1/billing/portal' : '/v1/billing/checkout',
+        { plan: u.plan?.plan_code || u.plan?.code || 'starter',
+          return_base: location.origin + location.pathname.replace(/\/app\.html$/, '') });
+      if (res.url) location.href = res.url;
+      else out.textContent = 'No URL returned';
+    } catch (e) {
+      out.textContent = String(e.message || e).slice(0, 80);
+      b.disabled = false;
+    }
+  });
 
   api('/v1/members').then((res) => {
     const rows = res.members || [];
