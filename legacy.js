@@ -118,13 +118,16 @@ function activate(el, fn) {
 
 async function viewOverview(root) {
   root.innerHTML = '<div class="spin">Loading…</div>';
-  const [s, h, ob] = await Promise.all([
-    api('/v1/stats'), api('/v1/health'),
-    // Never let the setup prompt take the whole Overview down with it.
+  const [s, ob, conns, mem, members] = await Promise.all([
+    api('/v1/stats'),
+    // Never let the setup prompt take the whole page down with it.
     api('/v1/onboarding').catch(() => null),
+    api('/v1/connections').catch(() => ({ connections: [] })),
+    api('/v1/memories?limit=6').catch(() => ({ items: [] })),
+    api('/v1/members').catch(() => ({ members: [] })),
   ]);
 
-  /* An org whose setup is unfinished has an Overview full of zeroes and no way to
+  /* An org whose setup is unfinished has a Home full of zeroes and no way to
    * know why. Say it once, at the top, with the way out. */
   const setupPrompt = (ob && !ob.completed_at) ? `
     <section class="card setupcard" style="margin-bottom:14px" aria-labelledby="h-setup">
@@ -134,19 +137,14 @@ async function viewOverview(root) {
       <a class="btnlink primary" href="./onboard.html">Open setup</a>
     </section>` : '';
 
-  const issues = h.issues.length ? h.issues.map((i) => `
-    <div class="issue">
-      <span class="sev ${esc(i.level)}" aria-hidden="true"></span>
-      <div class="itxt">
-        <div class="it">${esc(i.title)}</div>
-        <div class="id2">${esc(i.detail)}</div>
-      </div>
-      ${i.action ? `<button class="ia" data-act="${esc(i.action)}"
-        data-count="${i.count}" data-key="${esc(i.key)}">Fix</button>` : ''}
-    </div>`).join('')
-    : `<div class="allclear"><span class="sev" aria-hidden="true"></span>
-       No issues. Every input became knowledge, and the graph and summaries are
-       current.</div>`;
+  const week = (s.daily || []).slice(-7).reduce((a, d) => a + (d.n || 0), 0);
+  const cs = conns.connections || [];
+  const ok = cs.filter((c) => c.status === 'ok').length;
+  const recent = mem.items || [];
+  const clip = (t, len) => {
+    const v = String(t || '');
+    return esc(v.length > len ? v.slice(0, len) + '…' : v);
+  };
 
   root.innerHTML = `
     <h1>Home</h1>
@@ -155,36 +153,56 @@ async function viewOverview(root) {
 
     ${setupPrompt}
 
-    <section class="card" style="margin-bottom:14px" aria-labelledby="h-health">
-      <h2 class="sec" id="h-health">Health</h2>
-      <div id="issues">${issues}</div>
-    </section>
+    <form id="askform" class="card" role="search"
+          style="margin-bottom:14px;display:flex;gap:10px;align-items:center">
+      <input id="askq" class="fi" style="flex:1" type="search"
+             placeholder="Ask your memory — decisions, people, deadlines…"
+             aria-label="Search memory" autocomplete="off" />
+      <button class="ghost" type="submit">Search</button>
+    </form>
 
     <div class="tiles" style="margin-bottom:14px">
       ${tile(n(s.facts_current), 'current facts',
              s.facts > s.facts_current ? `${n(s.facts - s.facts_current)} superseded`
                                        : 'nothing retired')}
-      ${tile(n(s.raw), 'inputs', s.unenriched ? `${s.unenriched} unprocessed`
-                                              : 'all processed')}
-      ${tile(n(s.entities), 'entities', `${n(s.edges)} relationships`)}
-      ${tile(n(s.summaries), 'summaries', `${n(s.links)} fact links`)}
+      ${tile(n(week), 'added this week',
+             s.unenriched ? `${n(s.unenriched)} still processing` : 'all processed')}
+      ${tile(cs.length ? `${ok}/${cs.length}` : '0', 'sources verified',
+             cs.length ? 'live-checked every sweep' : 'none connected yet')}
+      ${tile(n((members.members || []).length), 'members', 'signed in from your domain')}
     </div>
 
     <div class="split">
-      <section class="card" aria-labelledby="h-daily">
-        <h2 class="sec" id="h-daily">Facts added — last 30 days</h2>
-        ${spark(s.daily, 30, 'facts')}
+      <section class="card" aria-labelledby="h-recent">
+        <h2 class="sec" id="h-recent">Latest knowledge</h2>
+        ${recent.length
+          ? `<table class="t"><tbody>${recent.map((f) => `
+              <tr data-goto="memories" tabindex="0" role="button"
+                  aria-label="Open Knowledge">
+                <td>${clip(f.content, 96)}</td>
+                <td class="tight"><span class="pill">${esc(f.type || 'fact')}</span></td>
+                <td class="tight">${ago(f.created_at)}</td>
+              </tr>`).join('')}</tbody></table>`
+          : '<p class="dim">Nothing yet — connect a source, or write through the MCP tools.</p>'}
       </section>
       <section class="card" aria-labelledby="h-src">
         <h2 class="sec" id="h-src">Where memory comes from</h2>
         <div id="srcbars"></div>
+        <h2 class="sec" id="h-type" style="margin-top:18px">What kind of thing</h2>
+        <div id="typebars"></div>
       </section>
     </div>
 
-    <section class="card" style="margin-top:12px" aria-labelledby="h-type">
-      <h2 class="sec" id="h-type">What kind of thing is stored</h2>
-      <div id="typebars"></div>
+    <section class="card" style="margin-top:12px" aria-labelledby="h-daily">
+      <h2 class="sec" id="h-daily">Facts added — last 30 days</h2>
+      ${spark(s.daily, 30, 'facts')}
     </section>`;
+
+  $('askform').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = $('askq').value.trim();
+    if (q) go(`search?q=${encodeURIComponent(q)}`);
+  });
 
   $('srcbars').innerHTML = barlist(
     s.by_source.map((r) => ({ key: r.source, label: r.source, value: r.n })),
@@ -193,29 +211,15 @@ async function viewOverview(root) {
     s.by_type.map((r) => ({ key: r.type, label: r.type, value: r.n })),
     { clickable: true });
 
-  // Every breakdown row is a filter into Memories — a count you cannot click
+  // Every breakdown row is a filter into Knowledge — a count you cannot click
   // is a dead end.
   const drill = (container, key) => container.querySelectorAll('[data-bar]')
     .forEach((r) => activate(r, () => go(`memories?${key}=${encodeURIComponent(r.dataset.bar)}`)));
   drill($('srcbars'), 'source');
   drill($('typebars'), 'type');
-
-  root.querySelectorAll('[data-act]').forEach((b) => {
-    b.addEventListener('click', async () => {
-      // Maintenance retires duplicates and prunes rows. Reversible only from a
-      // backup, so it asks first.
-      if (b.dataset.act === 'maintain'
-          && !confirm('Run maintenance? This retires near-duplicate facts and '
-                      + 'prunes orphaned graph nodes.')) return;
-      b.disabled = true; b.textContent = 'Running…';
-      try {
-        await post(b.dataset.act === 'reconcile' ? '/v1/reconcile' : '/v1/maintain', {});
-        announce('Maintenance finished. Reloading health.');
-        viewOverview(root);
-      } catch (e) { b.textContent = 'Failed'; b.disabled = false; }
-    });
-  });
-  announce(`Overview loaded. ${h.issues.length} issues.`);
+  root.querySelectorAll('[data-goto]').forEach((tr) =>
+    activate(tr, () => go(tr.dataset.goto)));
+  announce('Home loaded.');
 }
 
 // ---------------------------------------------------------------- memories
