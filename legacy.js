@@ -1,4 +1,4 @@
-import "./compat.js?v=6";
+import "./compat.js?v=7";
 
 /* OneBrain dashboard.
  *
@@ -1000,6 +1000,69 @@ function checkRows(checks) {
     </div>`).join('');
 }
 
+// ------------------------------------------------------------------- usage
+
+async function viewUsage(root) {
+  root.innerHTML = '<div class="spin">Loading…</div>';
+  let u;
+  try { u = await api('/v1/usage'); } catch (e) { return fail(root, e); }
+  const usd = (x, d = 2) => `$${Number(x || 0).toFixed(d)}`;
+  const mt = (t) => (t >= 1e6 ? `${(t / 1e6).toFixed(2)}M` : n(t));
+  const REASON = { trial: 'Trial credit', allowance: 'Plan allowance',
+    purchase: 'Purchase', promo: 'Promo', adjustment: 'Adjustment' };
+  const breakdown = (rows, name, key) => rows.length
+    ? `<table class="t"><tbody>${rows.map((r) => `<tr>
+        <td>${esc(r[key])}</td>
+        <td class="tight num">${mt(r.tokens)}</td>
+        <td class="tight num">${usd(r.usd, 4)}</td></tr>`).join('')}</tbody></table>`
+    : `<p class="dim">No ${name} yet.</p>`;
+
+  root.innerHTML = `
+    <h1>Usage</h1>
+    <p class="lede">What the platform engine has thought on your behalf — every
+      call metered as it happened, priced per token. An org running on its own
+      API keys spends there, not here.</p>
+
+    <div class="tiles" style="margin-bottom:14px">
+      ${tile(usd(u.balance_usd), 'balance', 'prepaid — rolls over')}
+      ${tile(u.plan ? esc(u.plan.name) : '—', 'plan',
+             u.plan ? `${usd(u.plan.usd_month, 0)}/mo · ${esc(u.plan.status)}`
+                    : 'not chosen yet')}
+      ${tile(mt(u.month_tokens), 'tokens this month', `${usd(u.month_spend_usd, 4)} spent`)}
+      ${tile(n(u.events), 'metered calls', `last ${u.days} days`)}
+    </div>
+
+    <section class="card" style="margin-bottom:12px" aria-labelledby="h-ud">
+      <h2 class="sec" id="h-ud">Tokens per day</h2>
+      ${spark(u.daily, u.days, 'tokens')}
+    </section>
+
+    <div class="split">
+      <section class="card" aria-labelledby="h-uop">
+        <h2 class="sec" id="h-uop">By operation</h2>
+        <p class="dim" style="margin:-4px 0 10px">Where the thinking goes:
+          enrichment turns raw inputs into facts; embeddings make them findable;
+          recall answers questions.</p>
+        ${breakdown(u.by_op, 'operations', 'operation')}
+      </section>
+      <section class="card" aria-labelledby="h-umod">
+        <h2 class="sec" id="h-umod">By model</h2>
+        ${breakdown(u.by_model, 'model spend', 'model')}
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:12px" aria-labelledby="h-ul">
+      <h2 class="sec" id="h-ul">Credits</h2>
+      ${u.ledger.length
+        ? `<table class="t"><tbody>${u.ledger.map((r) => `<tr>
+            <td>${ago(r.at)}</td>
+            <td>${esc(REASON[r.reason] || r.reason)}</td>
+            <td class="tight num">${Number(r.delta_usd) >= 0 ? '+' : ''}${usd(r.delta_usd)}</td>
+          </tr>`).join('')}</tbody></table>`
+        : '<p class="dim">No credits yet — the trial lands on first setup.</p>'}
+    </section>`;
+}
+
 // ------------------------------------------------------------------ router
 
 const VIEWS = {
@@ -1009,6 +1072,7 @@ const VIEWS = {
   people: { title: 'People', render: viewPeople },
   search: { title: 'Search', render: viewSearch },
   ops: { title: 'Operations', render: viewOps },
+  usage: { title: 'Usage', render: viewUsage },
   settings: { title: 'Settings', render: viewSettings },
 };
 

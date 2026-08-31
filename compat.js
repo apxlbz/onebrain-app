@@ -147,6 +147,51 @@ async function ops(days) {
   };
 }
 
+/* Usage page: raw metered events read via PostgREST (RLS scopes them to the
+ * member's org), aggregated here exactly like /v1/ops — the server already
+ * priced each row at read time through the usage_priced view. */
+async function usageSummary() {
+  needAuth();
+  const since = new Date(Date.now() - 30 * 864e5).toISOString();
+  const [ev, led, billing] = await Promise.all([
+    sb.from("usage_priced")
+      .select("at,operation,provider,model,tokens_in,tokens_out,usd")
+      .gte("at", since).order("at", { ascending: false }).limit(5000),
+    sb.from("credit_ledger").select("at,delta_usd,reason")
+      .order("at", { ascending: false }).limit(50),
+    fnCall("/v1/billing", null, "GET"),
+  ]);
+  if (ev.error) throw new Error(ev.error.message);
+  const daily = {}; const byOp = new Map(); const byModel = new Map();
+  for (const r of ev.data ?? []) {
+    const t = (r.tokens_in ?? 0) + (r.tokens_out ?? 0);
+    const u = Number(r.usd ?? 0);
+    const day = r.at.slice(0, 10);
+    daily[day] = (daily[day] ?? 0) + t;
+    const o = byOp.get(r.operation) ?? { operation: r.operation, tokens: 0, usd: 0, n: 0 };
+    o.tokens += t; o.usd += u; o.n++; byOp.set(r.operation, o);
+    const mk = `${r.provider}/${r.model}`;
+    const m = byModel.get(mk) ?? { model: mk, tokens: 0, usd: 0 };
+    m.tokens += t; m.usd += u; byModel.set(mk, m);
+  }
+  const plan = billing.subscription
+    ? { ...(billing.plans.find((x) => x.code === billing.subscription.plan_code) ?? {}),
+        ...billing.subscription }
+    : null;
+  return {
+    days: 30,
+    balance_usd: billing.balance_usd,
+    month_tokens: billing.month_tokens,
+    month_spend_usd: billing.month_spend_usd,
+    plan,
+    events: (ev.data ?? []).length,
+    daily: Object.entries(daily).sort().map(([day, cnt]) => ({ day, n: cnt })),
+    by_op: [...byOp.values()].sort((a, b) => b.usd - a.usd),
+    by_model: [...byModel.values()].sort((a, b) => b.usd - a.usd),
+    ledger: led.data ?? [],
+  };
+}
+
 async function routeGet(path) {
   const [p, qsRaw] = path.split("?");
   const params = new URLSearchParams(qsRaw ?? "");
@@ -206,6 +251,7 @@ async function routeGet(path) {
       ...m, gmail_connected: mine.has(m.email) })) };
   }
   if (p === "/v1/billing") return await fnCall("/v1/billing", null, "GET");
+  if (p === "/v1/usage") return await usageSummary();
   if (p === "/v1/preflight") return await fnCall("/v1/preflight", null, "GET");
   if (p === "/v1/connect/config") return await fnCall("/v1/connect/config", null, "GET");
   if (p === "/v1/connections") {
