@@ -191,34 +191,31 @@ async function connectGoogle(btn) {
   }
 }
 
-/* Trello needs no OAuth code at all: its first-party /1/authorize page shows
- * the user a read-only token to paste back — Trello's documented flow for
- * server apps. Clicking the card reveals a numbered walkthrough; the page
- * itself opens from a plain <a target=_blank> inside step 1, because a
- * window.open() fired after an await is exactly what popup blockers eat, and a
- * link is something no browser blocks. */
+/* Trello, one hop: its /1/authorize page bounces the token straight back in
+ * the URL fragment (return_url + callback_method=fragment) — the same return
+ * shape as Google, so the wizard catches it and verifies with a live call.
+ * No copy-paste. The org's (free) app key is the only one-time ask. */
+function trelloAuthorize(cfg) {
+  sessionStorage.setItem('ob_connect_provider', 'trello');
+  const u = new URL(cfg.trello_authorize_url);
+  u.searchParams.set('return_url', location.origin + location.pathname);
+  u.searchParams.set('callback_method', 'fragment');
+  location.href = u.toString();
+}
+
 async function connectTrello(btn) {
   const st = btn.querySelector('.srcstate');
   try {
     const cfg = await api('/v1/connect/config');
     state.cfg = cfg;
-    /* Per-org app key, same law as the LLM keys: the walkthrough opens either
-     * way — step 1 collects the org's own key when there is none (or when the
-     * org is riding the deployment fallback), and the authorize link lights up
-     * once a key exists. */
-    const url = cfg.trello_authorize_url || '';
-    if (url) $('tr-open').href = url;
-    $('tr-open').classList.toggle('disabled', !url);
-    $('tr-key-out').textContent =
-      cfg.trello_key_src === 'org' ? 'Your organization\u2019s key is saved.'
-      : cfg.trello_key_src === 'env'
-        ? 'Currently riding the deployment\u2019s fallback key — paste your '
-          + 'organization\u2019s own to own the app.'
-        : '';
+    if (cfg.trello_authorize_url) {
+      st.textContent = 'Heading to Trello\u2026';
+      trelloAuthorize(cfg);
+      return;
+    }
     const box = $('trello-attach');
     box.hidden = false;
-    st.textContent = url ? 'Follow the steps below'
-                         : 'Start with step 1 — your organization\u2019s API key';
+    st.textContent = 'One-time setup \u2014 your organization\u2019s API key';
     box.focus({ preventScroll: true });
     box.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth',
                          block: 'nearest' });
@@ -242,7 +239,9 @@ async function handleConnectReturn() {
   window.__ob_hash = '';
   const frag = new URLSearchParams(rawHash.slice(1));
   const prt = frag.get('provider_refresh_token');
-  const hadTokens = frag.has('access_token') || frag.has('provider_token');
+  const trelloToken = frag.get('token');
+  const hadTokens = frag.has('access_token') || frag.has('provider_token')
+    || frag.has('token');
   const provider = sessionStorage.getItem('ob_connect_provider');
   if (!hadTokens || !provider) return false;
   history.replaceState(null, '', location.pathname);
@@ -250,6 +249,26 @@ async function handleConnectReturn() {
   state.step = 1;                       // land back on the sources step
   steps.forEach((el, i) => { el.hidden = i !== 1; });
   paintRail();
+  if (provider === 'trello') {
+    try {
+      const res = await post('/v1/connections/trello', { token: trelloToken || '' });
+      announce(res.boards > 0
+        ? `Trello connected as ${res.account || 'your account'} \u2014 `
+          + `${res.boards} open board${res.boards === 1 ? '' : 's'} visible`
+        : `Trello verified as ${res.account || 'your account'} \u2014 `
+          + 'no open boards visible yet');
+    } catch (e) {
+      announce('Connecting Trello failed');
+      try { await refresh(); } catch { /* render what we have */ }
+      renderSources();
+      const card = document.querySelector('[data-src="trello"] .srcstate');
+      if (card) card.textContent = String(e.message || e).slice(0, 120);
+      return true;
+    }
+    try { await refresh(); } catch { /* render what we have */ }
+    renderSources();
+    return true;
+  }
   if (!prt) {
     announce('Google did not return offline access');
     try { await refresh(); } catch { /* render what we have */ }
@@ -467,36 +486,12 @@ function wire() {
       $('tr-key').value = '';
       const cfg = await api('/v1/connect/config');
       state.cfg = cfg;
-      if (cfg.trello_authorize_url) {
-        $('tr-open').href = cfg.trello_authorize_url;
-        $('tr-open').classList.remove('disabled');
-      }
-      out.textContent = 'Saved for your organization — continue to step 2. '
-        + '(The key is proven together with the token at step 5.)';
-    } catch (e) { out.textContent = `Failed: ${String(e.message || e).slice(0, 140)}`; }
-    finally { btn.disabled = false; }
-  });
-
-  $('tr-save').addEventListener('click', async () => {
-    const out = $('tr-out'); const btn = $('tr-save');
-    const token = $('tr-token').value.trim();
-    if (!token) { out.textContent = 'Paste the token Trello showed you first.'; return; }
-    btn.disabled = true; out.textContent = 'Verifying with Trello…';
-    try {
-      const res = await post('/v1/connections/trello', { token });
-      $('tr-token').value = '';
-      /* The verification the user can trust: not "saved", but who the token
-       * belongs to and how much it can actually see. A token with zero open
-       * boards works and ingests nothing — say so now, not in a silent poll. */
-      out.textContent = res.boards > 0
-        ? `Verified: connected as ${res.account || 'your account'} — `
-          + `${res.boards} open board${res.boards === 1 ? '' : 's'} visible. `
-          + 'Ingestion starts within the minute.'
-        : `Verified as ${res.account || 'your account'}, but this account sees `
-          + 'no open boards — nothing will be ingested until it can.';
-      await refresh(); renderSources();
-    } catch (e) { out.textContent = `Failed: ${String(e.message || e).slice(0, 160)}`; }
-    finally { btn.disabled = false; }
+      out.textContent = 'Saved \u2014 heading to Trello to approve\u2026';
+      trelloAuthorize(cfg);
+    } catch (e) {
+      out.textContent = `Failed: ${String(e.message || e).slice(0, 140)}`;
+      btn.disabled = false;
+    }
   });
 }
 
