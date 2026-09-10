@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OneBrain — Documentation</title>
+<meta name="description" content="How to connect OneBrain, your organization's shared memory, to Claude and other assistants; what each tool does; how data is handled." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 30 27H2Z' fill='%232b59d1'/%3E%3C/svg%3E" />
+<style>
+  :root{--paper:#f6f3f1;--ink:#1f1d1a;--muted:#6f6a61;--lake:#2b59d1;--line:#e4ded6;--sunk:#efeae7;
+    --serif:"Source Serif 4",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 var(--sans)}
+  main{max-width:680px;margin:8vh auto 12vh;padding:0 24px}
+  h1{font:400 34px/1.2 var(--serif);margin:0 0 6px}
+  h2{font:600 17px/1.3 var(--sans);margin:36px 0 8px}
+  h3{font:600 15px/1.3 var(--sans);margin:22px 0 6px}
+  p,li{color:var(--ink);font-size:15.5px}
+  .muted{color:var(--muted)}
+  a{color:var(--lake)}
+  code{font:13.5px var(--mono);background:var(--sunk);padding:1px 5px;border-radius:4px}
+  pre{font:13.5px/1.5 var(--mono);background:var(--sunk);border:1px solid var(--line);
+    border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:15px}
+  th,td{text-align:left;vertical-align:top;padding:8px 10px 8px 0;border-bottom:1px solid var(--line)}
+  th{font-weight:600;font-size:13px;color:var(--muted)}
+  td code{white-space:nowrap}
+  nav.toc{font-size:14px;color:var(--muted);margin:14px 0 0}
+  nav.toc a{margin-right:14px}
+</style>
+</head>
+<body>
+<main>
+  <h1>OneBrain documentation</h1>
+  <p class="muted">Your organization&rsquo;s shared memory, connected to the assistants
+    you already use. Questions: <a href="mailto:or@apxlbz.com">or@apxlbz.com</a></p>
+  <nav class="toc">
+    <a href="#what">What it is</a><a href="#connect">Connect to Claude</a>
+    <a href="#tools">Tools</a><a href="#other">Other assistants</a>
+    <a href="#data">Your data</a><a href="#trouble">Troubleshooting</a>
+  </nav>
+
+  <h2 id="what">What OneBrain is</h2>
+  <p>OneBrain reads the places where your team already works &mdash; Gmail, Google
+    Meet notes, Google Calendar, Trello, and over a thousand other tools through
+    their own MCP servers &mdash; and distils them into short, deduplicated facts:
+    decisions, commitments, who knows what, and why. Every fact keeps its source.
+    Your team searches it in the dashboard; your assistants call it directly.</p>
+  <p>Membership is by email domain. Everyone who signs in with a work Google
+    account from the same domain shares one memory, and nobody outside it can
+    reach a single row. A personal address gets a private memory of its own.</p>
+
+  <h2 id="connect">Connect OneBrain to Claude</h2>
+  <p>OneBrain is a remote MCP server. Claude connects to it the way it connects to
+    any connector: once, with a Google sign-in.</p>
+  <h3>Before you start</h3>
+  <ol>
+    <li>Sign in at <a href="https://onebrain.apxlbz.com">onebrain.apxlbz.com</a>
+      with your work Google account. The first person from a domain sets the
+      organization up; it takes about five minutes.</li>
+    <li>Connect at least one source on the Sources step, so the memory has
+      something to say.</li>
+  </ol>
+  <h3>Claude on the web, Claude Desktop, and mobile</h3>
+  <ol>
+    <li>Open <b>Settings &rarr; Connectors</b> (on Team and Enterprise plans an
+      Owner can add it once under <b>Organization settings &rarr; Connectors</b>
+      for everyone).</li>
+    <li>If OneBrain is listed in the directory, press <b>Connect</b>. Otherwise
+      choose <b>Add custom connector</b>, name it OneBrain, and paste the address:
+      <pre>https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp</pre></li>
+    <li>Press <b>Connect</b> and approve the Google sign-in. Claude keeps the
+      connection alive after that.</li>
+  </ol>
+  <h3>Claude Code</h3>
+  <pre>claude mcp add --transport http onebrain https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp</pre>
+  <p>On first use, run <code>/mcp</code>, choose <b>onebrain</b>, and approve the
+    Google sign-in. The setup wizard&rsquo;s Done step also offers a one-line
+    installer that adds the tools, turns on automatic memory hooks (recall before
+    every prompt, remember after every session), and connects Claude Desktop on
+    the same machine, using a personal token instead of a sign-in.</p>
+
+  <h2 id="tools">Tools</h2>
+  <table>
+    <tr><th>Tool</th><th>What it does</th><th>Kind</th></tr>
+    <tr><td><code>recall</code></td><td>Searches the memory for anything the team
+      decided, agreed, or discussed. Returns facts with their source, type, and
+      dates. Optional filters: <code>source</code>, <code>type</code>,
+      <code>limit</code>.</td><td>Read</td></tr>
+    <tr><td><code>who_knows</code></td><td>Who on the team has demonstrated
+      knowledge of a topic, ranked by the facts that prove it.</td><td>Read</td></tr>
+    <tr><td><code>graph_neighbors</code></td><td>The relationships around a person,
+      project, product, or system, out to a chosen depth.</td><td>Read</td></tr>
+    <tr><td><code>list_memory</code></td><td>Which sources and kinds of facts the
+      memory holds, with counts.</td><td>Read</td></tr>
+    <tr><td><code>remember</code></td><td>Saves a decision, fact, or note from the
+      conversation so everyone has it next time. Adds only; never edits or
+      deletes.</td><td>Write</td></tr>
+  </table>
+  <p>Read tools carry the <code>readOnlyHint</code> annotation and run without a
+    per-call confirmation in Claude. <code>remember</code> is the only tool that
+    writes, and Claude asks before calling it.</p>
+  <h3>Example prompts</h3>
+  <ul>
+    <li>&ldquo;What did we decide about pricing?&rdquo;</li>
+    <li>&ldquo;Who knows about the Stripe integration?&rdquo;</li>
+    <li>&ldquo;What were Tuesday&rsquo;s action items?&rdquo;</li>
+    <li>&ldquo;Remember that the launch moved to October 14.&rdquo;</li>
+  </ul>
+
+  <h2 id="other">Other assistants</h2>
+  <p>Any MCP client that speaks streamable HTTP takes the same address. Cursor,
+    VS&nbsp;Code, Windsurf, and Gemini CLI setups are filled in for you on the
+    setup wizard&rsquo;s Done step, including one-click links for Cursor and
+    VS&nbsp;Code. Scripts and hooks authenticate with a personal token, minted on
+    the same page or in Settings, sent as
+    <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+
+  <h2 id="data">Your data</h2>
+  <ul>
+    <li><b>Access is read-only</b> for every connected source; OneBrain cannot
+      modify or delete anything in Gmail, Drive, Calendar, Trello, or a remote
+      source.</li>
+    <li><b>Google user data</b> is handled under the
+      <a href="https://developers.google.com/terms/api-services-user-data-policy"
+      rel="noopener" target="_blank">Google API Services User Data Policy</a>,
+      including the Limited Use requirements. It is never sold or used for
+      advertising.</li>
+    <li><b>Secrets are stripped</b> on the way in: API keys, passwords, and tokens
+      are never written to memory.</li>
+    <li><b>You can take it all back.</b> Settings offers a full JSON export, a
+      one-click purge of the memory, and deletion of the organization, which
+      revokes each source&rsquo;s access at the provider.</li>
+    <li>Full details: <a href="./privacy.html">Privacy policy</a> &middot;
+      <a href="./terms.html">Terms of service</a>.</li>
+  </ul>
+
+  <h2 id="trouble">Troubleshooting</h2>
+  <ul>
+    <li><b>&ldquo;Couldn&rsquo;t reach the MCP server.&rdquo;</b> Check the address
+      ends in <code>/functions/v1/mcp</code> with no trailing slash.</li>
+    <li><b>The sign-in loops.</b> Sign in at onebrain.apxlbz.com first with the
+      same Google account, then connect again.</li>
+    <li><b>Answers are empty.</b> The memory fills within a minute of connecting
+      a source. The dashboard&rsquo;s Sources tab shows each connection&rsquo;s
+      state, when it was last verified, and any trouble.</li>
+    <li><b>A source shows &ldquo;error&rdquo;.</b> Open Setup &rarr; Sources and
+      click that source: OneBrain re-checks what it reads and fixes it.</li>
+    <li>Anything else: <a href="mailto:or@apxlbz.com">or@apxlbz.com</a>.</li>
+  </ul>
+</main>
+</body>
+</html>

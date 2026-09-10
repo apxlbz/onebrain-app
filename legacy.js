@@ -1,4 +1,14 @@
-import "./compat.js?v=11";
+import "./compat.js?v=13";
+
+/* What a person types to confirm a destructive action: the organization's
+ * display name when it has one; for a personal organization (keyed
+ * "user:<email>") the email itself. Nobody should have to type the key. */
+function confirmWord(org) {
+  const name = String((org && org.name) || '');
+  const display = String((org && org.display_name) || '').trim();
+  if (display) return display;
+  return name.startsWith('user:') ? name.slice(5) : name;
+}
 import { FN } from "./env.js?v=1";
 
 /* OneBrain dashboard.
@@ -29,7 +39,9 @@ const n = (v) => NUM.format(v || 0);
  *  `title` so the exact value is one hover away. */
 function ago(iso) {
   if (!iso) return '—';
-  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '—';        // a bad timestamp must never break a view
+  const s = (Date.now() - t) / 1000;
   if (s < 60) return 'just now';
   if (s < 3600) return `${Math.floor(s / 60)}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
@@ -785,6 +797,32 @@ const SOURCE_LABEL = {
   gmail: 'Gmail', google_meet: 'Google Meet',
   google_calendar: 'Google Calendar', trello: 'Trello',
 };
+/* What the last sweep did, in one line — the worker writes this onto the
+ * connection so the dashboard can say "listed 40 pages, fetched 25, 12 facts"
+ * instead of sending anyone to the function logs. */
+function sweepLine(c) {
+  try { return sweepLineInner(c); }
+  catch (e) { return `<div class="dim" style="font-size:12px">Last sweep: could not read its record (${esc(String(e.message || e))})</div>`; }
+}
+function sweepLineInner(c) {
+  let s = c.last_sweep;
+  if (typeof s === 'string') { try { s = JSON.parse(s); } catch { return ''; } }
+  if (!s || typeof s !== 'object') return '';
+  const parts = [];
+  if (s.tool) parts.push(`reads through ${esc(String(s.tool).replace(/^[a-z0-9]+[-_.]/i, '').replace(/[-_]+/g, ' '))}`);
+  parts.push(`${n(s.items || 0)} item${s.items === 1 ? '' : 's'} listed`);
+  if (s.refs) parts.push(`${n(s.refs)} page${s.refs === 1 ? '' : 's'} found${s.unseen != null ? `, ${n(s.unseen)} not read yet` : ''}`);
+  if (s.fetcher) parts.push(`${n(s.fetched || 0)} fetched via ${esc(String(s.fetcher).replace(/^[a-z0-9]+[-_.]/i, '').replace(/[-_]+/g, ' '))}${s.failed ? `, ${n(s.failed)} failed` : ''}`);
+  parts.push(`${n(s.fresh || 0)} new, ${n(s.facts || 0)} fact${s.facts === 1 ? '' : 's'}`);
+  const note = s.note ? ` — ${esc(s.note)}` : '';
+  const sample = s.sample ? `<div class="dim mono" style="font-size:11px;margin-top:4px;white-space:normal">first item: ${esc(String(s.sample).slice(0, 120))}</div>` : '';
+  return `<div class="dim" style="font-size:12px;margin-top:${c.last_error ? 6 : 0}px">Last sweep ${s.at ? esc(ago(s.at)) : ''}: ${parts.join(' · ')}${note}</div>${sample}`;
+}
+/* A remote source is stored as "mcp:<short-name>"; the person sees the name. */
+const sourceLabel = (provider) => SOURCE_LABEL[provider]
+  || (String(provider).startsWith('mcp:')
+    ? provider.slice(4).replace(/[-_]+/g, ' ').replace(/^./, (c) => c.toUpperCase())
+    : provider);
 
 async function viewSources(root) {
   root.innerHTML = '<div class="spin">Loading…</div>';
@@ -808,12 +846,15 @@ async function viewSources(root) {
         ? `<table class="t"><thead><tr><th>Source</th><th>State</th>
              <th>Last verified</th><th>Trouble</th><th class="num">Facts</th></tr></thead>
            <tbody>${rows.map((c) => `<tr>
-             <td>${esc(SOURCE_LABEL[c.provider] || c.provider)}${c.member_email
+             <td>${esc(sourceLabel(c.provider))}${c.member_email
                  ? ` <span class="dim mono">${esc(c.member_email)}</span>` : ''}</td>
              <td>${c.status === 'ok' ? '<span class="pill ok">verified</span>'
                  : `<span class="pill">${esc(c.status || 'pending')}</span>`}</td>
              <td>${c.last_ok_at ? esc(ago(c.last_ok_at)) : '—'}</td>
-             <td>${c.last_error ? `<span class="dim">${esc(String(c.last_error).slice(0, 90))}</span>` : ''}</td>
+             <td style="white-space:normal">${c.last_error ? `<span class="dim">${esc(String(c.last_error).slice(0, 240))}</span>${
+                 String(c.provider).startsWith('mcp:')
+                   ? ` <a class="ghost" href="./onboard.html?repair=${encodeURIComponent(c.provider)}">Fix now</a>` : ''}` : ''}${
+                 sweepLine(c)}</td>
              <td class="num">${n(counts[c.provider] || 0)}</td>
            </tr>`).join('')}</tbody></table>`
         : `<div class="empty"><b>Nothing is connected</b>Connect Gmail, Google Meet,
@@ -919,9 +960,9 @@ async function viewSettings(root) {
       </div>
       <div class="row" style="margin-top:14px">
         <label class="field" for="purgeconfirm" style="flex:1;min-width:220px">
-          Type <b class="mono" translate="no">${esc(org.name || '')}</b> to confirm
+          Type <b class="mono" translate="no">${esc(confirmWord(org))}</b> to confirm
           <input id="purgeconfirm" autocomplete="off" spellcheck="false"
-            placeholder="${esc(org.name || '')}" />
+            placeholder="${esc(confirmWord(org))}" />
         </label>
         <button id="purgego" class="destructive" disabled>Delete everything</button>
       </div>
@@ -933,16 +974,17 @@ async function viewSettings(root) {
           <div class="it">Delete the organization itself</div>
           <div class="id2">Everything above, plus the organization and its API
             tokens — and each connected source is revoked <b>at the provider</b>
-            (Google's revoke endpoint, Trello's token delete), so the access you
-            granted is genuinely withdrawn rather than just forgotten here. You are signed out; signing
-            in again creates it empty and starts setup from the top.</div>
+            where one allows it, so the access you granted is genuinely
+            withdrawn rather than just forgotten here. Anything that could not be
+            revoked is listed for you to finish by hand. You are signed out;
+            signing in again creates it empty and starts setup from the top.</div>
         </div>
       </div>
       <div class="row" style="margin-top:14px">
         <label class="field" for="delconfirm" style="flex:1;min-width:220px">
-          Type <b class="mono" translate="no">${esc(org.name || '')}</b> to confirm
+          Type <b class="mono" translate="no">${esc(confirmWord(org))}</b> to confirm
           <input id="delconfirm" autocomplete="off" spellcheck="false"
-            placeholder="${esc(org.name || '')}" />
+            placeholder="${esc(confirmWord(org))}" />
         </label>
         <button id="delgo" class="destructive" disabled>Delete organization</button>
       </div>
@@ -1020,12 +1062,13 @@ async function viewSettings(root) {
   const go = $('purgego');
   // The button stays dead until the name matches exactly — the same string the
   // server will re-check, so the UI never promises what the API would refuse.
+  /* Typing the name back IS the confirmation. No browser popup on top of it:
+   * that dialog names the host, not the product, and asks a question the
+   * person has just answered by typing. */
   input.addEventListener('input', () => {
-    go.disabled = input.value.trim() !== (org.name || '');
+    go.disabled = input.value.trim() !== confirmWord(org);
   });
   go.addEventListener('click', async () => {
-    if (!confirm(`Delete all ${n(org.raw)} inputs and ${n(org.facts)} facts? `
-                 + 'This cannot be undone.')) return;
     go.disabled = true; go.textContent = 'Deleting…';
     const out = $('purgeout');
     out.style.display = 'block';
@@ -1044,12 +1087,9 @@ async function viewSettings(root) {
   const dIn = $('delconfirm');
   const dGo = $('delgo');
   dIn.addEventListener('input', () => {
-    dGo.disabled = dIn.value.trim() !== (org.name || '');
+    dGo.disabled = dIn.value.trim() !== confirmWord(org);
   });
   dGo.addEventListener('click', async () => {
-    if (!confirm(`Delete ${org.name} entirely — all memory, its API tokens, and the `
-                 + 'source authorizations at Google and Trello? You will be signed out. '
-                 + 'This cannot be undone.')) return;
     dGo.disabled = true; $('delout').textContent = 'Deleting…';
     try {
       const res = await post('/v1/reset', { confirm: dIn.value.trim() });

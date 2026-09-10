@@ -10,7 +10,7 @@
 <meta name="description" content="Name your organization, connect your sources, and verify everything works before you rely on it." />
 <link rel="stylesheet" href="./app.css?v=3" />
 <link rel="stylesheet" href="./home.css?v=3" />
-<link rel="stylesheet" href="./onboard.css?v=3" />
+<link rel="stylesheet" href="./onboard.css?v=13" />
 </head>
 <body class="home ob">
 
@@ -22,19 +22,68 @@
     <span>OneBrain</span>
   </a>
   <ol class="obrail" id="obrail" aria-label="Setup progress">
-    <li data-step="0"><span class="rdot" aria-hidden="true"></span><span class="rlab">Organization</span></li>
-    <li data-step="1"><span class="rdot" aria-hidden="true"></span><span class="rlab">Sources</span></li>
-    <li data-step="2"><span class="rdot" aria-hidden="true"></span><span class="rlab">Plan</span></li>
-    <li data-step="3"><span class="rdot" aria-hidden="true"></span><span class="rlab">Verify</span></li>
-    <li data-step="4"><span class="rdot" aria-hidden="true"></span><span class="rlab">Done</span></li>
+    <li data-step="0"><span class="rdot" aria-hidden="true"></span><span class="rlab">Welcome</span></li>
+    <li data-step="1"><span class="rdot" aria-hidden="true"></span><span class="rlab">Organization</span></li>
+    <li data-step="2"><span class="rdot" aria-hidden="true"></span><span class="rlab">Sources</span></li>
+    <li data-step="3"><span class="rdot" aria-hidden="true"></span><span class="rlab">Plan</span></li>
+    <li data-step="4"><span class="rdot" aria-hidden="true"></span><span class="rlab">Verify</span></li>
+    <li data-step="5"><span class="rdot" aria-hidden="true"></span><span class="rlab">Done</span></li>
   </ol>
   <a class="obskip" href="./app.html?skip=1" id="exit">Skip for now</a>
 </header>
 
 <main id="stepmain" tabindex="-1">
 
+  <!-- 0 ─────────────────────────────────────────────── welcome -->
+  <section class="step" data-step="0" aria-labelledby="tw">
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Before we start</p>
+    <h1 id="tw" data-words>Welcome to OneBrain.</h1>
+    <p class="lede reveal">You&rsquo;re the first person from
+      <b class="mono" id="wel-domain" translate="no"></b> here, so the next few
+      minutes set up the memory everyone on your domain will share. It takes
+      about five minutes, and nothing here is hard to change later.</p>
+
+    <div class="welcome reveal">
+      <p class="welh">What OneBrain does</p>
+      <dl class="welfeat">
+        <div>
+          <dt>Captures</dt>
+          <dd>Email, meeting notes, calendars and boards flow in on their own,
+            read-only, once a source is connected.</dd>
+        </div>
+        <div>
+          <dt>Distils</dt>
+          <dd>Each item becomes short facts &mdash; decisions, commitments,
+            who knows what &mdash; deduplicated and kept current.</dd>
+        </div>
+        <div>
+          <dt>Answers</dt>
+          <dd>Your team searches it in the dashboard; your AI tools call it
+            directly. Every answer shows where it came from.</dd>
+        </div>
+      </dl>
+
+      <p class="welh">What setup covers</p>
+      <ol class="wlist welsteps">
+        <li><b>Name your organization.</b> A display name for the memory.
+          <span class="weltime">30 seconds</span></li>
+        <li><b>Connect sources.</b> Pick what should be remembered, or none
+          for now. <span class="weltime">Optional</span></li>
+        <li><b>Choose a plan.</b> Your trial credit is already in; nothing is
+          charged until billing activates. <span class="weltime">1 minute</span></li>
+        <li><b>Verify it works.</b> Live checks against every connection, so
+          you leave knowing it runs. <span class="weltime">Automatic</span></li>
+      </ol>
+    </div>
+
+    <div class="acts reveal">
+      <button class="cta" data-next>Start setup<span class="ctaarrow" aria-hidden="true">&rarr;</span></button>
+      <span class="fh">Only one person on your domain needs to do this.</span>
+    </div>
+  </section>
+
   <!-- 1 ─────────────────────────────────────────────── organization -->
-  <section class="step" data-step="0" aria-labelledby="t0">
+  <section class="step" data-step="1" aria-labelledby="t0" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step one</p>
     <h1 id="t0" data-words>Let&rsquo;s set up your organization.</h1>
     <p class="lede reveal">Everyone who signs in from your email domain shares one
@@ -70,14 +119,45 @@
   </section>
 
   <!-- 2 ────────────────────────────────────────────────── sources -->
-  <section class="step" data-step="1" aria-labelledby="t1" hidden>
+  <section class="step" data-step="2" aria-labelledby="t1" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step two &middot; optional</p>
     <h1 id="t1" data-words>Connect what you want remembered.</h1>
     <p class="lede reveal">Pick any of these, or none. With none, nothing ingests on
       its own and you write memory through the MCP tools instead &mdash; a supported
       way to run OneBrain, not a half-finished setup.</p>
 
-    <div class="srcgrid" id="srcgrid"></div>
+    <div class="acts reveal acts-top">
+      <button class="cta" data-next>Continue<span class="ctaarrow" aria-hidden="true">&rarr;</span></button>
+      <button class="textlink" data-back><span class="tl">Back</span></button>
+      <span class="fh">Connect anything below first, or continue and come back later.</span>
+    </div>
+
+    <div class="catalog reveal" id="catalog" aria-labelledby="cat-title">
+      <div class="cathead">
+        <div class="cattitle">
+          <h2 id="cat-title">Integrations</h2>
+          <p class="fh">Each one asks for your consent once. OneBrain keeps
+            the connection alive after that.</p>
+        </div>
+        <div class="catfilters" role="group" aria-label="Show">
+          <button type="button" class="catfilter" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="catfilter" data-filter="featured" aria-pressed="false">Popular</button>
+          <button type="button" class="catfilter" data-filter="connected" aria-pressed="false">Connected</button>
+        </div>
+      </div>
+      <label class="catsearch">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+        <input id="cat-q" class="fi" type="search"
+               placeholder="Search integrations"
+               aria-label="Search integrations" autocomplete="off" spellcheck="false" />
+      </label>
+      <div class="srcgrid" id="srcgrid"></div>
+      <div id="cat-sentinel" aria-hidden="true"></div>
+      <div class="catfoot" id="catfoot">
+        <span class="pcount" id="cat-count" role="status" aria-live="polite"></span>
+        <button type="button" class="ghostpill" id="cat-more" hidden>Show more</button>
+      </div>
+    </div>
 
     <section class="wsteps reveal" id="trello-attach" hidden
              aria-labelledby="tr-title" tabindex="-1">
@@ -104,14 +184,43 @@
       </ol>
     </section>
 
-    <div class="acts reveal">
-      <button class="cta" data-next>Continue</button>
-      <button class="textlink" data-back><span class="tl">Back</span></button>
+    <p class="fh" id="mcp-out" role="status" aria-live="polite"></p>
+    <div id="mcp-toolpick" class="wsteps mtp" hidden>
+      <h2 id="mtp-title">Connected</h2>
+      <p class="fh" id="mtp-sum"></p>
+      <details class="manual" id="mtp-adv">
+        <summary id="mtp-adv-label">Change what OneBrain reads</summary>
+        <p class="fh" style="margin-top:8px">Each option is something the service can
+          hand back. OneBrain reads it on every sweep and turns what comes back
+          into facts.</p>
+        <div class="mrow">
+          <select id="mtp-select" class="fi" aria-label="What OneBrain reads"></select>
+          <button type="button" class="ghostpill" id="mtp-save">Use this</button>
+        </div>
+        <p class="fh" id="mtp-out" role="status" aria-live="polite"></p>
+      </details>
+      <div class="acts mtp-acts">
+        <button class="cta" data-next>Continue<span class="ctaarrow" aria-hidden="true">&rarr;</span></button>
+        <span class="fh">or connect another source above.</span>
+      </div>
     </div>
+
+    <details class="manual reveal" id="cat-advanced">
+      <summary>Don&rsquo;t see your tool? Add it by server address</summary>
+      <p class="fh" style="margin-top:8px">Any remote server that speaks the Model
+        Context Protocol can feed this memory. Paste its address &mdash; if it
+        needs a sign-in, you&rsquo;ll be asked once.</p>
+      <div class="mrow">
+        <input id="mcp-url" class="fi" type="url"
+               placeholder="https://&hellip;/mcp"
+               aria-label="Server address" spellcheck="false" autocomplete="off" />
+        <button type="button" class="ghostpill" id="mcp-url-go">Connect</button>
+      </div>
+    </details>
   </section>
 
   <!-- 3 ───────────────────────────────────────────────────── plan -->
-  <section class="step" data-step="2" aria-labelledby="tp" hidden>
+  <section class="step" data-step="3" aria-labelledby="tp" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step three</p>
     <h1 id="tp" data-words>Choose your plan.</h1>
     <p class="lede reveal">Consumption pricing, prepaid: every month your plan
@@ -127,7 +236,7 @@
   </section>
 
   <!-- 4 ─────────────────────────────────────────────────── verify -->
-  <section class="step" data-step="3" aria-labelledby="t2" hidden>
+  <section class="step" data-step="4" aria-labelledby="t2" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step four</p>
     <h1 id="t2" data-words>Now let&rsquo;s prove it works.</h1>
     <p class="lede reveal">Every line below is a real call to the real API &mdash; not
@@ -150,27 +259,106 @@
   </section>
 
   <!-- 5 ───────────────────────────────────────────────────── done -->
-  <section class="step" data-step="4" aria-labelledby="t3" hidden>
+  <section class="step" data-step="5" aria-labelledby="t3" hidden>
     <div class="donemark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M14 25l7 7 14-16"/></svg></div>
     <h1 id="t3" data-words>You&rsquo;re set up.</h1>
     <p class="lede reveal" id="donesum"></p>
-    <p class="lede reveal">Your team signs in with Google and sees this memory
-      immediately &mdash; no consent screen, nothing to install. Send them the
-      invite link: it welcomes them, offers to connect <em>their own</em> mailbox,
-      and wires Claude up locally.</p>
-    <div class="term reveal"><div class="termbar">
-      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="shoturl">invite link &mdash; anyone on your domain</span></div>
-      <pre class="shot mono" id="done-invite" translate="no"></pre>
-    </div>
-    <p class="fh reveal">That page is for <em>you</em> too: it connects Claude
-      Code to this memory (one command, sign-in on first call) and installs the
-      automatic-memory hooks with one paste &mdash; mint your personal token
-      right on it.</p>
+
+    <section class="wsteps reveal" aria-labelledby="cc-title">
+      <h2 id="cc-title">Connect your tools</h2>
+      <p class="fh" style="margin-top:2px">Every assistant you use gets this memory.
+        Nothing below asks you to sign in: each setup carries your personal
+        token, created just now and shown once. <button type="button" class="textlink" id="cc-mint"><span class="tl">Create a new token</span></button></p>
+      <p class="fh" id="cc-out" role="status" aria-live="polite"></p>
+
+      <div class="catfilters harn" role="tablist" aria-label="Your tool">
+        <button type="button" class="catfilter" role="tab" data-harn="code" aria-selected="true">Claude Code</button>
+        <button type="button" class="catfilter" role="tab" data-harn="claude" aria-selected="false">Claude app</button>
+        <button type="button" class="catfilter" role="tab" data-harn="cursor" aria-selected="false">Cursor</button>
+        <button type="button" class="catfilter" role="tab" data-harn="vscode" aria-selected="false">VS&nbsp;Code</button>
+        <button type="button" class="catfilter" role="tab" data-harn="windsurf" aria-selected="false">Windsurf</button>
+        <button type="button" class="catfilter" role="tab" data-harn="gemini" aria-selected="false">Gemini CLI</button>
+        <button type="button" class="catfilter" role="tab" data-harn="other" aria-selected="false">Anything else</button>
+      </div>
+
+      <div class="harnpane" data-harn="code" role="tabpanel">
+        <p class="fh">One line, once. It gives Claude Code the recall and remember
+          tools, turns on automatic memory &mdash; recall before every prompt,
+          remember after every session &mdash; and connects Claude Desktop on this
+          Mac. No sign-in: your token is inside.</p>
+        <div class="term"><div class="termbar">
+            <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="shoturl">Terminal</span><span class="grow"></span>
+            <button type="button" class="copy" data-copy="h-code">Copy</button></div>
+          <pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> <span id="h-code"></span></code></pre>
+        </div>
+        <ol class="wlist harnsteps">
+          <li>Open Terminal: press <span class="mono" translate="no">&#8984; Space</span>,
+            type <em>Terminal</em>, press Return.</li>
+          <li>Paste the line, press Return. A few seconds; anything it touches is
+            backed up first.</li>
+          <li>Open Claude Code and ask <em>&ldquo;what did we decide about
+            pricing?&rdquo;</em></li>
+        </ol>
+      </div>
+      <div class="harnpane" data-harn="claude" role="tabpanel" hidden>
+        <p class="fh">Connectors belong to your Claude account: add OneBrain once and
+          claude.ai, Claude Desktop and the mobile apps all have it. Two clicks in
+          Claude and one Google sign-in.</p>
+        <div class="mrow" style="margin-top:0;align-items:center">
+          <a class="cta" data-claude-open href="claude://claude.ai/customize/connectors">Open Claude Desktop<span class="ctaarrow" aria-hidden="true">&rarr;</span></a>
+          <a class="ghostpill" data-claude-open href="https://claude.ai/customize/connectors"
+             target="_blank" rel="noopener">or claude.ai in the browser</a>
+        </div>
+        <p class="fh" id="h-claude-out" role="status" aria-live="polite">Either button
+          also copies the address.</p>
+        <ol class="wlist harnsteps">
+          <li>Press the button. Claude opens on its Connectors page, and the address
+            is on your clipboard.</li>
+          <li>Press <b>Add custom connector</b>, name it <b>OneBrain</b>, paste the
+            address, press <b>Add</b>.</li>
+          <li>Press <b>Connect</b> and approve the Google sign-in once. Claude Desktop
+            and mobile pick it up on their own.</li>
+        </ol>
+        <div class="snip"><pre class="mono" id="h-claude" translate="no"></pre>
+          <button type="button" class="ghostpill" data-copy="h-claude">Copy</button></div>
+        <p class="fh">On a Team or Enterprise plan an Owner adds it once under
+          <b>Organization settings &rarr; Connectors</b>, and everyone on the team
+          gets a Connect button.</p>
+      </div>
+      <div class="harnpane" data-harn="cursor" role="tabpanel" hidden>
+        <p class="fh">One click. Cursor opens and asks you to confirm.</p>
+        <div class="mrow" style="margin-top:0"><a class="cta" id="h-cursor" href="#">Add to Cursor</a></div>
+      </div>
+      <div class="harnpane" data-harn="vscode" role="tabpanel" hidden>
+        <p class="fh">One click. VS&nbsp;Code opens and asks you to confirm.</p>
+        <div class="mrow" style="margin-top:0"><a class="cta" id="h-vscode" href="#">Add to VS&nbsp;Code</a></div>
+      </div>
+      <div class="harnpane" data-harn="windsurf" role="tabpanel" hidden>
+        <p class="fh">In Windsurf open <b>Settings &rarr; Cascade &rarr; MCP servers &rarr;
+          Manage</b>, which opens <span class="mono" translate="no">mcp_config.json</span>.
+          Add this inside <span class="mono" translate="no">mcpServers</span>:</p>
+        <div class="snip"><pre class="mono" id="h-windsurf" translate="no"></pre>
+          <button type="button" class="ghostpill" data-copy="h-windsurf">Copy</button></div>
+      </div>
+      <div class="harnpane" data-harn="gemini" role="tabpanel" hidden>
+        <p class="fh">One line in Terminal.</p>
+        <div class="snip"><pre class="mono" id="h-gemini" translate="no"></pre>
+          <button type="button" class="ghostpill" data-copy="h-gemini">Copy</button></div>
+      </div>
+      <div class="harnpane" data-harn="other" role="tabpanel" hidden>
+        <p class="fh">Any MCP client that speaks streamable HTTP takes this address.
+          Send the header to skip sign-in; without it the client signs in with
+          Google once.</p>
+        <div class="snip"><pre class="mono" id="h-other" translate="no"></pre>
+          <button type="button" class="ghostpill" data-copy="h-other">Copy</button></div>
+      </div>
+    </section>
+
+    <p class="lede reveal" id="done-team" style="margin-top:var(--u5)"></p>
+
     <div class="acts reveal">
-      <a class="cta" href="/welcome">Set up my own Claude</a>
-      <a class="textlink" href="./app.html"><span class="tl">Open the dashboard</span>
-        <span class="tlarrow" aria-hidden="true">&rarr;</span></a>
+      <a class="cta" href="./app.html">Open the dashboard<span class="ctaarrow" aria-hidden="true">&rarr;</span></a>
     </div>
   </section>
 
@@ -182,6 +370,6 @@
    URL fragment, and module-land (supabase-js) may consume fragments. Stash
    it first so the wizard always receives it. */
 window.__ob_hash = location.hash;</script>
-<script type="module" src="./onboard.js?v=19"></script>
+<script type="module" src="./onboard.js?v=34"></script>
 </body>
 </html>

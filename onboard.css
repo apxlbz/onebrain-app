@@ -72,6 +72,42 @@
 @keyframes obin  { from { opacity:0; transform:translateY(14px); } }
 @keyframes obout { to   { opacity:0; transform:translateY(-10px); } }
 
+/* -------------------------------------------------------------- welcome
+
+   The one page that exists to be read, not filled in. It says what the
+   product does in three lines and what the next four steps will ask, so
+   nobody arrives at "name your organization" wondering what they signed up
+   for. No cards: two mono headers and the numbered list the Trello
+   walkthrough already uses, because a list of steps is what it is. */
+
+.welcome { margin:var(--u5) 0 0; max-width:40em; }
+.welh { font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-ash-gray); margin:0 0 var(--u3); }
+.welfeat { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:var(--u4); margin:0 0 var(--u6); }
+.welfeat dt { font-size:17px; margin:0 0 6px; }
+.welfeat dd { margin:0; font-size:14px; line-height:1.5;
+  color:var(--color-silver-mist); text-wrap:pretty; }
+.welsteps { margin-top:0; }
+.welcome .wlist > li { font-size:15px; line-height:1.5; padding-right:120px; }
+.welsteps > li:first-child { border-top:0; padding-top:4px; }
+.welsteps > li:first-child::before { top:4px; }
+.welsteps b { font-weight:500; }
+.weltime { position:absolute; right:0; top:var(--u3);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--color-ash-gray); }
+.welsteps > li:first-child .weltime { top:4px; }
+.ctaarrow { margin-left:10px; transition:transform 200ms var(--ease-out); }
+.cta:hover .ctaarrow { transform:translateX(3px); }
+.acts .fh { margin:0; }
+@media (max-width: 720px) {
+  .welfeat { grid-template-columns:1fr; gap:var(--u3); }
+  .welcome .wlist > li { padding-right:0; }
+  .weltime { position:static; display:block; margin-top:4px; }
+}
+
 /* --------------------------------------------------------------- fields */
 
 .fields { margin:var(--u5) 0 var(--u6); max-width:34em; }
@@ -115,8 +151,46 @@ button.textlink { background:none; border:none; cursor:pointer; padding:0; }
 .ghostpill:active:not(:disabled) { transform:scale(.97); }
 .ghostpill:disabled { opacity:.45; cursor:default; }
 
-/* -------------------------------------------------------------- sources */
+/* -------------------------------------------------------------- sources
 
+   The integrations catalog. Built-in sources and registry servers share one
+   card so the grid reads as a single product surface: a mark, a name, one
+   line, a state. Twelve to a page in three columns — four rows, scannable
+   without scrolling on a laptop — and the pager below is set in the same mono
+   voice as the progress rail, because it is the same kind of information:
+   where you are in a sequence. */
+
+.catalog { margin:var(--u5) 0 0; }
+.cathead { display:flex; align-items:flex-end; justify-content:space-between;
+  gap:var(--u3); flex-wrap:wrap; margin-bottom:var(--u3); }
+.cattitle h2 { font-size:22px; margin:0 0 4px; }
+.cattitle .fh { margin:0; max-width:34em; text-wrap:pretty; }
+
+/* Filters: a segmented row of the same mono pills the page uses everywhere;
+   the pressed one fills so the current view is legible without colour. */
+.catfilters { display:inline-flex; gap:4px; padding:3px;
+  border:1px solid var(--color-ash-line); border-radius:var(--radius-buttons); }
+.catfilter { height:32px; padding:0 14px; cursor:pointer;
+  background:transparent; color:var(--color-silver-mist); border:0;
+  border-radius:var(--radius-buttons);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  transition:background-color 160ms ease, color 160ms ease; }
+.catfilter:hover { color:var(--color-bone-white); }
+.catfilter[aria-pressed="true"], .catfilter[aria-selected="true"] {
+  background:var(--color-bone-white); color:var(--color-void); }
+.catfilter:focus-visible { outline:2px solid var(--color-electric-iris);
+  outline-offset:2px; }
+
+.catsearch { position:relative; display:block; margin-bottom:var(--u3); }
+.catsearch svg { position:absolute; left:18px; top:50%; width:16px; height:16px;
+  transform:translateY(-50%); fill:none; stroke:var(--color-ash-gray);
+  stroke-width:1.8; stroke-linecap:round; pointer-events:none; }
+.catsearch .fi { height:46px; padding-left:44px; }
+.catsearch .fi::-webkit-search-cancel-button { cursor:pointer; }
+
+#srcgrid { display:grid; gap:var(--u2); margin:0 0 var(--u3);
+  grid-template-columns:repeat(3, minmax(0, 1fr)); }
 .srcgrid { display:grid; gap:var(--u2); margin:var(--u5) 0 var(--u4);
   grid-template-columns:repeat(auto-fill, minmax(232px, 1fr)); }
 .srccard {
@@ -131,20 +205,36 @@ button.textlink { background:none; border:none; cursor:pointer; padding:0; }
   transition:border-color 220ms ease, transform 220ms var(--ease-out),
              box-shadow 220ms var(--ease-out);
 }
+#srcgrid .srccard { padding:16px; border-radius:16px; gap:6px; min-width:0; }
 .srccard:hover:not(:disabled) { border-color:var(--line-strong);
   transform:translateY(-2px); }
+.srccard:focus-visible { outline:2px solid var(--color-electric-iris);
+  outline-offset:2px; }
 .srccard[data-on="1"] { border-color:var(--color-deep-verdant); }
 .srccard[data-on="err"] { border-color:var(--color-coral); }
-.srcname { display:flex; align-items:center; gap:10px; font-size:17px; }
+.srcname { display:flex; align-items:center; gap:10px; font-size:17px; min-width:0; }
+#srcgrid .srcname { font-size:15px; font-weight:500; letter-spacing:-.005em; }
+#srcgrid .srcname > :not(.srcicon):not(.sd) { overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap; }
 /* The logo carries recognition, so the status dot moves to the end of the row
    rather than competing with it for the leading position. */
 .srcicon { width:22px; height:22px; flex:none; display:block; }
 .srcicon svg { width:100%; height:100%; display:block; }
+/* Registry servers get a monogram tile in the product's colour — a square
+   with an initial reads as "a product" without shipping anyone's logo. */
+.srcicon.tile { display:grid; place-items:center; border-radius:6px;
+  background:var(--tile, var(--color-ash-gray)); color:#fff;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px; font-weight:600; line-height:1; }
 .srcname .sd { margin-left:auto; }
 .srcwhat { font-size:14px; color:var(--color-silver-mist); text-wrap:pretty; }
+#srcgrid .srcwhat { font-size:13px; line-height:1.4; display:-webkit-box;
+  -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  min-height:calc(13px * 1.4 * 2); }
 .srcstate { font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size:11px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--color-ash-gray); }
+#srcgrid .srcstate { margin-top:2px; }
 .srccard[data-on="1"] .srcstate { color:var(--color-deep-verdant); }
 .srccard[data-on="err"] .srcstate { color:var(--color-coral); }
 .sd { width:8px; height:8px; border-radius:50%; flex:none;
@@ -153,12 +243,63 @@ button.textlink { background:none; border:none; cursor:pointer; padding:0; }
 .srccard[data-on="1"] .sd { background:var(--color-deep-verdant); transform:scale(1.15); }
 .srccard[data-on="err"] .sd { background:var(--color-coral); }
 
+/* Skeletons hold each card's exact footprint while the page loads, so the
+   grid never reflows when rows arrive. */
+.srccard.skel { pointer-events:none; }
+.sk { display:block; border-radius:4px; background:var(--color-ash-line);
+  opacity:.55; }
+.js .sk { animation:obsk 1.1s ease-in-out infinite alternate; }
+@keyframes obsk { to { opacity:.25; } }
+.skel .srcicon { border-radius:6px; background:var(--color-ash-line); opacity:.55; }
+.sk-t { width:55%; height:13px; }
+.sk-w { width:92%; height:12px; margin-top:6px; }
+.sk-s { width:38%; height:9px; margin-top:8px; }
+.catempty { grid-column:1 / -1; padding:var(--u5) var(--u3); text-align:center;
+  color:var(--color-silver-mist); font-size:15px; text-wrap:pretty; margin:0; }
+
+/* Fetched logos sit in the same 22px box as the built-in marks. */
+.srcicon.logo { display:grid; place-items:center; border-radius:6px; overflow:hidden; }
+.srcicon.logo img { width:100%; height:100%; display:block; object-fit:contain; }
+
+/* The list's foot: how far you are through it, in the rail's mono voice,
+   and a button for anyone whose browser will not fetch on scroll. */
+#cat-sentinel { height:1px; }
+.catfoot { display:flex; align-items:center; justify-content:space-between;
+  gap:var(--u3); flex-wrap:wrap; padding-top:var(--u3);
+  border-top:1px solid var(--color-ash-line);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-ash-gray); font-variant-numeric:tabular-nums; }
+.catfoot[hidden] { display:none; }
+.catfoot .ghostpill { height:34px; padding:0 16px; }
+
+@media (max-width: 720px) {
+  #srcgrid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .cathead { align-items:flex-start; }
+}
+@media (max-width: 440px) {
+  #srcgrid { grid-template-columns:1fr; }
+}
+
 .manual { margin-top:var(--u3); }
 .manual summary { cursor:pointer; font-size:15px;
   color:var(--color-silver-mist); transition:color 200ms ease; }
 .manual summary:hover { color:var(--color-electric-iris); }
 .mrow { display:flex; gap:var(--u2); flex-wrap:wrap; margin-top:var(--u3); }
 .mrow .fi { flex:1 1 190px; width:auto; height:44px; }
+
+/* The "what does it read" box after a remote source connects. */
+.mtp h2 { font-size:20px; }
+.mtp .fh b.mono { font-weight:500; color:var(--color-bone-white); }
+.mtp .manual { margin-top:var(--u3); }
+.mtp select.fi { flex:1 1 260px; width:auto; height:44px; padding-right:40px;
+  background-position:calc(100% - 22px) 19px, calc(100% - 16px) 19px; }
+.mtp[hidden] { display:none; }
+.mtp-acts { margin-top:var(--u4); }
+/* On Sources the actions lead: the list below is long, and "what next" must
+   not depend on reaching its end. */
+.acts-top { margin:var(--u4) 0 0; }
+.acts-top + .catalog { margin-top:var(--u6); }
 
 /* --------------------------------------------------------------- verify */
 
@@ -192,6 +333,31 @@ button.textlink { background:none; border:none; cursor:pointer; padding:0; }
 
 /* ----------------------------------------------------------------- done */
 
+/* A command to copy: the text is the object, the button sits beside it. */
+.snip { display:flex; align-items:flex-start; gap:12px; margin-top:10px;
+  padding:12px 14px; border:1px solid var(--color-ash-line); border-radius:12px;
+  background:var(--sunk, #efeae7); }
+.snip pre { flex:1; margin:0; font-size:13px; line-height:1.5;
+  white-space:pre-wrap; word-break:break-all; color:var(--color-bone-white); }
+.snip .ghostpill { height:32px; padding:0 14px; flex:none; }
+.snip[hidden] { display:none; }
+.wsteps .textlink { font-size:14px; color:var(--color-silver-mist); }
+.wsteps .textlink .tl { border-bottom:1px solid var(--color-ash-line); }
+a.ghostpill { text-decoration:none; }
+.harn { flex-wrap:wrap; margin:var(--u3) 0 var(--u3); }
+.harnpane[hidden] { display:none; }
+.harnpane .snip { margin-top:6px; }
+/* The Claude Code line as a terminal window (the landing page's), left-set
+   inside the box; the steps under it in the same numbered voice as Welcome. */
+.harnpane .term { margin:var(--u3) 0; max-width:none; }
+.harnpane .snippet code { white-space:pre-wrap; word-break:break-all; }
+.harnsteps { margin-top:var(--u3); }
+.harnsteps > li { font-size:14px; line-height:1.5; }
+.harnsteps > li:first-child { border-top:0; padding-top:4px; }
+.harnsteps > li:first-child::before { top:4px; }
+.harnsteps .snip { margin-top:8px; }
+.wsteps .cta { text-decoration:none; }
+
 .donemark { width:64px; height:64px; margin:0 0 var(--u4);
   border-radius:50%; border:1px solid var(--color-deep-verdant);
   display:grid; place-items:center; }
@@ -222,7 +388,7 @@ button.textlink { background:none; border:none; cursor:pointer; padding:0; }
    stop moving. */
 @media (prefers-reduced-motion: reduce) {
   .js .step[data-anim="in"], .js .step[data-anim="out"],
-  .js .vrow, .js .donemark svg path {
+  .js .vrow, .js .donemark svg path, .js .sk {
     animation:none; opacity:1; transform:none; stroke-dashoffset:0; }
   .spinner { animation:none; }
   .rdot { transition:none; }
@@ -252,6 +418,19 @@ button.textlink { background:none; border:none; cursor:pointer; padding:0; }
 .wlist .fh { margin-top:6px; }
 .wlist .ghostpill, .wlist .mrow { margin-top:12px; }
 a.ghostpill { text-decoration:none; }
+.harn { flex-wrap:wrap; margin:var(--u3) 0 var(--u3); }
+.harnpane[hidden] { display:none; }
+.harnpane .snip { margin-top:6px; }
+/* The Claude Code line as a terminal window (the landing page's), left-set
+   inside the box; the steps under it in the same numbered voice as Welcome. */
+.harnpane .term { margin:var(--u3) 0; max-width:none; }
+.harnpane .snippet code { white-space:pre-wrap; word-break:break-all; }
+.harnsteps { margin-top:var(--u3); }
+.harnsteps > li { font-size:14px; line-height:1.5; }
+.harnsteps > li:first-child { border-top:0; padding-top:4px; }
+.harnsteps > li:first-child::before { top:4px; }
+.harnsteps .snip { margin-top:8px; }
+.wsteps .cta { text-decoration:none; }
 
 /* The platform group inside verify: same rows, different owner — the label is
    the hand-off. Steps under a failed row are the operator walkthrough. */

@@ -257,13 +257,19 @@ async function routeGet(path) {
   if (p === "/v1/connections") {
     needAuth();
     const { data } = await sb.from("connections")
-      .select("provider,member_email,connection_id,status,last_ok_at,last_error");
-    return { connections: data ?? [] };
+      .select("provider,member_email,connection_id,status,last_ok_at,last_error,config");
+    // config carries the worker's account of the last sweep (__last_sweep)
+    // and, for remote sources, the tool it reads through — never a secret.
+    return { connections: (data ?? []).map((c) => ({
+      ...c, config: undefined,
+      tool: c.config?.tool ?? null, last_sweep: c.config?.__last_sweep ?? null,
+    })) };
   }
   throw new Error(`this view isn't wired to the new engine yet (${p})`);
 }
 
 window.OB = {
+  sb,
   token: () => session?.access_token ?? null,
   async api(path, opts = {}) {
     if (!opts.method || opts.method === "GET") return await routeGet(path);
@@ -280,6 +286,12 @@ window.OB = {
     if (path === "/v1/billing/portal") return await fnCall("/v1/billing/portal", body);
     if (path === "/v1/connections/google") return await fnCall("/v1/connections/google", body);
     if (path === "/v1/connections/trello") return await fnCall("/v1/connections/trello", body);
+    // Remote (MCP) sources: start, tools, tool, and the authless finish all
+    // live on the api function under the same paths.
+    if (path.startsWith("/v1/connections/mcp")) return await fnCall(path, body);
+    // The danger zone: both are POSTs with the organization's name typed back.
+    if (path === "/v1/purge") return await fnCall("/v1/purge", body);
+    if (path === "/v1/reset") return await fnCall("/v1/reset", body);
     throw new Error(`this action isn't wired to the new engine yet (${path})`);
   },
   signout() { sb.auth.signOut().then(() => { location.href = "./index.html"; }); },
