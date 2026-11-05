@@ -10,6 +10,7 @@ function confirmWord(org) {
   return name.startsWith('user:') ? name.slice(5) : name;
 }
 import { FN } from "./env.js?v=1";
+import { badgeHTML } from "./badge.js?v=1";
 
 /* OneBrain dashboard.
  *
@@ -30,6 +31,17 @@ import { FN } from "./env.js?v=1";
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g,
   (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// /v1/recall frames each result's content in <memory_item> tags for LLM
+// consumers; the dashboard shows the plain text.
+const unframe = (s) => {
+  let t = String(s == null ? '' : s);
+  for (;;) {
+    const n = t.replace(/<\/?\s*(?:memory_item|recalled_memory)\b[^>]*>/gi, '');
+    if (n === t) return t.trim();
+    t = n;
+  }
+};
 
 const NUM = new Intl.NumberFormat();
 const n = (v) => NUM.format(v || 0);
@@ -131,23 +143,21 @@ function activate(el, fn) {
 
 async function viewOverview(root) {
   root.innerHTML = '<div class="spin">Loading…</div>';
-  const [s, ob, conns, mem, members] = await Promise.all([
+  const [s, conns, mem, members] = await Promise.all([
     api('/v1/stats'),
-    // Never let the setup prompt take the whole page down with it.
-    api('/v1/onboarding').catch(() => null),
     api('/v1/connections').catch(() => ({ connections: [] })),
     api('/v1/memories?limit=6').catch(() => ({ items: [] })),
     api('/v1/members').catch(() => ({ members: [] })),
   ]);
 
-  /* An org whose setup is unfinished has a Home full of zeroes and no way to
-   * know why. Say it once, at the top, with the way out. */
-  const setupPrompt = (ob && !ob.completed_at) ? `
+  /* An empty memory has a Home full of zeroes. The way forward is mint + copy,
+   * not the Google-sources wizard. Once anything is stored, the card leaves. */
+  const connectPrompt = !(Number(s.facts_current) > 0) ? `
     <section class="card setupcard" style="margin-bottom:14px" aria-labelledby="h-setup">
-      <h2 class="sec" id="h-setup">Finish setting up ${esc(ob.org || 'your organization')}</h2>
-      <p style="margin:0 0 12px">Connect your sources and verify every key and
-        connection with a live call. Until then this page mostly shows zeroes.</p>
-      <a class="btnlink primary" href="./onboard.html">Open setup</a>
+      <h2 class="sec" id="h-setup">Connect an agent</h2>
+      <p style="margin:0 0 12px">Mint a token and copy one install line. That is
+        the whole setup.</p>
+      <a class="btnlink primary" href="#settings">Mint and copy</a>
     </section>` : '';
 
   const week = (s.daily || []).slice(-7).reduce((a, d) => a + (d.n || 0), 0);
@@ -164,7 +174,7 @@ async function viewOverview(root) {
     <p class="lede">${n(s.facts_current)} current facts from ${n(s.raw)} inputs${
       s.last_ingest ? ` · last ingest ${ago(s.last_ingest)}` : ''}</p>
 
-    ${setupPrompt}
+    ${connectPrompt}
 
     <div class="tiles" style="margin-bottom:14px">
       ${tile(n(s.facts_current), 'current facts',
@@ -188,7 +198,7 @@ async function viewOverview(root) {
                 <td class="tight"><span class="pill">${esc(f.type || 'fact')}</span></td>
                 <td class="tight">${ago(f.created_at)}</td>
               </tr>`).join('')}</tbody></table>`
-          : '<p class="dim">Nothing yet — connect a source, or write through the MCP tools.</p>'}
+          : '<p class="dim">Nothing yet — mint a token in Settings and install a host, or call remember().</p>'}
       </section>
       <section class="card" aria-labelledby="h-src">
         <h2 class="sec" id="h-src">Where memory comes from</h2>
@@ -288,7 +298,7 @@ async function viewMemories(root, params) {
       list.innerHTML = `<div class="empty"><b>No memories match</b>${
         MEM.q || MEM.source || MEM.type
           ? 'Try clearing the filters above.'
-          : 'Connect a source or call remember() to start building memory.'}</div>`;
+          : 'Install an agent from Settings, or call remember(), to start building memory.'}</div>`;
       announce('No memories match.');
       return;
     }
@@ -296,7 +306,7 @@ async function viewMemories(root, params) {
     const to = Math.min(data.offset + data.items.length, data.total);
     list.innerHTML = `
       <table class="t"><thead><tr>
-        <th style="width:50%">Fact</th><th style="width:13%">Source</th>
+        <th style="width:50%">Fact</th><th style="width:13%">Source</th><th style="width:13%">Written by</th>
         <th style="width:11%">Type</th><th style="width:15%">About</th>
         <th style="width:11%">When</th>
       </tr></thead><tbody>
@@ -306,6 +316,7 @@ async function viewMemories(root, params) {
           <td><span class="clamp2">${esc(f.content)}</span>${f.is_current ? ''
             : ' <span class="pill" title="A newer fact replaced this">superseded</span>'}</td>
           <td class="tight">${esc(f.source)}</td>
+          <td class="tight">${badgeHTML({ source: f.source, metadata: f.memory_raw && f.memory_raw.metadata }, esc)}</td>
           <td class="tight">${esc(f.type)}</td>
           <td class="tight">${esc([f.entity, f.product, f.topic, f.system]
             .filter(Boolean)[0] || '—')}</td>
@@ -439,6 +450,7 @@ async function openFact(id, opener) {
       <h2 class="sec" id="h-det">Details</h2>
       <div class="kv">
         <span class="k">Source</span><span class="v">${esc(f.source || '—')}</span>
+        <span class="k">Written by</span><span class="v">${badgeHTML({ source: f.source, metadata: f.memory_raw && f.memory_raw.metadata }, esc)}</span>
         <span class="k">Recorded</span><span class="v" title="${esc(exact(f.created_at))}">${ago(f.created_at)}</span>
         ${f.happened_at ? `<span class="k">Happened</span><span class="v" title="${
           esc(exact(f.happened_at))}">${ago(f.happened_at)}</span>` : ''}
@@ -634,9 +646,10 @@ function hitHTML(r, i) {
     <div class="hit" data-id="${esc(r.id)}">
       <div class="hrank num" aria-hidden="true">${i + 1}</div>
       <div class="hbody">
-        <div class="hc">${esc(r.content)}</div>
+        <div class="hc">${esc(unframe(r.content))}</div>
         <div class="hm">
           <span class="pill">${esc(r.source || '—')}</span>
+          ${badgeHTML(r, esc)}
           ${r.scoped === false && (SEARCH.source || SEARCH.type)
             ? '<span class="pill" title="Your filter was too narrow, so general memory filled in">unscoped fallback</span>'
             : ''}
@@ -688,7 +701,7 @@ async function viewPeople(root, params) {
           <span class="pill">${n(p.fact_count ?? (p.evidence || []).length)} facts</span>
         </div>
         ${(p.evidence || []).map((e) => `<div class="hit" data-id="${esc(e.id || '')}">
-          <div class="hbody"><div class="hc">${esc(e.content || e)}</div></div>
+          <div class="hbody"><div class="hc">${esc(unframe(e.content || e))}</div></div>
         </div>`).join('')}
       </section>`).join('');
     out.querySelectorAll('[data-id]').forEach((d) => {
@@ -857,10 +870,10 @@ async function viewSources(root) {
                  sweepLine(c)}</td>
              <td class="num">${n(counts[c.provider] || 0)}</td>
            </tr>`).join('')}</tbody></table>`
-        : `<div class="empty"><b>Nothing is connected</b>Connect Gmail, Google Meet,
-             Calendar or Trello and ingestion starts within a minute.</div>`}
-      <p style="margin:12px 0 0"><a class="ghost" href="./onboard.html">Connect or
-        repair a source</a></p>
+        : `<div class="empty"><b>Nothing is connected</b>Google sources are optional.
+             Agents write memory through the install line in Settings.</div>`}
+      <p style="margin:12px 0 0"><a class="ghost" href="./onboard.html">Google sources
+        (optional)</a></p>
     </section>
 
     ${others.length ? `
@@ -902,7 +915,6 @@ async function viewSettings(root) {
         <span class="k">Entities</span><span class="v num">${n(org.entities)}</span>
         <span class="k">API tokens</span><span class="v num">${n(org.tokens)}</span>
       </div>
-      <p style="margin:12px 0 0"><a class="btnlink" href="./onboard.html">Re-run setup</a></p>
       <p class="dim" style="margin:12px 0 0">Membership is by email domain.
         Everyone signing in from your domain shares this memory; nobody outside
         it can reach a single row.</p>
@@ -911,27 +923,39 @@ async function viewSettings(root) {
 
     <section class="card" style="margin-bottom:14px" aria-labelledby="h-connect">
       <h2 class="sec" id="h-connect">Connect your tools</h2>
-      <p class="dim" style="margin:-4px 0 14px">Two ways in: AI assistants speak
-        MCP; hooks and scripts authenticate with a personal token.</p>
+      <p class="dim" style="margin:-4px 0 14px">Mint one personal token, then copy
+        one line per host. Re-running rewrites only the onebrain entry. The key
+        stays in the environment that launches the host.</p>
 
-      <div class="it" style="font-weight:600">Claude and other MCP clients</div>
-      <div class="id2" style="margin:2px 0 8px">Run this once, then sign in with
-        Google on first use — recall and remember work mid-conversation from
-        then on.</div>
-      <pre class="raw mono" id="mcpsnip" tabindex="0"
-        style="white-space:pre-wrap;word-break:break-all"></pre>
-      <p style="margin:6px 0 20px">
-        <button class="btnlink" id="mcpcopy">Copy command</button></p>
-
-      <div class="it" style="font-weight:600">Personal token — hooks &amp; API</div>
-      <div class="id2" style="margin:2px 0 8px">Authenticates the capture hook and
-        the REST API as you. The token is shown once; minting again replaces the
-        previous one everywhere it's used.</div>
-      <p style="margin:0"><button class="btnlink" id="mintgo">Mint my token</button></p>
+      <p style="margin:0"><button class="btnlink primary" id="mintgo" type="button">Mint my token</button></p>
       <pre class="raw mono" id="mintout" tabindex="0"
         style="margin-top:10px;display:none;white-space:pre-wrap;word-break:break-all"></pre>
       <p style="margin:6px 0 0;display:none" id="mintcopyrow">
-        <button class="btnlink" id="mintcopy">Copy token</button></p>
+        <button class="btnlink" id="mintcopy" type="button">Copy token</button></p>
+
+      <div class="it" style="font-weight:600;margin-top:18px">Install lines</div>
+      <p class="dim" style="margin:2px 0 8px">Export the token as
+        <span class="mono" translate="no">ONEBRAIN_API_KEY</span>, then copy the
+        line for the host you are installing.</p>
+      <div id="installlines"></div>
+      <p class="dim" id="installnote" style="margin:12px 0 0"></p>
+
+      <details id="connect-advanced" style="margin-top:16px">
+        <summary>Advanced — Google sources</summary>
+        <p class="dim" style="margin:8px 0">Optional. Gmail, Meet, Calendar, and
+          Trello. Agents never go through this.</p>
+        <p style="margin:0"><a class="ghost" href="./onboard.html">Connect Google sources</a></p>
+      </details>
+    </section>
+
+
+    <section class="card" style="margin-bottom:14px" aria-labelledby="h-memmd">
+      <h2 class="sec" id="h-memmd">Memory.md</h2>
+      <p class="dim" style="margin:-4px 0 12px">A short file that teaches any agent
+        when to recall and remember, personalised with your endpoint. Drop it
+        in a CLAUDE.md or AGENTS.md.</p>
+      <p style="margin:0"><button class="btnlink" id="memmdgo">Download Memory.md</button>
+        <span class="dim" id="memmdout" role="status" style="margin-left:10px"></span></p>
     </section>
 
 
@@ -977,7 +1001,7 @@ async function viewSettings(root) {
             where one allows it, so the access you granted is genuinely
             withdrawn rather than just forgotten here. Anything that could not be
             revoked is listed for you to finish by hand. You are signed out;
-            signing in again creates it empty and starts setup from the top.</div>
+            signing in again creates it empty.</div>
         </div>
       </div>
       <div class="row" style="margin-top:14px">
@@ -1013,17 +1037,63 @@ async function viewSettings(root) {
     } finally { btn.disabled = false; }
   });
 
-  // Connect your tools: the MCP add command is plain text (public URL), the
-  // personal token is fetched on demand and shown exactly once.
-  const mcpCmd = `claude mcp add --transport http onebrain ${FN}/mcp`;
-  $('mcpsnip').textContent = mcpCmd;
-  $('mcpcopy').addEventListener('click', async () => {
+  $('memmdgo').addEventListener('click', async () => {
+    const btn = $('memmdgo');
+    btn.disabled = true; $('memmdout').textContent = 'Preparing…';
     try {
-      await navigator.clipboard.writeText(mcpCmd);
-      $('mcpcopy').textContent = 'Copied';
-      setTimeout(() => { $('mcpcopy').textContent = 'Copy command'; }, 1800);
-    } catch { announce('Copy failed — select the command text instead.'); }
+      const r = await fetch(`${FN}/api/memory.md`, {
+        headers: { Authorization: `Bearer ${window.OB.token()}` },
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(await r.blob());
+      a.download = 'Memory.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      $('memmdout').textContent = 'Downloaded.';
+    } catch (e) {
+      $('memmdout').textContent = `Failed: ${e.message || e}`;
+    } finally { btn.disabled = false; }
   });
+
+  // Connect your tools: mint once, then copy one line of the live
+  // agent-install.sh. Prod host uses the prod script; every other host uses
+  // the dev script, so a token minted here matches the project it is written
+  // against. The secret is not placed in the command — shell history would
+  // keep it — the line reads ONEBRAIN_API_KEY from the environment.
+  const INSTALL_HOSTS = [
+    ['claude-code', 'Claude Code'],
+    ['cursor', 'Cursor'],
+    ['codex', 'Codex'],
+    ['mcp', 'Any MCP client'],
+    ['rest', 'Plain REST'],
+  ];
+  const installScript = location.hostname === 'onebrain.apxlbz.com'
+    ? 'https://onebrain.apxlbz.com/agent-install.sh'
+    : 'https://onebrain-dev.apxlbz.com/agent-install.sh';
+  const installLine = (host) =>
+    `curl -fsSL ${installScript} | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- ${host}`;
+  $('installlines').innerHTML = INSTALL_HOSTS.map(([host, label], i) => `
+    <div class="it" style="margin-top:12px">${esc(label)}</div>
+    <pre class="raw mono" id="inst-${i}" tabindex="0"
+      style="white-space:pre-wrap;word-break:break-all"></pre>
+    <p style="margin:6px 0 0"><button class="btnlink" type="button" data-inst="${i}">Copy</button></p>
+  `).join('');
+  INSTALL_HOSTS.forEach(([host], i) => { $(`inst-${i}`).textContent = installLine(host); });
+  $('installlines').querySelectorAll('[data-inst]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const line = $(`inst-${btn.dataset.inst}`).textContent;
+      try {
+        await navigator.clipboard.writeText(line);
+        const prior = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => { btn.textContent = prior; }, 1800);
+      } catch { announce('Copy failed — select the line instead.'); }
+    });
+  });
+  $('installnote').textContent =
+    'Production is https://onebrain.apxlbz.com/agent-install.sh. ' +
+    'Dev is the same command from https://onebrain-dev.apxlbz.com/agent-install.sh.';
   let mintedToken = '';
   $('mintgo').addEventListener('click', async () => {
     if (!confirm('Mint a personal token? Any previous token of yours stops '
@@ -1036,10 +1106,9 @@ async function viewSettings(root) {
       mintedToken = res.token;
       out.style.display = 'block';
       out.textContent =
-        `# ~/.config/onebrain/config — for the capture hook\n` +
-        `ONEBRAIN_URL=${FN}/api\n` +
-        `ONEBRAIN_TOKEN=${res.token}\n\n` +
-        `# shown once — minting again replaces it`;
+        `export ONEBRAIN_API_KEY='${res.token}'\n\n` +
+        `# shown once — minting again replaces it\n` +
+        `# then copy an install line below`;
       $('mintcopyrow').style.display = 'block';
       announce('Token minted — shown once, copy it now.');
       btn.textContent = 'Mint again';
@@ -1150,11 +1219,18 @@ async function viewUsage(root) {
         <td class="tight num">${usd(r.usd, 4)}</td></tr>`).join('')}</tbody></table>`
     : `<p class="dim">No ${name} yet.</p>`;
 
+  const planActive = u.plan && u.plan.status === 'active';
   root.innerHTML = `
     <h1>Billing</h1>
+    ${u.free_tier?.active ? `<p class="lede" style="font-weight:600">
+      ${n(u.free_tier.facts)} of ${n(u.free_tier.max_facts)} facts stored on
+      Free — connect up to ${n(u.free_tier.max_agents)} agents.</p>` : ''}
     <p class="lede">What the platform engine has thought on your behalf — every
       call metered as it happened, priced per token. An org running on its own
       API keys spends there, not here.</p>
+    ${planActive ? `<p class="dim" style="margin:-4px 0 14px">If we raise
+      prices later, you keep today&rsquo;s rate for as long as you stay
+      subscribed.</p>` : ''}
 
     <div class="tiles" style="margin-bottom:14px">
       ${tile(usd(u.balance_usd), 'balance', 'prepaid — rolls over')}
@@ -1200,7 +1276,7 @@ async function viewUsage(root) {
             <td>${esc(REASON[r.reason] || r.reason)}</td>
             <td class="tight num">${Number(r.delta_usd) >= 0 ? '+' : ''}${usd(r.delta_usd)}</td>
           </tr>`).join('')}</tbody></table>`
-        : '<p class="dim">No credits yet — the trial lands on first setup.</p>'}
+        : '<p class="dim">No credits yet — the trial lands when the memory is created.</p>'}
     </section>`;
 
   $('bill-act').addEventListener('click', async () => {
@@ -1209,7 +1285,7 @@ async function viewUsage(root) {
     try {
       const active = u.plan && u.plan.status === 'active';
       const res = await post(active ? '/v1/billing/portal' : '/v1/billing/checkout',
-        { plan: u.plan?.plan_code || u.plan?.code || 'starter',
+        { plan: u.plan?.plan_code || u.plan?.code || 'pro',
           return_base: location.origin + location.pathname.replace(/\/app\.html$/, '') });
       if (res.url) location.href = res.url;
       else out.textContent = 'No URL returned';
@@ -1253,37 +1329,7 @@ const VIEWS = {
 
 const go = (hash) => { location.hash = hash; };
 
-/* An org that has never completed setup lands on the wizard instead of an
- * Overview full of zeroes with no explanation. Deliberately a ONE-TIME redirect
- * held in memory, not a hard gate: once it has fired, every other tab stays
- * reachable, so a half-configured org can still look at what it does have. A
- * loop that kept forcing you back to setup would be a trap, not a guide. */
-let setupRedirectDone = false;
-
-async function maybeForceSetup() {
-  /* "Skip for now" must actually skip. The guard above only lives inside one
-   * page load, so the wizard's Skip link (a fresh /app load) used to bounce
-   * straight back to /onboarding — a loop, which is exactly the trap this was
-   * written not to be. The skip arrives as ?skip=1 and is remembered for the
-   * browser session; the wizard still greets them on their next visit. */
-  if (sessionStorage.getItem('ob_skipped') === '1') return false;
-  if (new URLSearchParams(location.search).has('skip')) {
-    sessionStorage.setItem('ob_skipped', '1');
-    history.replaceState(null, '', location.pathname + location.hash);
-    return false;
-  }
-  if (setupRedirectDone) return false;
-  setupRedirectDone = true;
-  if (location.hash && location.hash !== '#overview') return false;
-  try {
-    const ob = await api('/v1/onboarding');
-    if (ob && !ob.completed_at) { location.href = './onboard.html'; return true; }
-  } catch { /* never block the dashboard on this */ }
-  return false;
-}
-
 async function route() {
-  if (await maybeForceSetup()) return;   // the hash change re-enters route()
   const raw = (location.hash || '#overview').slice(1);
   const [name, query] = raw.split('?');
   const key = VIEWS[name] ? name : 'overview';
@@ -1326,7 +1372,7 @@ const palette = {
       .filter(([k, v]) => !q || k.includes(q) || v.title.toLowerCase().includes(q))
       .map(([k, v]) => ({ label: v.title, kind: 'Go to', to: k }));
     palette.items = [...tabs, ...hits.map((h) => ({
-      label: h.content, kind: h.source || 'memory', fact: h.id }))];
+      label: unframe(h.content), kind: h.source || 'memory', fact: h.id }))];
     palette.at = 0;
     const box = $('presults');
     box.innerHTML = palette.items.length

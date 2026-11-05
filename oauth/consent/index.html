@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://esm.sh; connect-src https://esm.sh https://epjkzltwyfexiunbmbel.supabase.co https://qlpfjeciekaqzribxlnp.supabase.co; style-src 'self'; img-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>Connect your client | OneBrain</title>
+  <link rel="stylesheet" href="../../app.css?v=3" />
+  <link rel="stylesheet" href="../../oauth-consent.css?v=1" />
+</head>
+<body>
+  <main class="consent-shell" aria-labelledby="title">
+    <a class="brand" href="../../index.html">OneBrain</a>
+    <section class="consent-card">
+      <p class="eyebrow">Client connection <span id="environment"></span></p>
+      <h1 id="title">Connect your client</h1>
+      <p id="status" role="status" aria-live="polite">Checking this connection request...</p>
+      <div id="error" role="alert" hidden></div>
+      <div id="signin" hidden>
+        <p>Sign in to review the client and its requested access before you decide.</p>
+        <button id="sign-in" class="primary" type="button">Sign in with Google</button>
+      </div>
+      <div id="request" hidden>
+        <dl>
+          <dt>Signed in as</dt><dd id="identity"></dd>
+          <dt>Requesting client</dt><dd id="client"></dd>
+          <dt>Client ID</dt><dd id="client-id" class="mono"></dd>
+          <dt>Return address</dt><dd id="redirect" class="mono"></dd>
+        </dl>
+        <h2>Requested permissions</h2>
+        <ul id="scopes"></ul>
+        <p class="notice">Only allow this connection if you started it and recognize this client. The client name is supplied by the client, not a verification by OneBrain.</p>
+        <div class="decisions">
+          <button id="deny" type="button">Deny</button>
+          <button id="approve" type="button" class="primary">Allow connection</button>
+        </div>
+      </div>
+      <div id="previous" hidden>
+        <p>You have already allowed this request. Continue only if you recognize the return address.</p>
+        <p id="previous-identity"></p>
+        <p id="previous-destination" class="mono"></p>
+        <button id="continue" type="button" class="primary">Continue to client</button>
+      </div>
+      <p class="footer">You can close this page without allowing a new connection.</p>
+    </section>
+  </main>
+  <script type="module" src="../../oauth-consent.js?v=1"></script>
+</body>
+</html>

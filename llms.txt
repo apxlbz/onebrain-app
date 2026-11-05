@@ -1,0 +1,38 @@
+# OneBrain
+
+> Shared memory for AI agents. Mint one personal token, copy one install line. No wizard.
+
+Auth is the environment variable ONEBRAIN_API_KEY. ONEBRAIN_TOKEN is the same key. Send it as Authorization: Bearer $ONEBRAIN_API_KEY. A static key cannot mint another token. Minting again replaces the previous token. A token from one project does not work on the other: use the production URLs or the dev URLs, not a mix.
+
+Production site: https://onebrain.apxlbz.com
+Production API base: https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/api
+Production MCP: https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp
+Production install script: https://onebrain.apxlbz.com/agent-install.sh
+
+Dev site: https://onebrain-dev.apxlbz.com
+Dev API base: https://epjkzltwyfexiunbmbel.supabase.co/functions/v1/api
+Dev MCP: https://epjkzltwyfexiunbmbel.supabase.co/functions/v1/mcp
+Dev install script: https://onebrain-dev.apxlbz.com/agent-install.sh
+
+Hosts, last argument of the install script: claude-code, cursor, codex, mcp, rest. OpenClaw is not an install host; use mcp or rest.
+
+## Agent docs
+
+- [Agent quickstart](https://onebrain.apxlbz.com/docs.html#agents): mint, every install line, the four tools, and the errors an agent hits.
+- [Full brief](https://onebrain.apxlbz.com/llms-full.txt): the same contract in one file, enough to mint and install with no other page.
+- [Dev copy of this index](https://onebrain-dev.apxlbz.com/llms.txt): the same instructions on the dev site.
+- [Dev full brief](https://onebrain-dev.apxlbz.com/llms-full.txt): one-file contract on the dev site.
+
+## Per-host examples
+
+- [Claude Code](https://onebrain.apxlbz.com/examples/claude-code.md): ~/.claude.json, header Bearer ${ONEBRAIN_API_KEY}.
+- [Cursor](https://onebrain.apxlbz.com/examples/cursor.md): ~/.cursor/mcp.json, header Bearer ${env:ONEBRAIN_API_KEY}.
+- [Codex](https://onebrain.apxlbz.com/examples/codex.md): ~/.codex/config.toml, bearer_token_env_var ONEBRAIN_API_KEY.
+- [Generic MCP](https://onebrain.apxlbz.com/examples/mcp.md): ~/.config/onebrain/mcp.json for any other MCP client.
+- [REST](https://onebrain.apxlbz.com/examples/rest.md): ~/.config/onebrain/rest.env, then POST /v1/remember and /v1/recall.
+
+## Also
+
+- [Install page](https://onebrain.apxlbz.com/install.html): the same lines, plus browser sign-in for clients that open Google themselves.
+- [API reference](https://onebrain.apxlbz.com/api-reference.html): live OpenAPI, with Try it.
+- [Documentation](https://onebrain.apxlbz.com/docs.html): quickstart, tools, and the error table.

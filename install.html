@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f6f3f1" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 30 27H2Z' fill='%232b59d1'/%3E%3C/svg%3E" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://onebrain.apxlbz.com/install.html" />
+<meta property="og:title" content="OneBrain — install" />
+<meta property="og:description" content="Mint a OneBrain token, then copy one install line for Claude Code, Cursor, Codex, any MCP client, or plain REST. Dev uses the same command from onebrain-dev." />
+<meta property="og:image" content="https://onebrain.apxlbz.com/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://onebrain.apxlbz.com/og-image.png" />
+<title>OneBrain — install</title>
+<meta name="description" content="Mint a OneBrain token, then copy one install line for Claude Code, Cursor, Codex, any MCP client, or plain REST. Dev uses the same command from onebrain-dev." />
+<style>
+  :root{--paper:#f6f3f1;--ink:#1f1d1a;--muted:#6f6a61;--lake:#2b59d1;--line:#e4ded6;--sunk:#efeae7;
+    --serif:"Source Serif 4",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 var(--sans)}
+  main{max-width:720px;margin:8vh auto 12vh;padding:0 24px}
+  h1{font:400 34px/1.2 var(--serif);margin:0 0 6px}
+  h2{font:600 17px/1.3 var(--sans);margin:40px 0 4px}
+  p,li{color:var(--ink);font-size:15.5px}
+  .muted{color:var(--muted)}
+  .lede{color:var(--muted);max-width:60ch}
+  a{color:var(--lake)}
+  code{font:13.5px var(--mono);background:var(--sunk);padding:1px 5px;border-radius:4px}
+  pre{font:13px/1.5 var(--mono);background:var(--sunk);border:1px solid var(--line);
+    border-radius:8px;padding:12px 14px;margin:8px 0 0;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+  .client{border-top:1px solid var(--line);padding-top:18px;margin-top:18px}
+  .client:first-of-type{border-top:none;padding-top:0;margin-top:0}
+  .snip{position:relative}
+  .copybtn{position:absolute;top:8px;right:8px;font:12px var(--sans);
+    background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 9px;
+    color:var(--ink);cursor:pointer}
+  .copybtn:hover{background:var(--sunk)}
+  .oneclick{display:inline-block;margin-top:8px;padding:9px 16px;border-radius:8px;
+    background:var(--lake);color:#fff;text-decoration:none;font-size:14px}
+  .note{font-size:13px;color:var(--muted);margin-top:8px;max-width:60ch}
+  .top{font-size:13px;color:var(--muted);margin-top:36px;max-width:60ch;
+    border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<main>
+  <p class="muted"><a href="./index.html">&larr; OneBrain</a></p>
+  <h1>Install OneBrain</h1>
+  <p class="lede">Mint a personal token, then copy one line. No wizard.
+    Each line runs the live <code translate="no">agent-install.sh</code> for
+    this site. The key stays in <code translate="no">ONEBRAIN_API_KEY</code>
+    and is not written into the host config.</p>
+  <p class="note">Sign in, then <b>Settings &rarr; Connect your tools &rarr; Mint my token</b>.
+    Production is <code translate="no">https://onebrain.apxlbz.com/agent-install.sh</code>.
+    Dev is the same command from
+    <code translate="no">https://onebrain-dev.apxlbz.com/agent-install.sh</code>.</p>
+  <div id="agent-lines"></div>
+
+  <h2>Clients that sign in themselves</h2>
+  <p class="lede">These clients can open a Google sign-in on first connect.
+    The address is <code translate="no" data-mcp-url>__MCP_URL__</code>.
+    Nothing in this section carries a token. See
+    <a href="./docs.html#connect">Connect to Claude</a>.</p>
+
+  <div class="client">
+    <h2>Claude Code</h2>
+    <p>Without a token: one command, then a Google sign-in on first use.
+      The install line above is the one to copy.</p>
+    <div class="snip">
+      <pre id="s-code" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-code">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>Claude (web, desktop, mobile)</h2>
+    <p>Settings &rarr; Connectors &rarr; Add custom connector &rarr; name it
+      <b>OneBrain</b> &rarr; paste the address. On Team or Enterprise, an owner
+      adds it once for everyone under Organization settings &rarr; Connectors.</p>
+    <a class="oneclick" href="claude://claude.ai/customize/connectors">Open Claude Desktop</a>
+    <a class="oneclick" style="background:#fff;color:var(--ink);border:1px solid var(--line)"
+       href="https://claude.ai/customize/connectors" target="_blank" rel="noopener">claude.ai in the browser</a>
+    <div class="snip">
+      <pre id="s-claude" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-claude">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>Cursor</h2>
+    <p>One click. Cursor opens and asks you to confirm.</p>
+    <a class="oneclick" id="link-cursor" href="#">Add to Cursor</a>
+    <p class="note">Doesn&rsquo;t open? Add this to Cursor&rsquo;s MCP settings
+      by hand:</p>
+    <div class="snip">
+      <pre id="s-cursor" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-cursor">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>VS Code</h2>
+    <p>One click. VS&nbsp;Code opens and asks you to confirm.</p>
+    <a class="oneclick" id="link-vscode" href="#">Add to VS Code</a>
+    <p class="note">Doesn&rsquo;t open? Add this to VS&nbsp;Code&rsquo;s MCP
+      settings by hand:</p>
+    <div class="snip">
+      <pre id="s-vscode" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-vscode">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>Windsurf</h2>
+    <p>Settings &rarr; Cascade &rarr; MCP servers &rarr; Manage, which opens
+      <span class="mono">mcp_config.json</span>. Add this inside
+      <code translate="no">mcpServers</code>:</p>
+    <div class="snip">
+      <pre id="s-windsurf" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-windsurf">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>Codex CLI</h2>
+    <p>Add this to <code translate="no">~/.codex/config.toml</code>:</p>
+    <div class="snip">
+      <pre id="s-codex" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-codex">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>Zed</h2>
+    <p>Add this to Zed&rsquo;s <code translate="no">settings.json</code> under
+      <code translate="no">context_servers</code>:</p>
+    <div class="snip">
+      <pre id="s-zed" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-zed">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>Gemini CLI</h2>
+    <p>One command in a terminal.</p>
+    <div class="snip">
+      <pre id="s-gemini" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-gemini">Copy</button>
+    </div>
+  </div>
+
+  <div class="client">
+    <h2>Any other MCP client</h2>
+    <p>Anything that speaks streamable HTTP takes the same address. Point it
+      here; a client with no OAuth support of its own can instead authenticate
+      using a personal token from Settings (once signed in), passed however
+      that client's own config expects a bearer credential.</p>
+    <div class="snip">
+      <pre id="s-other" translate="no"></pre>
+      <button type="button" class="copybtn" data-copy="s-other">Copy</button>
+    </div>
+  </div>
+
+  <p class="top">Full walkthrough, tools, and the REST API behind all of this:
+    <a href="./docs.html">Documentation</a>. Questions:
+    <a href="mailto:or@apxlbz.com">or@apxlbz.com</a></p>
+</main>
+
+<script type="module" src="./install.js?v=2"></script>
+</body>
+</html>

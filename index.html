@@ -7,8 +7,17 @@
 <meta name="theme-color" content="#f6f3f1" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 30 27H2Z' fill='%232b59d1'/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
+<meta property="og:url" content="https://onebrain.apxlbz.com/" />
 <meta property="og:title" content="OneBrain — one memory for everything your team decided" />
 <meta property="og:description" content="One memory your team searches and your agents call. OneBrain turns Gmail, Google Meet, Calendar and Trello into answers that arrive with their source." />
+<meta property="og:image" content="https://onebrain.apxlbz.com/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="OneBrain — one memory for everything your team decided." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="OneBrain — one memory for everything your team decided" />
+<meta name="twitter:description" content="One memory your team searches and your agents call. OneBrain turns Gmail, Google Meet, Calendar and Trello into answers that arrive with their source." />
+<meta name="twitter:image" content="https://onebrain.apxlbz.com/og-image.png" />
 <title>OneBrain — one memory for everything your team decided</title>
 <meta name="description" content="One memory your team searches and your agents call. OneBrain turns Gmail, Google Meet, Calendar and Trello into answers that arrive with their source." />
 <link rel="stylesheet" href="./app.css?v=3" />
@@ -51,6 +60,7 @@
     <a href="#how">How it works</a>
     <a href="#data">Your data</a>
     <a href="#agents">Wire it up</a>
+    <a href="./pricing.html">Pricing</a>
   </nav>
   <a class="cta" href="./app.html" data-signin>Sign in</a>
 </header>
@@ -345,10 +355,10 @@
   <div class="wrap narrow center">
     <p class="eyebrow">Wire it up</p>
     <h2 data-words id="agents-h">One line, wherever you work.</h2>
-    <p class="lede">An agent with tools and no memory will confidently tell you
-      something your team decided against in March. Point it here and it checks
-      first &mdash; same URL and token in your terminal, your editor, or a job
-      running at 3am.</p>
+    <p class="lede">Mint one token, then one line. An agent with tools and no
+      memory will confidently tell you something your team decided against in
+      March. Point it here and it checks first &mdash; the terminal, the editor,
+      or a job running at 3am.</p>
 
     <div class="term">
       <div class="termbar" role="tablist" aria-label="Setup target">
@@ -363,37 +373,27 @@
       </div>
 
       <div class="termpane" id="p-cc" role="tabpanel" aria-labelledby="t-cc"
-        data-copy="claude mcp add --scope user --transport http onebrain __MCP_URL__">
-<pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> claude mcp add --scope user --transport http onebrain \
-    <span data-mcp-url>__MCP_URL__</span></code></pre>
-        <p class="termnote">For everyone on the team who works in the terminal.
-          Sign in with Google on the first call; hooks make memory automatic
-          &mdash; nobody has to remember to say &ldquo;remember this&rdquo;.</p>
+        data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- claude-code'>
+<pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> curl -fsSL <span data-install-sh>__INSTALL_SH__</span> | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- claude-code</code></pre>
+        <p class="termnote">Mint the token in Settings &rarr; Connect your tools
+          and export it as <span class="mono" translate="no">ONEBRAIN_API_KEY</span>.
+          Production is <span class="mono" translate="no">https://onebrain.apxlbz.com/agent-install.sh</span>.
+          Dev is the same command from
+          <span class="mono" translate="no">https://onebrain-dev.apxlbz.com/agent-install.sh</span>.</p>
       </div>
 
       <div class="termpane" id="p-cursor" role="tabpanel" aria-labelledby="t-cursor" hidden
-        data-copy='{ "mcpServers": { "onebrain": { "type": "http", "url": "__MCP_URL__" } } }'>
-<pre class="snippet" tabindex="0"><code translate="no">{
-  "mcpServers": {
-    "onebrain": {
-      "type": "http",
-      "url": "<span data-mcp-url>__MCP_URL__</span>"
-    }
-  }
-}</code></pre>
-        <p class="termnote">Any MCP client takes the same URL and signs in the
-          same way. Nothing about OneBrain is specific to one harness.</p>
+        data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- cursor'>
+<pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> curl -fsSL <span data-install-sh>__INSTALL_SH__</span> | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- cursor</code></pre>
+        <p class="termnote">Same script. <span class="mono" translate="no">codex</span>
+          and <span class="mono" translate="no">mcp</span> are the other hosts.</p>
       </div>
 
       <div class="termpane" id="p-rest" role="tabpanel" aria-labelledby="t-rest" hidden
-        data-copy="curl -s __API_URL__/v1/recall -H &quot;Authorization: Bearer $ONEBRAIN_TOKEN&quot; -H 'Content-Type: application/json' -d '{&quot;query&quot;:&quot;why did we not adopt cognee&quot;}'">
-<pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> curl -s <span data-api-url>__API_URL__</span>/v1/recall \
-    -H "Authorization: Bearer $ONEBRAIN_TOKEN" \
-    -H 'Content-Type: application/json' \
-    -d '{"query":"why did we not adopt cognee"}'</code></pre>
+        data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- rest'>
+<pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> curl -fsSL <span data-install-sh>__INSTALL_SH__</span> | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- rest</code></pre>
         <p class="termnote">For agents that never touch a laptop &mdash; CI jobs,
-          cron, a service in your cluster. Plain REST with a personal token from
-          Settings, so a shell hook is one <span class="mono" translate="no">curl</span>.</p>
+          cron, a service in your cluster. The key stays in the environment.</p>
       </div>
     </div>
   </div>
@@ -414,6 +414,9 @@
   <span class="dim">Organizational memory for teams and their agents.</span>
   <span class="grow"></span>
   <a href="./docs.html">Docs</a>
+  <a href="./llms.txt">llms.txt</a>
+  <a href="./install.html">Install</a>
+  <a href="./pricing.html">Pricing</a>
   <a href="./terms.html">Terms</a>
   <a href="./privacy.html">Privacy</a>
   <a href="mailto:or@apxlbz.com">Contact</a>
@@ -421,65 +424,6 @@
 </footer>
 
 <script src="./home.js?v=1"></script>
-<script type="module">
-  /* Sign-in and routing. The page is the front door for everyone: a visitor
-   * reads it, a member signs in from the button top right. Someone who already
-   * has a session is NOT bounced away — the buttons simply become "Open
-   * OneBrain" — because a home page that vanishes the moment you are logged in
-   * is a page nobody can ever show a colleague. The one exception is the
-   * return leg of Google sign-in itself: that visit exists only to land you in
-   * the product, so it routes onward (unfinished org -> setup, else dashboard). */
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-  import { FN, SUPA_ORIGIN } from "./env.js?v=1";
-
-  // Per-environment endpoints for the "Wire it up" snippets.
-  const MCP = `${SUPA_ORIGIN}/functions/v1/mcp`;
-  const API = `${SUPA_ORIGIN}/functions/v1/api`;
-  document.querySelectorAll("[data-mcp-url]").forEach((el) => { el.textContent = MCP; });
-  document.querySelectorAll("[data-api-url]").forEach((el) => { el.textContent = API; });
-  document.querySelectorAll("[data-copy]").forEach((el) => {
-    el.dataset.copy = el.dataset.copy.replace(/__MCP_URL__/g, MCP).replace(/__API_URL__/g, API);
-  });
-
-  const returning = /access_token=|provider_token=/.test(location.hash);
-  const buttons = [...document.querySelectorAll("[data-signin]")];
-  const cfg = await fetch(`${FN}/api/config`).then((r) => r.json());
-  const sb = createClient(cfg.supabase_url, cfg.supabase_anon_key);
-
-  async function destination() {
-    try {
-      const { data: ob } = await sb.from("onboarding").select("completed_at").maybeSingle();
-      return ob?.completed_at ? "./app.html" : "./onboard.html";
-    } catch { return "./app.html"; }
-  }
-
-  function showSignedIn(dest) {
-    for (const b of buttons) {
-      b.setAttribute("href", dest);
-      b.textContent = b.classList.contains("cta") ? "Open OneBrain" : "Open OneBrain";
-      b.removeAttribute("data-signin");
-    }
-  }
-
-  buttons.forEach((b) => b.addEventListener("click", async (e) => {
-    if (!b.hasAttribute("data-signin")) return;     // already routed: a plain link
-    e.preventDefault();
-    b.setAttribute("aria-busy", "true");
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: location.origin + location.pathname },
-    });
-    if (error) { b.removeAttribute("aria-busy"); alert(error.message); }
-  }));
-
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    const dest = await destination();
-    if (returning) { location.replace(dest); } else { showSignedIn(dest); }
-  } else if (returning) {
-    // The hash is being consumed by supabase-js; route once the session lands.
-    sb.auth.onAuthStateChange(async (_e, s) => { if (s) location.replace(await destination()); });
-  }
-</script>
+<script type="module" src="./home-auth.js?v=2"></script>
 </body>
 </html>

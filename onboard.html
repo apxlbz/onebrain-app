@@ -10,7 +10,7 @@
 <meta name="description" content="Name your organization, connect your sources, and verify everything works before you rely on it." />
 <link rel="stylesheet" href="./app.css?v=3" />
 <link rel="stylesheet" href="./home.css?v=3" />
-<link rel="stylesheet" href="./onboard.css?v=13" />
+<link rel="stylesheet" href="./onboard.css?v=14" />
 </head>
 <body class="home ob">
 
@@ -27,9 +27,10 @@
     <li data-step="2"><span class="rdot" aria-hidden="true"></span><span class="rlab">Sources</span></li>
     <li data-step="3"><span class="rdot" aria-hidden="true"></span><span class="rlab">Plan</span></li>
     <li data-step="4"><span class="rdot" aria-hidden="true"></span><span class="rlab">Verify</span></li>
-    <li data-step="5"><span class="rdot" aria-hidden="true"></span><span class="rlab">Done</span></li>
+    <li data-step="5"><span class="rdot" aria-hidden="true"></span><span class="rlab">Bring your memory</span></li>
+    <li data-step="6"><span class="rdot" aria-hidden="true"></span><span class="rlab">Done</span></li>
   </ol>
-  <a class="obskip" href="./app.html?skip=1" id="exit">Skip for now</a>
+  <a class="obskip" href="./app.html#settings" id="exit">Skip for now</a>
 </header>
 
 <main id="stepmain" tabindex="-1">
@@ -223,10 +224,11 @@
   <section class="step" data-step="3" aria-labelledby="tp" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step three</p>
     <h1 id="tp" data-words>Choose your plan.</h1>
-    <p class="lede reveal">Consumption pricing, prepaid: every month your plan
-      adds tokens to the balance, and enrichment draws it down as it happens.
-      Unused tokens roll over. Your trial credit is already in the balance
-      &mdash; nothing is charged until billing activates.</p>
+    <p class="lede reveal">Free holds 500 facts and connects 2 agents. Pro
+      ($12) and Team ($15 per seat) lift those limits. Nothing is charged
+      until billing activates; you can change plan any time in Settings. If
+      we raise prices later, you keep today&rsquo;s rate for as long as you
+      stay subscribed.</p>
     <div id="plangrid" class="srcgrid reveal" role="radiogroup" aria-label="Plans"></div>
     <p class="fh reveal" id="plan-out" role="status"></p>
     <div class="acts reveal">
@@ -258,8 +260,70 @@
     </div>
   </section>
 
-  <!-- 5 ───────────────────────────────────────────────────── done -->
-  <section class="step" data-step="5" aria-labelledby="t3" hidden>
+  <!-- 5 ─────────────────────────────────────────── bring your memory -->
+  <section class="step" data-step="5" aria-labelledby="ti" hidden>
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step five &middot; optional</p>
+    <h1 id="ti" data-words>Bring the memory you already have.</h1>
+    <p class="lede reveal">Paste what ChatGPT or Claude knows about you, or open an
+      export file. Each line becomes one memory in <b id="im-scope">your memory</b>,
+      and nothing is saved until you press Import.</p>
+
+    <details class="manual reveal" id="im-how">
+      <summary>How do I get an export?</summary>
+      <ol class="wlist harnsteps">
+        <li><b>Fastest, any assistant:</b> paste this prompt into ChatGPT (or Claude,
+          Gemini&hellip;) and paste its answer below.
+          <div class="snip"><pre class="mono" id="im-prompt" translate="no"></pre>
+            <button type="button" class="ghostpill" data-copy="im-prompt">Copy</button></div></li>
+        <li><b>ChatGPT memories:</b> Settings &rarr; Personalization &rarr; Manage
+          memories; select the list and copy it.</li>
+        <li><b>ChatGPT data export:</b> Settings &rarr; Data controls &rarr; Export
+          data. Open <span class="mono" translate="no">conversations.json</span> from
+          the zip below; only your own messages are read, and only the lasting ones
+          are kept.</li>
+        <li><b>Claude data export:</b> Settings &rarr; Privacy &rarr; Export data.
+          Open <span class="mono" translate="no">memories.json</span> or
+          <span class="mono" translate="no">conversations.json</span> from the zip.</li>
+      </ol>
+    </details>
+
+    <div class="fields reveal">
+      <label class="fl" for="im-text">Your export</label>
+      <textarea id="im-text" class="fi" rows="9" spellcheck="false"
+                placeholder="[2024-05-01] - Works as a staff engineer at Apex Labs.&#10;Prefers short answers with a recommendation first.&#10;&hellip;"></textarea>
+      <div class="mrow" style="margin-top:var(--u2);align-items:center">
+        <label class="ghostpill" for="im-file" style="cursor:pointer">Open a file&hellip;</label>
+        <input id="im-file" type="file" accept=".json,.md,.txt,application/json,text/plain,text/markdown" hidden />
+        <span class="fh" id="im-file-name"></span>
+      </div>
+      <p class="fh" id="im-sum" role="status" aria-live="polite"></p>
+      <ul class="fh" id="im-preview" style="margin:0;padding-left:18px"></ul>
+    </div>
+    <div class="acts reveal">
+      <button class="cta" id="im-go" disabled>Import</button>
+      <button class="textlink" data-next id="im-skip"><span class="tl">Skip</span></button>
+      <button class="textlink" data-back><span class="tl">Back</span></button>
+    </div>
+    <p class="fh" id="im-out" role="status" aria-live="polite"></p>
+
+    <section class="wsteps reveal" aria-labelledby="mm-title" style="margin-top:var(--u4)">
+      <h2 id="mm-title">Teach your agents when to use it</h2>
+      <p class="fh" style="margin-top:2px">Memory.md is a short file of rules:
+        recall before answering anything personal, remember durable facts, never
+        store secrets. It is the same text OneBrain already sends to every
+        connected agent, personalised with your address. Add it to a
+        <span class="mono" translate="no">CLAUDE.md</span>,
+        <span class="mono" translate="no">AGENTS.md</span>, Cursor rules or ChatGPT
+        custom instructions for agents that skip server instructions.</p>
+      <div class="mrow" style="margin-top:0;align-items:center">
+        <button type="button" class="ghostpill" id="memmdgo">Download Memory.md</button>
+        <span class="fh" id="memmdout" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+  </section>
+
+  <!-- 6 ───────────────────────────────────────────────────── done -->
+  <section class="step" data-step="6" aria-labelledby="t3" hidden>
     <div class="donemark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M14 25l7 7 14-16"/></svg></div>
     <h1 id="t3" data-words>You&rsquo;re set up.</h1>
     <p class="lede reveal" id="donesum"></p>
@@ -366,10 +430,10 @@
 
 <p id="live" class="visually-hidden" role="status" aria-live="polite"></p>
 
-<script>/* Runs before any module: the Google-connect grant arrives in the
+<script nonce="__NONCE__">/* Runs before any module: the Google-connect grant arrives in the
    URL fragment, and module-land (supabase-js) may consume fragments. Stash
    it first so the wizard always receives it. */
 window.__ob_hash = location.hash;</script>
-<script type="module" src="./onboard.js?v=34"></script>
+<script type="module" src="./onboard.js?v=36"></script>
 </body>
 </html>

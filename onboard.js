@@ -1,5 +1,6 @@
-import "./compat.js?v=13";
+import "./compat.js?v=14";
 import { FN } from "./env.js?v=1";
+import { CONVERSATION_FORMATS, FORMAT_LABELS, importBatches, parseImport } from "./import_parse.js?v=1";
 
 /* OneBrain onboarding.
  *
@@ -7,6 +8,13 @@ import { FN } from "./env.js?v=1";
  * framework, no build step, and nothing loaded from any external host: Google
  * consent is a plain navigation through Supabase's own /authorize endpoint, and
  * Trello consent happens on Trello's own page in a new tab.
+ *
+ * Step five, "bring your memory" (PB-4), parses a ChatGPT/Claude export in the
+ * browser (import_parse.js) and sends the lines in batches to POST
+ * /api/v1/import, which writes them into the caller's own org: nothing here
+ * names an org, the server takes it from the session. Memory.md comes from GET
+ * /api/memory.md, the one template the MCP instructions are also rendered from
+ * (_shared/memory_md.ts); this page never carries its own copy of the rules.
  *
  * The rule this file follows everywhere: nothing claims success it has not
  * measured. Every state a source can be in comes from a real API response, and
@@ -74,7 +82,7 @@ const ICON = {
           font-family="Inter, system-ui, sans-serif" fill="#1A73E8">31</text></svg>`,
 };
 
-let state = { step: 0, ob: null, conns: [] };
+let state = { step: 0, ob: null, conns: [], imported: 0 };
 
 // ------------------------------------------------------------- step machine
 
@@ -113,8 +121,9 @@ function show(next, { back = false } = {}) {
   setTimeout(swap, 160);
 }
 
-/* Step indices: 0 welcome, 1 organization, 2 sources, 3 plan, 4 verify, 5 done. */
-const STEP = { welcome: 0, org: 1, sources: 2, plan: 3, verify: 4, done: 5 };
+/* Step indices: 0 welcome, 1 organization, 2 sources, 3 plan, 4 verify,
+ * 5 bring your memory, 6 done. */
+const STEP = { welcome: 0, org: 1, sources: 2, plan: 3, verify: 4, memory: 5, done: 6 };
 
 function onEnter(i) {
   if (i === STEP.sources) renderSources();
@@ -481,11 +490,12 @@ async function renderPlans() {
       <button class="srccard" role="radio" data-plan="${esc(pl.code)}"
               aria-checked="${pl.code === chosen}" data-on="${pl.code === chosen ? '1' : '0'}">
         <span class="srcname">${esc(pl.name)}<span class="sd" aria-hidden="true"></span></span>
-        <span class="srcwhat">$${Number(pl.usd_month)}/month &mdash; ${esc(pl.display_tokens)} included, rolls over</span>
+        <span class="srcwhat">${Number(pl.usd_month) ? `$${Number(pl.usd_month)}${pl.per_seat ? ' per seat' : ''}/month` : '$0'} &mdash; ${esc(pl.display_limits)}</span>
         <span class="srcstate">${pl.code === chosen ? 'Selected' : 'Choose'}</span>
       </button>`).join('');
-    out.textContent = `Balance: $${Number(b.balance_usd).toFixed(2)} — this month’s use: `
-      + `${(b.month_tokens / 1e6).toFixed(2)}M tokens ($${Number(b.month_spend_usd).toFixed(4)})`;
+    out.textContent = b.free_tier
+      ? `Facts stored: ${b.free_tier.facts} of ${b.free_tier.max_facts} on Free`
+      : '';
     $('plan-next').disabled = !chosen;
     grid.querySelectorAll('[data-plan]').forEach((card) => {
       card.addEventListener('click', async () => {
@@ -701,7 +711,149 @@ async function runChecks() {
   }
 }
 
-// ------------------------------------------------------------------ step 4
+// ------------------------------------------------- step 5: bring your memory
+
+/* What to ask another assistant for. Section headers and one dated line
+ * per memory: exactly the shape parseImport reads best. */
+const EXPORT_PROMPT = `List everything you have stored in memory about me, and any lasting context you have learned about me from past conversations. Keep my own words where you can.
+
+Use these sections, in this order: Instructions, Identity, Career, Projects, Preferences.
+Under each, one entry per line, oldest first, formatted as:
+[YYYY-MM-DD] - Entry content.
+Use [unknown] when you do not know the date.
+
+Put the whole list in one code block. Leave out passwords, account numbers and anything about health or money.`;
+
+let parsed = null;
+
+function renderPreview() {
+  const text = $('im-text').value;
+  parsed = text.trim() ? parseImport(text) : null;
+  const go = $('im-go');
+  $('im-out').textContent = '';
+  if (!parsed) {
+    $('im-sum').textContent = ''; $('im-preview').innerHTML = '';
+    go.disabled = true; go.textContent = 'Import'; return;
+  }
+  if (parsed.error) {
+    $('im-sum').textContent = parsed.error; $('im-preview').innerHTML = '';
+    go.disabled = true; return;
+  }
+  const n = parsed.items.length;
+  const s = parsed.skipped;
+  const dropped = [
+    s.duplicate && `${s.duplicate} repeated`,
+    s.short && `${s.short} too short`,
+    s.long && `${s.long} too long or code`,
+    s.directive && `${s.directive} that read as instructions to an AI`,
+    parsed.truncated && `${parsed.truncated} older beyond the ${n}-line limit`,
+  ].filter(Boolean);
+  const gated = CONVERSATION_FORMATS.has(parsed.format);
+  $('im-sum').textContent = `${FORMAT_LABELS[parsed.format]}: ${n} line${n === 1 ? '' : 's'} to import`
+    + (dropped.length ? ` (left out: ${dropped.join(', ')})` : '') + '.'
+    + (gated ? ' These are your chat messages, so only the ones that state something lasting are kept.' : '');
+  $('im-preview').innerHTML = parsed.items.slice(0, 8)
+    .map((it) => `<li>${it.date ? `<span class="mono">${esc(it.date)}</span> ` : ''}${esc(it.content.slice(0, 160))}${it.content.length > 160 ? '…' : ''}</li>`)
+    .join('') + (n > 8 ? `<li>… and ${n - 8} more</li>` : '');
+  go.disabled = n === 0;
+  go.textContent = n ? `Import ${n}` : 'Import';
+}
+
+const IMPORT_BATCH = 20;              // = IMPORT_BATCH_MAX in _shared/policy.ts
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* Batches to POST /api/v1/import. A 429 from the per-minute write brake (or
+ * a busy model) is not a failure: wait it out and resend the same batch. The
+ * daily cap and the free-tier fact limit (402) do not pass, so they stop the
+ * import with the server's own words. */
+async function runImport() {
+  if (!parsed || !parsed.items.length) return;
+  const go = $('im-go'); const out = $('im-out');
+  go.disabled = true; $('im-text').disabled = true;
+  const total = { stored: 0, duplicates: 0, gated: 0, failed: 0 };
+  const batches = importBatches(parsed, IMPORT_BATCH);
+  const n = parsed.items.length;
+  let done = 0;
+  try {
+    for (let b = 0; b < batches.length;) {
+      out.textContent = `Importing ${Math.min(done + batches[b].items.length, n)} of ${n}…`;
+      const r = await fetch(`${FN}/api/v1/import`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${window.OB.token()}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(batches[b]),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (r.status === 429 && !/per day/.test(String(data.error || ''))) {
+        for (let s = 60; s > 0; s--) {
+          out.textContent = `Imported ${done} of ${n}. Pausing ${s}s: big imports go in at a steady pace…`;
+          await sleep(1000);
+        }
+        continue;
+      }
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      for (const k of Object.keys(total)) total[k] += Number(data[k] || 0);
+      done += batches[b].items.length;
+      b++;
+    }
+    state.imported += total.stored;
+    out.textContent = `Imported ${total.stored} new memor${total.stored === 1 ? 'y' : 'ies'}`
+      + (total.duplicates ? `, ${total.duplicates} already there` : '')
+      + (total.gated ? `, ${total.gated} chat lines skipped as not lasting` : '')
+      + (total.failed ? `, ${total.failed} failed` : '') + '.';
+    go.textContent = 'Imported';
+    $('im-skip').querySelector('.tl').textContent = 'Continue';
+  } catch (e) {
+    state.imported += total.stored;
+    out.textContent = `Import stopped: ${String(e.message || e).slice(0, 160)}. `
+      + 'What was saved stays saved; press Import again to finish (repeats are skipped).';
+    go.disabled = false;
+  } finally { $('im-text').disabled = false; }
+}
+
+async function readFile(file) {
+  if (!file) return;
+  $('im-file-name').textContent = `${file.name} (${Math.round(file.size / 1024).toLocaleString('en-US')} KB)`;
+  $('im-text').value = await file.text();
+  renderPreview();
+}
+
+/* Same endpoint as the Settings button: GET /api/memory.md, personalised
+ * server-side for the signed-in caller. */
+async function downloadMemoryMd() {
+  const btn = $('memmdgo');
+  btn.disabled = true; $('memmdout').textContent = 'Preparing…';
+  try {
+    const r = await fetch(`${FN}/api/memory.md`, {
+      headers: { Authorization: `Bearer ${window.OB.token()}` },
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(await r.blob());
+    a.download = 'Memory.md';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    $('memmdout').textContent = 'Downloaded.';
+  } catch (e) {
+    $('memmdout').textContent = `Failed: ${e.message || e}`;
+  } finally { btn.disabled = false; }
+}
+
+function wireMemory() {
+  $('im-prompt').textContent = EXPORT_PROMPT;
+  let t = 0;
+  $('im-text').addEventListener('input', () => {
+    $('im-file-name').textContent = '';          // typed over: no longer that file
+    clearTimeout(t); t = setTimeout(renderPreview, 250);
+  });
+  $('im-file').addEventListener('change', async (e) => {
+    await readFile(e.target.files && e.target.files[0]);
+    e.target.value = '';                         // the same file can be picked again
+  });
+  $('im-go').addEventListener('click', runImport);
+  $('memmdgo').addEventListener('click', downloadMemoryMd);
+}
+
+// ------------------------------------------------------------- step 6: done
 
 /* Done. Two things belong here and nothing else: the shortest honest path to
  * Claude on THIS machine, and one line about who else can get in.
@@ -714,6 +866,7 @@ async function runChecks() {
  * membership is by email domain, managed in Settings. */
 const MCP_URL = `${FN}/mcp`;
 const API_URL = `${FN}/api`;
+
 let doneWired = false;
 let doneToken = '';
 
@@ -775,6 +928,10 @@ async function renderDone() {
       + 'starts collecting within the minute.'
     : `${name} is ready. Nothing is ingesting automatically yet — connect a source `
       + 'from Settings whenever you want it filled for you.';
+  if (state.imported) {
+    $('donesum').textContent += ` ${state.imported} imported memor${state.imported === 1 ? 'y is' : 'ies are'} `
+      + 'in, and your agents can recall them now.';
+  }
   const org = (state.ob && state.ob.org) || '';
   $('done-team').textContent = org.startsWith('user:')
     ? 'This memory is keyed to your personal address, so it is yours alone. '
@@ -815,22 +972,21 @@ function wireDone() {
       () => { $('h-claude-out').textContent = 'Address copied — in Claude, press “Add custom connector” and paste it.'; },
       () => { $('h-claude-out').textContent = 'Copy the address below, then paste it into “Add custom connector”.'; });
   }));
-  document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
-    const text = $(b.dataset.copy).textContent;
-    try {
-      await navigator.clipboard.writeText(text);
-      const was = b.textContent; b.textContent = 'Copied';
-      setTimeout(() => { b.textContent = was; }, 1800);
-    } catch { announce('Copy failed — select the text instead.'); }
-  }));
-  $('cc-mint').addEventListener('click', async () => {
-    const btn = $('cc-mint');
-    if (doneToken && !confirm('Create a new token? The one in the line above stops working.')) return;
-    btn.disabled = true;
-    try { showLine(await mintToken()); announce('New token created — shown once.'); }
-    catch (e) { $('cc-out').textContent = `Could not create a token: ${String(e.message || e).slice(0, 140)}`; }
-    finally { btn.disabled = false; }
-  });
+  $('cc-mint').addEventListener('click', mintForHooks);
+}
+
+/* "Create a new token": the install line (hooks + tools) carries a personal
+ * token, and minting one stops the previous token. So it asks first whenever
+ * a token was ever minted, shown on this page or not: the one installed on
+ * this person's machine last week dies just the same. */
+async function mintForHooks() {
+  const btn = $('cc-mint');
+  const minted = doneToken || (state.ob && state.ob.steps && state.ob.steps.token_minted_at);
+  if (minted && !confirm('Create a new token? The one installed earlier stops working.')) return;
+  btn.disabled = true;
+  try { showLine(await mintToken()); announce('New token created — shown once.'); }
+  catch (e) { $('cc-out').textContent = `Could not create a token: ${String(e.message || e).slice(0, 140)}`; }
+  finally { btn.disabled = false; }
 }
 
 // ------------------------------------------------------------------- boot
@@ -865,6 +1021,15 @@ function wire() {
     b.addEventListener('click', () => show(Math.max(state.step - 1, 0), { back: true })));
 
   $('vrun').addEventListener('click', runChecks);
+  // Copy buttons live in two steps (the export prompt, the client lines).
+  document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+    const text = $(b.dataset.copy).textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      const was = b.textContent; b.textContent = 'Copied';
+      setTimeout(() => { b.textContent = was; }, 1800);
+    } catch { announce('Copy failed — select the text instead.'); }
+  }));
 
   if ($('tr-origin')) $('tr-origin').firstChild.textContent = location.origin + ' ';
   $('tr-origin')?.addEventListener('click', async () => {
@@ -1150,6 +1315,7 @@ async function boot() {
   paintRail();
   wireCatalog();
   wireToolBox();
+  wireMemory();
   /* Reveal before any network round-trip. Everything marked .reveal starts
    * invisible for its entrance, and on a return from a provider the first
    * request can take seconds — a step with no visible Continue reads as
@@ -1169,6 +1335,10 @@ async function boot() {
     paintRail();
   }
   $('ob-name').placeholder = ob.org || 'Acme Inc.';
+  // orgs.name, the tenancy key: "user:<email>" or a shared email domain.
+  const orgName = ob.org_name || ob.org || '';
+  $('im-scope').textContent = orgName.startsWith('user:') ? 'your personal memory'
+    : orgName ? `the shared memory of ${orgName}` : 'your memory';
   if (ob.steps) {
     if (ob.steps.team) $('ob-team').value = ob.steps.team;
     if (ob.steps.goal) $('ob-goal').value = ob.steps.goal;

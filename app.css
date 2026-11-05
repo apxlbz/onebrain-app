@@ -523,3 +523,8 @@ button.destructive:disabled { background: transparent; color: var(--faint);
    nothing to walk through. */
 .chksteps { margin:8px 0 2px 18px; padding:0 0 0 14px; }
 .chksteps li { margin:6px 0; color:var(--muted); max-width:64ch; text-wrap:pretty; }
+
+/* per-agent provenance badge (CM-2) */
+.badge-agent { color:var(--text, inherit); }
+.badge-human { font-weight:600; }
+.badge-unknown { font-style:italic; opacity:.75; }

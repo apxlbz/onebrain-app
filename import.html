@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f6f3f1" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 30 27H2Z' fill='%232b59d1'/%3E%3C/svg%3E" />
+<title>Bring your memory · OneBrain</title>
+<meta name="description" content="Paste your existing memory file or notes and OneBrain turns them into searchable memories." />
+<link rel="stylesheet" href="./app.css?v=3" />
+<link rel="stylesheet" href="./home.css?v=3" />
+<link rel="stylesheet" href="./onboard.css?v=13" />
+<link rel="stylesheet" href="./import.css?v=1" />
+</head>
+<body class="home ob">
+
+<a class="skip" href="#stepmain">Skip to content</a>
+
+<header class="obnav">
+  <a class="navbrand" href="./index.html" translate="no">
+    <span class="mark" aria-hidden="true"></span>
+    <span>OneBrain</span>
+  </a>
+  <span class="grow"></span>
+  <a class="obskip" href="./app.html">Back to dashboard</a>
+</header>
+
+<main id="stepmain" tabindex="-1">
+  <section class="step" aria-labelledby="ti">
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Bring your memory</p>
+    <h1 id="ti">Switching? Bring what you already know.</h1>
+    <p class="lede">Paste your current <span class="mono" translate="no">Memory.md</span>,
+      an export from another memory tool, or any plain-text list of facts and
+      notes. OneBrain splits it into individual memories, stores each one, and
+      makes them searchable straight away.</p>
+
+    <form id="imp-form" novalidate>
+      <label class="fl" for="imp-text">Your memory content</label>
+      <textarea id="imp-text" class="imp-text" spellcheck="false" rows="14"
+        placeholder="- Prefers dark mode and concise answers&#10;- Works at Acme on the payments team&#10;- Decided to use Postgres for the ledger (March)&#10;&#10;## Projects&#10;Launching the beta on 14 November."></textarea>
+      <p class="fh" id="imp-hint">One memory per bullet, line or paragraph works best.
+        Headings are kept as context. Passwords and API keys are redacted before
+        anything is stored.</p>
+      <div class="imp-meta mono" id="imp-count" aria-live="polite"></div>
+
+      <div class="acts">
+        <button class="cta" id="imp-go" type="submit" disabled>Import memories<span class="ctaarrow" aria-hidden="true">&rarr;</span></button>
+        <label class="ghostpill" for="imp-file" id="imp-file-l">Load a file</label>
+        <input type="file" id="imp-file" accept=".md,.txt,.json,.csv,text/*" hidden />
+        <button class="textlink fh" id="imp-clear" type="button" hidden>Clear</button>
+      </div>
+    </form>
+
+    <section id="imp-prog" class="imp-card" hidden aria-labelledby="imp-ph">
+      <p class="fl" id="imp-ph">Importing</p>
+      <div class="imp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="imp-bar"><i></i></div>
+      <p class="fh" id="imp-pt"></p>
+      <button class="textlink fh" id="imp-stop" type="button">Stop</button>
+    </section>
+
+    <section id="imp-res" class="imp-card" hidden aria-labelledby="imp-rh">
+      <p class="fl" id="imp-rh">Result</p>
+      <dl class="imp-stats">
+        <div><dt>Stored</dt><dd id="r-stored">0</dd></div>
+        <div><dt>Already known</dt><dd id="r-dup">0</dd></div>
+        <div><dt>Skipped</dt><dd id="r-skip">0</dd></div>
+        <div><dt>Failed</dt><dd id="r-fail">0</dd></div>
+      </dl>
+      <p class="lede" id="r-msg"></p>
+      <ul class="imp-errs" id="r-errs" hidden></ul>
+      <div class="acts">
+        <a class="cta" href="./app.html#memories">See your memories<span class="ctaarrow" aria-hidden="true">&rarr;</span></a>
+        <button class="ghostpill" id="r-retry" type="button" hidden>Retry failed</button>
+        <button class="ghostpill" id="r-again" type="button">Import more</button>
+      </div>
+    </section>
+  </section>
+</main>
+
+<p id="live" class="visually-hidden" role="status" aria-live="polite"></p>
+<script type="module" src="./import.js?v=2"></script>
+</body>
+</html>

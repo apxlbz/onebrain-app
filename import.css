@@ -1,0 +1,40 @@
+/* Switch-moment import page. Builds on onboard.css (Monad tokens, .fl, .fh,
+   .cta, .acts, .ghostpill); adds the paste box, progress bar and result card. */
+
+.obnav .grow { flex:1; }
+.imp-text {
+  display:block; width:100%; min-height:280px; padding:16px 18px; resize:vertical;
+  background:transparent; color:var(--color-bone-white);
+  border:1px solid var(--color-ash-line); border-radius:14px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:14px; line-height:1.55;
+  transition:border-color 200ms ease, box-shadow 200ms var(--ease-out);
+}
+.imp-text:hover { border-color:var(--line-strong); }
+.imp-text:focus { outline:none; border-color:var(--color-electric-iris);
+  box-shadow:0 0 0 4px rgba(43,89,209,.12); }
+.imp-text:disabled { opacity:.6; }
+.imp-meta { font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-ash-gray); margin-top:8px; min-height:1.4em; }
+.imp-meta[data-warn] { color:var(--color-saffron-spark); }
+#imp-file-l { cursor:pointer; }
+.cta:disabled { opacity:.45; cursor:not-allowed; }
+
+.imp-card { margin-top:var(--u6); padding:var(--u5);
+  border:1px solid var(--color-ash-line); border-radius:14px; }
+.imp-card .fl { margin-top:0; }
+.imp-bar { height:6px; border-radius:3px; background:var(--color-ash-line);
+  overflow:hidden; }
+.imp-bar i { display:block; height:100%; width:0; background:var(--color-electric-iris);
+  transition:width 200ms var(--ease-out); }
+.imp-stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--u4);
+  margin:0 0 var(--u4); }
+.imp-stats div { margin:0; }
+.imp-stats dt { font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-ash-gray); }
+.imp-stats dd { margin:4px 0 0; font-size:32px; letter-spacing:-.02em; }
+.imp-errs { margin:0 0 var(--u4); padding-left:1.2em; font-size:14px;
+  color:var(--color-silver-mist); max-height:12em; overflow:auto; }
+@media (max-width: 720px) { .imp-stats { grid-template-columns:repeat(2, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .imp-bar i { transition:none; } }

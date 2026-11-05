@@ -1,0 +1,10 @@
+{
+  "name": "onebrain",
+  "description": "Shared, multiplayer organizational memory, exposed as a remote MCP server.",
+  "endpoint": "https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp",
+  "transport": "streamable-http",
+  "auth": {
+    "type": "oauth2",
+    "protected_resource_metadata": "https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp/.well-known/oauth-protected-resource"
+  }
+}

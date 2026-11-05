@@ -67,6 +67,8 @@ async function memories(params) {
     .select("id,content,type,entity,product,topic,system,tags,created_at," +
             "happened_at,is_current,importance,memory_raw!inner(source,metadata)",
             { count: "exact" });
+  // "Show superseded" must never surface what was forgotten.
+  sel = sel.is("forgotten_at", null);
   if (!history) sel = sel.or("is_current.is.null,is_current.is.true");
   if (type) sel = sel.eq("type", type);
   if (source) sel = sel.eq("memory_raw.source", source);
@@ -90,7 +92,7 @@ async function memories(params) {
 async function factDetail(id) {
   const { data, error } = await sb.from("knowledge")
     .select("*,memory_raw(source,metadata,content,created_at)")
-    .eq("id", id).maybeSingle();
+    .eq("id", id).is("forgotten_at", null).maybeSingle();
   if (error || !data) throw new Error(error?.message ?? "not found");
   return {
     ...data,
@@ -183,6 +185,7 @@ async function usageSummary() {
     month_tokens: billing.month_tokens,
     month_spend_usd: billing.month_spend_usd,
     plan,
+    free_tier: billing.free_tier,
     events: (ev.data ?? []).length,
     daily: Object.entries(daily).sort().map(([day, cnt]) => ({ day, n: cnt })),
     by_op: [...byOp.values()].sort((a, b) => b.usd - a.usd),
@@ -218,7 +221,7 @@ async function routeGet(path) {
     const { data } = await sb.from("onboarding").select("*").maybeSingle();
     const { data: org } = await sb.from("orgs").select("name,display_name").maybeSingle();
     return { ...(data ?? { completed_at: null }),
-             org: org?.display_name || org?.name || "" };
+             org: org?.display_name || org?.name || "", org_name: org?.name || "" };
   }
   if (p === "/v1/memory-types") {
     const s = await stats();

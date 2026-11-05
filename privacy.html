@@ -21,18 +21,32 @@
 <body>
 <main>
   <h1>Privacy Policy</h1>
-  <p class="muted">OneBrain, by Apex Labs · Last updated 9 September 2026 ·
+  <p class="muted">OneBrain, by Apex Labs · Last updated 11 October 2026 ·
     Contact: <a href="mailto:or@apxlbz.com">or@apxlbz.com</a></p>
 
   <p>OneBrain is a shared memory for organizations: it ingests the work
-    conversations and records your organization chooses to connect, distills
-    them into durable facts, and makes them searchable by the people of that
-    organization — and only them.</p>
+    conversations and records your organization chooses to connect (or that
+    your tools send it), distills them into durable facts, and makes them
+    searchable by the people of that organization — and only them. This page
+    says plainly what we store, who else touches it, and how you get it out
+    or get rid of it.</p>
 
   <h2>What we collect</h2>
   <ul>
-    <li><b>Account data.</b> Your name and email address from Google Sign-In,
-      used to identify you and to key your organization by its email domain.</li>
+    <li><b>Account data.</b> Your name and email address from Google Sign-In
+      (handled by Supabase Auth). The email is used to identify you, to key
+      your organization (by your email domain, or as a personal organization
+      for consumer addresses), and to record your role (owner or member) and
+      when and from which surface (web, API, MCP, a hook) you were last seen.
+      We also keep per-member counters of recalls and remembers.</li>
+    <li><b>Memory content.</b> Everything stored as memory: the raw inputs
+      (messages, notes, transcripts, tool exchanges), the facts, entities,
+      relationships and summaries distilled from them, and the vector
+      embeddings used to search them. Content you send through the API, MCP
+      tools or the Claude Code hooks is stored as-is, except that likely
+      credentials (API keys, passwords, high-entropy secrets) are redacted
+      before storage. Redaction is best-effort; don't send secrets on
+      purpose.</li>
     <li><b>Connected sources you authorize.</b> Depending on what your
       organization connects: Gmail messages (read-only), Google Drive meeting
       notes and transcripts (read-only), Google Calendar events (read-only),
@@ -43,21 +57,69 @@
       reads through the one tool you chose for it and stores what comes back
       as facts; the grant you approve there can be revoked in that service at
       any time.</li>
-    <li><b>Content you submit.</b> Notes and context written into OneBrain
-      through its tools and integrations.</li>
-    <li><b>Usage metering.</b> Token counts of the processing we perform for
-      your organization, used for billing. We do not use third-party
-      advertising or analytics trackers.</li>
+    <li><b>Credentials.</b> OAuth tokens for connected sources, and any
+      Anthropic or Voyage API keys your organization supplies, are stored in
+      Supabase Vault. Personal API tokens (<code>ob_…</code>) are stored only
+      as SHA-256 hashes; we can't read them back.</li>
+    <li><b>Billing data.</b> Your plan, credit balance and ledger, and the
+      Stripe customer and subscription IDs for your organization. Payment
+      card details go to Stripe and never touch our servers.</li>
+    <li><b>Usage metering.</b> For every model call made on your
+      organization's behalf: the operation, provider, model and token counts
+      (not the content), used for billing and capacity limits.</li>
+    <li><b>Activity records.</b> A <code>forget_audit</code> row for every
+      forget request (who asked, which surface, the selector they typed, the
+      ids removed — never the deleted content), recall events (used to rank
+      and tune search), and fact feedback ratings.</li>
+    <li><b>Email.</b> We send you product emails (onboarding, tips,
+      occasional newsletters) and keep a record of which we've sent. Every
+      one has an unsubscribe link.</li>
+    <li><b>Status page subscribers.</b> If you enter your email on the
+      <a href="./status">status page</a> to be notified of incidents, we keep
+      just that address and a random token, with no account attached. We
+      email it only for status updates; the confirmation email includes a
+      one-click unsubscribe link that deletes the address from this list.</li>
+    <li><b>Anti-abuse trial records.</b> To stop one person claiming the free
+      trial repeatedly, we keep a record of trial claims keyed by a
+      normalized form of your email address or domain. See "Retention and
+      deletion" for how this one behaves.</li>
+    <li><b>No advertising or analytics trackers.</b> We don't run
+      third-party analytics, ad pixels or cross-site tracking. Server logs
+      are kept for operating the service, with provider error text truncated
+      and credentials redacted.</li>
   </ul>
 
   <h2>How we use it</h2>
-  <p>Connected content is processed to extract durable organizational
-    knowledge (facts, decisions, commitments), which is stored with vector
-    embeddings so your organization can search it. Processing is performed by
-    large-language-model providers acting as our processors; content is never
-    used to train their models. We do not sell personal data, and we do not
-    share it with third parties except the processors necessary to run the
-    service (hosting and model inference).</p>
+  <p>To run the service: extract durable organizational knowledge (facts,
+    decisions, commitments) from connected content, embed it so your
+    organization can search it, answer recall and MCP requests, enforce roles
+    and limits, send you product email, and bill you. Your content is not
+    used to train models — ours or our processors'. We do not sell personal
+    data, and we don't share it except with the processors listed below.</p>
+
+  <h2>Who processes it</h2>
+  <p>These providers handle data on our behalf to run the service:</p>
+  <ul>
+    <li><b>Supabase</b> — database (PostgreSQL), authentication, Vault and
+      edge-function hosting.</li>
+    <li><b>Stripe</b> — payments and subscriptions. Receives your
+      organization's name and ID and whatever you enter at checkout.</li>
+    <li><b>Language-model providers</b> — memory content is sent to a model
+      to extract facts and judge what's worth keeping. If your organization
+      brings its own Anthropic key, that is Anthropic (under your key and
+      terms with them); otherwise the OneBrain-provided engine runs on an
+      open-weights model hosted by DeepInfra.</li>
+    <li><b>Embedding providers</b> — text (and your search queries) is sent
+      to an embedding model to produce vectors: Voyage AI if your
+      organization supplies a Voyage key, otherwise the OneBrain-provided
+      embedding model on DeepInfra. An organization's embedding provider is
+      fixed when it first needs one.</li>
+    <li><b>Resend / SMTP</b> — delivers product email to your address.</li>
+    <li><b>Sources you connect</b> — Google, Trello and any MCP service, at
+      your direction.</li>
+  </ul>
+  <p>Content leaves our infrastructure only to the model, embedding and
+    source providers above, to do the job you asked for.</p>
 
   <h2>Google user data — Limited Use</h2>
   <p>OneBrain's use and transfer of information received from Google APIs
@@ -69,21 +131,57 @@
     used for advertising, is never sold, and is transferred to humans only
     with consent, for security, or to comply with law.</p>
 
-  <h2>Where it lives</h2>
+  <h2>Where it lives and who can see it</h2>
   <p>Data is stored in a per-organization tenancy on Supabase (PostgreSQL),
     encrypted in transit and at rest. Access is enforced by row-level
-    security: members of an organization can only ever read their own
-    organization's rows. OAuth tokens are stored encrypted in a dedicated
-    secrets vault.</p>
+    security and by the API: members of an organization can only read their
+    own organization's memory. Memory is shared across the organization by
+    design — anyone in your organization can recall what any connected
+    member's sources contributed. Destructive actions (deleting memory or the
+    organization) require an organization owner.</p>
 
-  <h2>Retention and deletion</h2>
-  <p>Data is retained while your organization uses the service. From
-    Settings, an organization can delete all of its memory, or delete the
-    organization entirely — the latter also revokes each connected source's
-    access at the provider (Google token revocation, Trello token deletion).
-    You can also revoke OneBrain's access at any time from your
-    <a href="https://myaccount.google.com/permissions" rel="noopener noreferrer">Google
-    Account permissions</a>.</p>
+  <h2>Your rights: access, export, deletion</h2>
+  <ul>
+    <li><b>Access and export.</b> <code>GET /v1/export</code> returns your
+      organization's memory as JSON: raw inputs, facts, entities,
+      relationships and summaries, ids preserved. Embeddings are omitted
+      (they're model-specific and reproducible), and anything already
+      forgotten is not included.</li>
+    <li><b>Forget specific things.</b> <code>POST /v1/forget</code> (or the
+      forget tool) permanently deletes chosen facts and the inputs they came
+      from, by id or by matching text. It is a hard delete, not a
+      tombstone. Bulk matches need explicit confirmation, and you can dry-run
+      first.</li>
+    <li><b>Erase all memory.</b> <code>POST /v1/purge</code> deletes every
+      input, fact, entity, relationship, summary and recall record for the
+      organization; the account, tokens and connections stay. Owner only,
+      with the organization name typed back.</li>
+    <li><b>Delete the organization.</b> <code>POST /v1/reset</code> (also in
+      Settings) cancels the Stripe subscription, revokes each connected
+      source's access at the provider (Google token revocation, Trello token
+      deletion), purges all memory, deletes the organization row — which
+      cascades to members, API tokens, connections, usage, billing ledger and
+      audit records — and deletes its Vault secrets. Owner only, with the
+      organization name typed back. Irreversible.</li>
+    <li><b>Revoke access.</b> You can also withdraw OneBrain's access from
+      your <a href="https://myaccount.google.com/permissions"
+      rel="noopener noreferrer">Google Account permissions</a> at any time.</li>
+    <li><b>Corrections and anything else.</b> Email
+      <a href="mailto:or@apxlbz.com">or@apxlbz.com</a>. If you're a member
+      who wants your own data handled and not the whole organization's, ask
+      us; we'll work with your organization's owner.</li>
+  </ul>
+
+  <h2>Retention</h2>
+  <p>Memory is kept while your organization uses the service, until it is
+    forgotten, purged or the organization is deleted. Backups held by our
+    database provider age out on their normal schedule after deletion. Two
+    records deliberately outlive an organization reset: Stripe's own
+    financial records (which Stripe and tax law require it to keep), and our
+    anti-abuse trial-claim record (a normalized email or domain key, an
+    organization ID and a date), which exists so deleting and re-creating an
+    organization can't be used to claim another free trial. Email us if you
+    want that record removed.</p>
 
   <h2>Changes</h2>
   <p>If this policy changes materially, we will note the change on this page
