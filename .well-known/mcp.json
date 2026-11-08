@@ -1,6 +1,6 @@
 {
   "name": "onebrain",
-  "description": "Shared, multiplayer organizational memory, exposed as a remote MCP server.",
+  "description": "Private memory shared across a developer's agents, exposed as a remote MCP server. Explicit remember and recall. Shared spaces are opt-in.",
   "endpoint": "https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp",
   "transport": "streamable-http",
   "auth": {

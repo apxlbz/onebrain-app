@@ -695,7 +695,7 @@ async function runChecks() {
                        done ? [] : c.steps) + keyForm(c);
           }).join('')
         : ROW(true, 'Nothing connected',
-              'Connect any source above whenever you want it ingested.', '', false))
+              'Automatic ingestion is off. Memory comes from remember.', '', false))
       + (platform.length
         ? '<div class="vsub">Platform — what this deployment runs on. Fixed by '
           + 'whoever operates it, not per organization.</div>'
@@ -862,8 +862,8 @@ function wireMemory() {
  * single pasted line — but it is ONE line, it needs no sign-in (the personal
  * token rides along, and the MCP endpoint accepts it as a bearer), and it
  * does everything: Claude Code tools, the auto-memory hooks, Claude Desktop.
- * Cursor and VS Code take a click. Invitations are not a wizard concern —
- * membership is by email domain, managed in Settings. */
+ * Cursor and VS Code take a click. A fresh sign-in is a private personal
+ * namespace. Shared spaces are opt-in. */
 const MCP_URL = `${FN}/mcp`;
 const API_URL = `${FN}/api`;
 
@@ -924,21 +924,19 @@ async function renderDone() {
   const live = state.conns.filter((c) => c.status === 'ok').length;
   const name = orgLabel();
   $('donesum').textContent = live
-    ? `${name} is connected to ${live} source${live === 1 ? '' : 's'}, and OneBrain `
-      + 'starts collecting within the minute.'
-    : `${name} is ready. Nothing is ingesting automatically yet — connect a source `
-      + 'from Settings whenever you want it filled for you.';
+    ? `${name} has ${live} legacy source connection${live === 1 ? '' : 's'}. `
+      + 'Automatic ingestion is off, so nothing is collected from them.'
+    : `${name} is ready. Memory comes from what you and your agents remember.`;
   if (state.imported) {
     $('donesum').textContent += ` ${state.imported} imported memor${state.imported === 1 ? 'y is' : 'ies are'} `
       + 'in, and your agents can recall them now.';
   }
   const org = (state.ob && state.ob.org) || '';
   $('done-team').textContent = org.startsWith('user:')
-    ? 'This memory is keyed to your personal address, so it is yours alone. '
-      + 'A work domain gets a shared one: everyone who signs in from it lands together.'
-    : `Anyone with a Google account at ${org} who signs in at ${location.origin} `
-      + 'lands in this memory — no invitation needed. Who is in, and who has '
-      + 'connected what, lives in Settings.';
+    ? 'This memory is private to you. Shared spaces are opt-in and need an '
+      + 'existing membership.'
+    : `You are in the shared space ${org}. Only people who are already members `
+      + 'can open it. Signing in from this domain does not add anyone.';
 
   if (!doneWired) { doneWired = true; wireDone(); }
   post('/v1/onboarding', { complete: true }).catch(() => {});

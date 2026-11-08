@@ -21,23 +21,24 @@
 <body>
 <main>
   <h1>Privacy Policy</h1>
-  <p class="muted">OneBrain, by Apex Labs · Last updated 11 October 2026 ·
+  <p class="muted">OneBrain, by Apex Labs · Last updated 8 November 2026 ·
     Contact: <a href="mailto:or@apxlbz.com">or@apxlbz.com</a></p>
 
-  <p>OneBrain is a shared memory for organizations: it ingests the work
-    conversations and records your organization chooses to connect (or that
-    your tools send it), distills them into durable facts, and makes them
-    searchable by the people of that organization — and only them. This page
-    says plainly what we store, who else touches it, and how you get it out
-    or get rid of it.</p>
+  <p>OneBrain is a private memory for one person, shared across the AI agents
+    they connect. A fresh sign-in is a personal namespace. A coworker on the
+    same email domain cannot read it. A shared space is opt-in, and only an
+    existing member can open one. Memory is built from what you and your agents
+    explicitly remember. Automatic ingestion is off: OneBrain does not read
+    Gmail, Calendar, Drive, or Trello on its own. This page says plainly what
+    we store, who else touches it, and how you get it out or get rid of it.</p>
 
   <h2>What we collect</h2>
   <ul>
     <li><b>Account data.</b> Your name and email address from Google Sign-In
       (handled by Supabase Auth). The email is used to identify you, to key
-      your organization (by your email domain, or as a personal organization
-      for consumer addresses), and to record your role (owner or member) and
+      your personal namespace, and to record your role (owner or member) and
       when and from which surface (web, API, MCP, a hook) you were last seen.
+      A shared space, if you already belong to one, is separate and opt-in.
       We also keep per-member counters of recalls and remembers.</li>
     <li><b>Memory content.</b> Everything stored as memory: the raw inputs
       (messages, notes, transcripts, tool exchanges), the facts, entities,
@@ -47,16 +48,18 @@
       credentials (API keys, passwords, high-entropy secrets) are redacted
       before storage. Redaction is best-effort; don't send secrets on
       purpose.</li>
-    <li><b>Connected sources you authorize.</b> Depending on what your
-      organization connects: Gmail messages (read-only), Google Drive meeting
-      notes and transcripts (read-only), Google Calendar events (read-only),
-      and Trello board content (read-only). We request only read access and
-      cannot modify or delete anything in those services.</li>
-    <li><b>Other tools you connect.</b> Any remote service your organization
-      connects through its MCP server (for example Notion or Linear). OneBrain
-      reads through the one tool you chose for it and stores what comes back
-      as facts; the grant you approve there can be revoked in that service at
-      any time.</li>
+    <li><b>Connected sources you authorize.</b> Automatic ingestion is off.
+      If a connection exists, including a legacy grant: Gmail messages
+      (read-only), Google Drive meeting notes and transcripts (read-only),
+      Google Calendar events (read-only), and Trello board content (read-only).
+      We request only read access and cannot modify or delete anything in
+      those services. OneBrain does not read those services unless a
+      connection is authorized.</li>
+    <li><b>Other tools you connect.</b> Any remote service connected as a
+      source (for example Notion or Linear). OneBrain would read through the
+      one tool you chose for it and store what comes back as facts; the grant
+      you approve there can be revoked in that service at any time. That
+      ingestion path is off today.</li>
     <li><b>Credentials.</b> OAuth tokens for connected sources, and any
       Anthropic or Voyage API keys your organization supplies, are stored in
       Supabase Vault. Personal API tokens (<code>ob_…</code>) are stored only
@@ -90,12 +93,12 @@
   </ul>
 
   <h2>How we use it</h2>
-  <p>To run the service: extract durable organizational knowledge (facts,
-    decisions, commitments) from connected content, embed it so your
-    organization can search it, answer recall and MCP requests, enforce roles
-    and limits, send you product email, and bill you. Your content is not
-    used to train models — ours or our processors'. We do not sell personal
-    data, and we don't share it except with the processors listed below.</p>
+  <p>To run the service: extract durable facts (decisions, preferences,
+    commitments) from what you and your agents remember, embed them so you
+    can recall them, answer recall and MCP requests, enforce roles and limits,
+    send you product email, and bill you. Your content is not used to train
+    models — ours or our processors'. We do not sell personal data, and we
+    don't share it except with the processors listed below.</p>
 
   <h2>Who processes it</h2>
   <p>These providers handle data on our behalf to run the service:</p>
@@ -127,18 +130,18 @@
     <a href="https://developers.google.com/terms/api-services-user-data-policy"
        rel="noopener noreferrer">Google API Services User Data Policy</a>,
     including the <b>Limited Use</b> requirements. Google user data is used
-    only to provide the organization-memory features the user sees, is never
+    only to provide the memory features the user sees, is never
     used for advertising, is never sold, and is transferred to humans only
     with consent, for security, or to comply with law.</p>
 
   <h2>Where it lives and who can see it</h2>
-  <p>Data is stored in a per-organization tenancy on Supabase (PostgreSQL),
+  <p>Data is stored in a per-namespace tenancy on Supabase (PostgreSQL),
     encrypted in transit and at rest. Access is enforced by row-level
-    security and by the API: members of an organization can only read their
-    own organization's memory. Memory is shared across the organization by
-    design — anyone in your organization can recall what any connected
-    member's sources contributed. Destructive actions (deleting memory or the
-    organization) require an organization owner.</p>
+    security and by the API. A personal namespace is readable only by that
+    person and the agents they connect. A shared space is readable by its
+    existing members, and only when they ask for that space. A fresh sign-in
+    does not join a domain-wide memory. Destructive actions (deleting memory
+    or the namespace) require an owner.</p>
 
   <h2>Your rights: access, export, deletion</h2>
   <ul>

@@ -904,7 +904,7 @@ async function viewSettings(root) {
   const sources = (reg.sources || []);
   root.innerHTML = `
     <h1>Settings</h1>
-    <p class="lede">This organization, what feeds it, and how to remove it.</p>
+    <p class="lede">This private memory, how agents connect, and how to remove it.</p>
 
     <section class="card" style="margin-bottom:14px" aria-labelledby="h-org">
       <h2 class="sec" id="h-org">Organization</h2>
@@ -915,9 +915,9 @@ async function viewSettings(root) {
         <span class="k">Entities</span><span class="v num">${n(org.entities)}</span>
         <span class="k">API tokens</span><span class="v num">${n(org.tokens)}</span>
       </div>
-      <p class="dim" style="margin:12px 0 0">Membership is by email domain.
-        Everyone signing in from your domain shares this memory; nobody outside
-        it can reach a single row.</p>
+      <p class="dim" style="margin:12px 0 0">This is a private personal memory.
+        A fresh sign-in stays private, including to coworkers on the same email
+        domain. Shared spaces are opt-in: only an existing member can open one.</p>
     </section>
 
 
@@ -942,8 +942,7 @@ async function viewSettings(root) {
 
       <details id="connect-advanced" style="margin-top:16px">
         <summary>Advanced — Google sources</summary>
-        <p class="dim" style="margin:8px 0">Optional. Gmail, Meet, Calendar, and
-          Trello. Agents never go through this.</p>
+        <p class="dim" style="margin:8px 0">Legacy compatibility. Automatic ingestion is off, so connecting Gmail, Meet, Calendar, or Trello does not capture them. Agents never go through this.</p>
         <p style="margin:0"><a class="ghost" href="./onboard.html">Connect Google sources</a></p>
       </details>
     </section>
@@ -1299,8 +1298,8 @@ async function viewUsage(root) {
     const rows = res.members || [];
     $('umembers').innerHTML = rows.length ? `
       <table class="t"><thead><tr><th>Member</th><th>Last seen</th>
-        <th>Via</th><th>Own Gmail</th><th class="num">Recalls</th>
-        <th class="num">Captures</th></tr></thead>
+        <th>Via</th><th>Legacy Gmail</th><th class="num">Recalls</th>
+        <th class="num">Remembers</th></tr></thead>
       <tbody>${rows.map((m) => `<tr>
         <td class="mono">${esc(m.email)}</td>
         <td title="${esc(exact(m.last_seen))}">${esc(ago(m.last_seen))}</td>

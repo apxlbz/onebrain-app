@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#f6f3f1" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 30 27H2Z' fill='%232b59d1'/%3E%3C/svg%3E" />
 <title>Set up OneBrain</title>
-<meta name="description" content="Name your organization, connect your sources, and verify everything works before you rely on it." />
+<meta name="description" content="Legacy source connections. Automatic ingestion is off. A fresh sign-in is a private memory. Shared spaces are opt-in." />
 <link rel="stylesheet" href="./app.css?v=3" />
 <link rel="stylesheet" href="./home.css?v=3" />
 <link rel="stylesheet" href="./onboard.css?v=14" />
@@ -39,18 +39,18 @@
   <section class="step" data-step="0" aria-labelledby="tw">
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Before we start</p>
     <h1 id="tw" data-words>Welcome to OneBrain.</h1>
-    <p class="lede reveal">You&rsquo;re the first person from
-      <b class="mono" id="wel-domain" translate="no"></b> here, so the next few
-      minutes set up the memory everyone on your domain will share. It takes
-      about five minutes, and nothing here is hard to change later.</p>
+    <p class="lede reveal">Legacy compatibility. Automatic ingestion is off, and
+      a fresh sign-in is a private memory. Shared spaces are opt-in. This page
+      does not share <b class="mono" id="wel-domain" translate="no"></b> with
+      coworkers on the same email domain.</p>
 
     <div class="welcome reveal">
       <p class="welh">What OneBrain does</p>
       <dl class="welfeat">
         <div>
-          <dt>Captures</dt>
-          <dd>Email, meeting notes, calendars and boards flow in on their own,
-            read-only, once a source is connected.</dd>
+          <dt>Remembers</dt>
+          <dd>Legacy compatibility only. Connecting a source does not start
+            automatic capture. Memory comes from an explicit remember.</dd>
         </div>
         <div>
           <dt>Distils</dt>
@@ -59,8 +59,8 @@
         </div>
         <div>
           <dt>Answers</dt>
-          <dd>Your team searches it in the dashboard; your AI tools call it
-            directly. Every answer shows where it came from.</dd>
+          <dd>You and your agents search the same private memory. Every answer
+            shows where it came from.</dd>
         </div>
       </dl>
 
@@ -79,7 +79,7 @@
 
     <div class="acts reveal">
       <button class="cta" data-next>Start setup<span class="ctaarrow" aria-hidden="true">&rarr;</span></button>
-      <span class="fh">Only one person on your domain needs to do this.</span>
+      <span class="fh">You can skip this and install an agent from Settings.</span>
     </div>
   </section>
 
@@ -87,17 +87,17 @@
   <section class="step" data-step="1" aria-labelledby="t0" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step one</p>
     <h1 id="t0" data-words>Let&rsquo;s set up your organization.</h1>
-    <p class="lede reveal">Everyone who signs in from your email domain shares one
-      memory. Nobody outside it can reach a single row &mdash; and only one person
-      needs to do this.</p>
+    <p class="lede reveal">A fresh sign-in is already a private memory. This
+      name is a display name. It does not share the memory with your email
+      domain. Shared spaces are opt-in.</p>
 
     <div class="fields reveal">
       <label class="fl" for="ob-name">What should we call it?</label>
       <input id="ob-name" class="fi" type="text" maxlength="120"
              autocomplete="organization" spellcheck="false" />
-      <p class="fh">A display name. Membership stays keyed to
-        <b class="mono" id="ob-domain" translate="no"></b>, so renaming can never
-        move or hide anyone&rsquo;s memory.</p>
+      <p class="fh">A display name. Renaming does not change who can read the
+        memory. The namespace stays
+        <b class="mono" id="ob-domain" translate="no"></b>.</p>
 
       <label class="fl" for="ob-team">Roughly how many people will use it?</label>
       <select id="ob-team" class="fi">
@@ -123,9 +123,9 @@
   <section class="step" data-step="2" aria-labelledby="t1" hidden>
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step two &middot; optional</p>
     <h1 id="t1" data-words>Connect what you want remembered.</h1>
-    <p class="lede reveal">Pick any of these, or none. With none, nothing ingests on
-      its own and you write memory through the MCP tools instead &mdash; a supported
-      way to run OneBrain, not a half-finished setup.</p>
+    <p class="lede reveal">Legacy compatibility. Automatic ingestion is off, so
+      connecting a source does not capture it. With none connected, you write
+      memory through remember &mdash; the supported way to run OneBrain.</p>
 
     <div class="acts reveal acts-top">
       <button class="cta" data-next>Continue<span class="ctaarrow" aria-hidden="true">&rarr;</span></button>
@@ -191,9 +191,8 @@
       <p class="fh" id="mtp-sum"></p>
       <details class="manual" id="mtp-adv">
         <summary id="mtp-adv-label">Change what OneBrain reads</summary>
-        <p class="fh" style="margin-top:8px">Each option is something the service can
-          hand back. OneBrain reads it on every sweep and turns what comes back
-          into facts.</p>
+        <p class="fh" style="margin-top:8px">Legacy compatibility. Automatic
+          ingestion is off, so choosing a tool here does not start a sweep.</p>
         <div class="mrow">
           <select id="mtp-select" class="fi" aria-label="What OneBrain reads"></select>
           <button type="button" class="ghostpill" id="mtp-save">Use this</button>
@@ -208,9 +207,9 @@
 
     <details class="manual reveal" id="cat-advanced">
       <summary>Don&rsquo;t see your tool? Add it by server address</summary>
-      <p class="fh" style="margin-top:8px">Any remote server that speaks the Model
-        Context Protocol can feed this memory. Paste its address &mdash; if it
-        needs a sign-in, you&rsquo;ll be asked once.</p>
+      <p class="fh" style="margin-top:8px">Legacy compatibility. Automatic
+        ingestion is off. Pasting an address can store a connection; it does
+        not start capture. If it needs a sign-in, you&rsquo;ll be asked once.</p>
       <div class="mrow">
         <input id="mcp-url" class="fi" type="url"
                placeholder="https://&hellip;/mcp"
@@ -242,9 +241,9 @@
     <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Step four</p>
     <h1 id="t2" data-words>Now let&rsquo;s prove it works.</h1>
     <p class="lede reveal">Every line below is a real call to the real API &mdash; not
-      a check that a setting is non-empty. Once these are green you are done:
-      ingestion runs by itself every 30 seconds, and the first items reach the
-      Overview within a minute.</p>
+      a check that a setting is non-empty. Once these are green, the connection
+      checks passed. Automatic ingestion is off. Agents write memory with
+      remember.</p>
 
     <div class="vpanel reveal">
       <div class="vhead">
