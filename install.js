@@ -36,7 +36,12 @@ if (lines) {
   });
 }
 
-$("s-code").textContent = `claude mcp add --scope user --transport http onebrain ${MCP_URL}`;
+$("s-code").textContent = [
+  `claude mcp add --scope user --transport http onebrain ${MCP_URL}`,
+  "claude mcp get onebrain",
+  "claude mcp login onebrain",
+].join("\n");
+// The copied lines stay in that order. mcp get (or /mcp in a session) caches the metadata URL.
 $("s-claude").textContent = MCP_URL;
 $("s-cursor").textContent = JSON.stringify(
   { mcpServers: { onebrain: { url: MCP_URL } } }, null, 2);

@@ -1328,7 +1328,33 @@ const VIEWS = {
 
 const go = (hash) => { location.hash = hash; };
 
+// Each navigation mounts a fresh #view. A render writes that element after
+// it awaits — Billing assigns its markup only once /v1/usage returns, and
+// on failure it calls fail() on the same element. The write closes over the
+// node route() handed in. Opening Settings while that request is still in
+// flight has to leave the node detached, or the late assignment replaces
+// Settings while the hash, header, and sidebar already name Settings.
+// Checking a generation counter after `await view.render` returns is too
+// late: the markup is already on the node by then.
+let routeGen = 0;
+
+function mountView() {
+  const prev = $('view');
+  const next = document.createElement(prev.localName);
+  for (const attr of [...prev.attributes]) {
+    // class is per navigation. Graph adds "wide"; carrying it forward would
+    // make the next view full-bleed. route() sets the base class itself.
+    if (attr.name === 'class') continue;
+    next.setAttribute(attr.name, attr.value);
+  }
+  const keepFocus = document.activeElement === prev;
+  prev.replaceWith(next);
+  if (keepFocus) next.focus();
+  return next;
+}
+
 async function route() {
+  const gen = ++routeGen;
   const raw = (location.hash || '#overview').slice(1);
   const [name, query] = raw.split('?');
   const key = VIEWS[name] ? name : 'overview';
@@ -1344,11 +1370,14 @@ async function route() {
 
   // Filter changes use replaceState, which does NOT fire hashchange, so
   // reaching here always means real navigation and always means a re-render.
-  const root = $('view');
+  const root = mountView();
   root.className = 'view';
-  root.innerHTML = '';
   try { await view.render(root, params); }
-  catch (e) { fail(root, e); }
+  catch (e) {
+    // The reader already moved on. This render's node is detached.
+    if (gen !== routeGen) return;
+    fail(root, e);
+  }
 }
 
 // -------------------------------------------------------- command palette

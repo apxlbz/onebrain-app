@@ -5,6 +5,14 @@
   "transport": "streamable-http",
   "auth": {
     "type": "oauth2",
-    "protected_resource_metadata": "https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp/.well-known/oauth-protected-resource"
+    "protected_resource_metadata": "https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp/.well-known/oauth-protected-resource",
+    "claude_code": {
+      "steps": [
+        "claude mcp add --scope user --transport http onebrain https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp",
+        "claude mcp get onebrain",
+        "claude mcp login onebrain"
+      ],
+      "note": "Run mcp get (or /mcp in a session) before login. That connect caches the metadata URL from the 401 WWW-Authenticate header. The lighter install is agent-install.sh with ONEBRAIN_API_KEY."
+    }
   }
 }

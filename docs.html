@@ -166,7 +166,16 @@ curl -fsSL https://onebrain.apxlbz.com/agent-install.sh | ONEBRAIN_API_KEY="$ONE
     and export it as <code>ONEBRAIN_API_KEY</code>. The script does not write the
     secret into Claude&rsquo;s config. Dev is the same command from
     <code>https://onebrain-dev.apxlbz.com/agent-install.sh</code>.
-    Claude on the web uses the connector steps above and does not need the token.</p>
+    That API-key line is the one to use. Claude on the web uses the connector
+    steps above and does not need the token.</p>
+  <p>Google sign-in, without a token, needs a connect before login:</p>
+  <pre>claude mcp add --scope user --transport http onebrain https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp
+claude mcp get onebrain
+claude mcp login onebrain</pre>
+  <p><code>claude mcp get onebrain</code> (or <code>/mcp</code> in a session)
+    caches the metadata URL from the 401 <code>WWW-Authenticate</code> header.
+    A fresh <code>claude mcp login</code> before that stops with no authorization
+    URL. Dev puts the dev MCP URL in the <code>mcp add</code> line.</p>
 
   <h2 id="tools">Tools</h2>
   <table>
@@ -666,7 +675,10 @@ curl -fsSL https://onebrain.apxlbz.com/agent-install.sh | ONEBRAIN_API_KEY="$ONE
     as a protected resource (<code>/.well-known/oauth-protected-resource</code>,
     RFC&nbsp;9728) so a compliant client discovers the authorization server on
     its own. The agent behind an OAuth session is derived from the token&rsquo;s
-    registered client, never from anything the request claims to be.</p>
+    registered client, never from anything the request claims to be.
+    Claude Code on a fresh login does not see that document until a connect
+    caches it: run <code>claude mcp get onebrain</code> (or <code>/mcp</code>)
+    before <code>claude mcp login</code>. The API-key install above skips this.</p>
   <p>Connecting a third-party source (where still offered) likewise uses OAuth
     at the provider, and requests only read scopes (<code>gmail.readonly</code>,
     <code>drive.readonly</code>, <code>calendar.readonly</code>, Trello&rsquo;s
@@ -781,9 +793,10 @@ curl -fsSL https://onebrain.apxlbz.com/agent-install.sh | ONEBRAIN_API_KEY="$ONE
         bearer and a bearer that does not resolve look the same.</td></tr>
     <tr><td>401</td><td><code>authorization required</code> (MCP)</td>
       <td>Same fix as the row above. OAuth clients can still follow
-        <code>WWW-Authenticate</code>. An agent that holds
-        <code>ONEBRAIN_API_KEY</code> should send that bearer instead of
-        starting a new sign-in.</td></tr>
+        <code>WWW-Authenticate</code>. Claude Code: <code>claude mcp get onebrain</code>
+        (or <code>/mcp</code>) before <code>claude mcp login</code> caches the
+        metadata URL. An agent that holds <code>ONEBRAIN_API_KEY</code> should
+        send that bearer instead of starting a new sign-in.</td></tr>
     <tr><td>401</td><td><code>Mint failed:</code></td>
       <td>The mint call used a static <code>ONEBRAIN_API_KEY</code>.
         Retry <code>POST /v1/me/token</code> with

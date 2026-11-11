@@ -40,6 +40,18 @@ curl -fsSL https://onebrain-dev.apxlbz.com/agent-install.sh | ONEBRAIN_API_KEY="
 Production MCP: `https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp`
 Production API base: `https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/api`
 
+## Google sign-in, without a token
+
+The API-key command above is the one to use. Without a token, connect before login:
+
+```bash
+claude mcp add --scope user --transport http onebrain https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp
+claude mcp get onebrain
+claude mcp login onebrain
+```
+
+`claude mcp get onebrain` (or `/mcp` in a session) caches the metadata URL from the 401 `WWW-Authenticate` header. A fresh `claude mcp login` before that stops with no authorization URL. Dev puts `https://epjkzltwyfexiunbmbel.supabase.co/functions/v1/mcp` in the `mcp add` line.
+
 ## Check
 
 Ask Claude Code to `remember` one sentence, then `recall` it. Tools: `recall`, `remember`, `forget`, `list_memory`.

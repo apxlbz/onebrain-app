@@ -214,7 +214,13 @@ say "✓ hooks registered in $CC  (Claude Code + Cowork)"
 
 # --- 3b) Claude Code MCP server: recall/remember tools, token-authenticated -----
 # The personal token stands in for the OAuth sign-in, so nothing asks for
-# consent later. Re-registering replaces an earlier entry.
+# consent later. Re-registering replaces an earlier entry. This header install
+# is the light path. Without a token, Claude Code needs a connect before login:
+#   claude mcp add --scope user --transport http onebrain "$MCP_URL"
+#   claude mcp get onebrain
+#   claude mcp login onebrain
+# `claude mcp get onebrain` (or /mcp in a session) caches the metadata URL
+# from the 401 WWW-Authenticate header. A fresh login before that does not.
 MCP_URL="${URL%/api}/mcp"
 if command -v claude >/dev/null 2>&1; then
   claude mcp remove onebrain -s user >/dev/null 2>&1 || true
