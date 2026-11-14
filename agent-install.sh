@@ -8,8 +8,11 @@
 # Hosts: claude-code, cursor, codex, mcp, rest.
 #
 # The key is required so a missing credential fails here, but it is NOT written
-# into the host config. Each host reads ONEBRAIN_API_KEY from its environment
-# (ONEBRAIN_TOKEN is accepted as a fallback name for the same value).
+# into the host config. Claude Code, Codex, and the generic MCP file name
+# ONEBRAIN_API_KEY and read it from the environment (ONEBRAIN_TOKEN is the
+# same value). Cursor is the exception: a Dock or Finder launch does not see
+# a shell export, so this script writes the key into a mode-0600 header file
+# and points ~/.cursor/mcp.json at that file. mcp.json stores the path only.
 #
 # The published copy of this file has https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp / https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/api replaced with
 # that site's project. From a git checkout those placeholders stay, and the
@@ -38,13 +41,15 @@ usage() {
 Usage: ONEBRAIN_API_KEY=ob_… bash agent-install.sh <host>
 
   claude-code   user-scope server in ~/.claude.json
-  cursor        ~/.cursor/mcp.json
+  cursor        ~/.cursor/mcp.json plus a mode-0600 header file
   codex         ~/.codex/config.toml
   mcp           ~/.config/onebrain/mcp.json (generic streamable HTTP)
   rest          ~/.config/onebrain/rest.env (URLs only)
 
-The config references ONEBRAIN_API_KEY; it does not store the secret.
-Export that variable in the environment that launches the host.
+Claude Code, Codex, and the generic file name ONEBRAIN_API_KEY; they do not
+store the secret. Export it in the environment that launches those hosts.
+Cursor writes the secret to ~/.config/onebrain/cursor-headers.txt (mode 0600)
+and launches mcp-remote with that file, so a Dock launch still sends the key.
 ONEBRAIN_TOKEN is accepted as another name for the same key.
 Re-running replaces only the onebrain entry.
 
@@ -102,7 +107,7 @@ resolve_urls() {
 $(resolve_urls)
 EOF
 
-REGION="${ONEBRAIN_REGION:-ap-southeast-1}"
+REGION="${ONEBRAIN_REGION:-ap-northeast-1}"
 
 KEY="${ONEBRAIN_API_KEY:-${ONEBRAIN_TOKEN:-}}"
 if [ -z "$KEY" ]; then
@@ -131,19 +136,57 @@ case "$KEY" in
     exit 1
     ;;
 esac
+# Cursor's GUI process does not inherit a shell export. Write the key into a
+# header file the launched mcp-remote reads, then drop the key before Python.
+NPX_BIN=""
+HEADER_FILE=""
+if [ "$HOST" = "cursor" ]; then
+  NPX_BIN="$(command -v npx || true)"
+  case "$NPX_BIN" in
+    /*) ;;
+    *)
+      echo "cursor install needs npx on PATH (Node.js) so Cursor can launch the MCP server." >&2
+      echo "The saved command is that npx binary's absolute path. A Dock launch does not use your shell PATH." >&2
+      echo "Install Node.js, open a new shell so npx resolves, then re-run this command." >&2
+      exit 1
+      ;;
+  esac
+  case "$REGION" in
+    *[[:space:]]*|*[\"\\]*)
+      echo "ONEBRAIN_REGION is not a single region token: ${REGION}" >&2
+      echo "Use a value like ap-northeast-1 (the production default) with no spaces, then re-run." >&2
+      exit 1
+      ;;
+  esac
+  cfg="${XDG_CONFIG_HOME:-$HOME/.config}/onebrain"
+  HEADER_FILE="$cfg/cursor-headers.txt"
+  mkdir -p "$cfg"
+  tmp="$HEADER_FILE.onebrain-tmp"
+  (
+    umask 077
+    printf 'Authorization: Bearer %s\nx-region: %s\nx-onebrain-host: cursor\n' "$KEY" "$REGION" > "$tmp"
+  )
+  chmod 600 "$tmp"
+  if [ -f "$HEADER_FILE" ] && cmp -s "$tmp" "$HEADER_FILE"; then
+    rm -f "$tmp"
+  else
+    mv "$tmp" "$HEADER_FILE"
+  fi
+  chmod 600 "$HEADER_FILE"
+fi
 unset KEY
 
-# The key stays out of the Python process. Configs name the variable; they
-# never receive the value.
+# The key stays out of the Python process. Cursor's copy is already in the
+# header file; every other host config only names ONEBRAIN_API_KEY.
 env -u ONEBRAIN_API_KEY -u ONEBRAIN_TOKEN \
-  python3 - "$HOST" "$MCP" "$API" "$REGION" "$HOME" "${CODEX_HOME:-}" "${XDG_CONFIG_HOME:-}" <<'PY'
+  python3 - "$HOST" "$MCP" "$API" "$REGION" "$HOME" "${CODEX_HOME:-}" "${XDG_CONFIG_HOME:-}" "$NPX_BIN" "$HEADER_FILE" <<'PY'
 import json
 import os
 import pathlib
 import sys
 import tomllib
 
-host, mcp, api, region, home_s, codex_s, xdg_s = sys.argv[1:8]
+host, mcp, api, region, home_s, codex_s, xdg_s, npx_s, header_s = sys.argv[1:10]
 home = pathlib.Path(home_s).expanduser()
 codex_home = pathlib.Path(codex_s).expanduser() if codex_s else home / ".codex"
 xdg = pathlib.Path(xdg_s).expanduser() if xdg_s else home / ".config"
@@ -164,7 +207,7 @@ def check_region(value: str) -> None:
     ):
         die(
             f"ONEBRAIN_REGION is not a single region token: {value!r}. "
-            "Use a value like ap-southeast-1 (the default) with no spaces, then re-run."
+            "Use a value like ap-northeast-1 (the production default) with no spaces, then re-run."
         )
 
 check_url("MCP URL", mcp)
@@ -172,7 +215,7 @@ check_url("API URL", api)
 check_region(region)
 
 AUTH = "Bearer ${ONEBRAIN_API_KEY}"
-CURSOR_AUTH = "Bearer ${env:ONEBRAIN_API_KEY}"
+MCP_REMOTE = "mcp-remote@0.16.6"
 
 def host_headers(auth: str) -> dict:
     # x-onebrain-host is the install target. The server records it as the
@@ -209,9 +252,30 @@ def claude_entry() -> dict:
     }
 
 def cursor_entry() -> dict:
+    # Stdio launch. Cursor starts this command itself, then mcp-remote reads
+    # the header file. ${env:ONEBRAIN_API_KEY} is not used: a Dock launch does
+    # not have the shell variable, so the key would never be sent.
+    if any(c in npx_s or c in header_s for c in "\r\n"):
+        die("npx path or header file path contains a newline")
+    if not npx_s.startswith("/"):
+        die(f"npx path is not absolute: {npx_s}")
+    header_path = pathlib.Path(header_s)
+    if not header_path.is_file():
+        die(f"cursor header file is missing: {header_s}")
+    mode = header_path.stat().st_mode & 0o777
+    if mode & 0o077:
+        die(f"cursor header file must be mode 0600, found {mode:o}")
     return {
-        "url": mcp,
-        "headers": host_headers(CURSOR_AUTH),
+        "command": npx_s,
+        "args": [
+            "-y",
+            MCP_REMOTE,
+            mcp,
+            "--transport",
+            "http-only",
+            "--header-file",
+            header_s,
+        ],
     }
 
 def generic_entry() -> dict:
@@ -335,13 +399,17 @@ else:
     )
 
 print(f"onebrain: wired {host} -> {path}", file=sys.stderr)
-json.dump({
+summary = {
     "host": host,
     "path": str(path),
     "mcp_url": mcp,
     "api_url": api,
     "region": region,
-    "auth": "env:ONEBRAIN_API_KEY",
-}, sys.stdout, separators=(",", ":"))
+    "auth": "header-file" if host == "cursor" else "env:ONEBRAIN_API_KEY",
+}
+if host == "cursor":
+    summary["header_file"] = header_s
+    summary["command"] = npx_s
+json.dump(summary, sys.stdout, separators=(",", ":"))
 sys.stdout.write("\n")
 PY

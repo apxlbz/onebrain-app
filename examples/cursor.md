@@ -23,7 +23,7 @@ Dev mint URL: `https://epjkzltwyfexiunbmbel.supabase.co/functions/v1/api/v1/me/t
 
 ## Install
 
-Production. Writes `onebrain` in `~/.cursor/mcp.json`. The header is `Authorization: Bearer ${env:ONEBRAIN_API_KEY}` (Cursor's env form, not Claude's). The secret is not written into the file. Also sets `x-region` and `x-onebrain-host: cursor`.
+Production. Writes `onebrain` in `~/.cursor/mcp.json` as an `npx mcp-remote` launch, and writes the key to `~/.config/onebrain/cursor-headers.txt` (mode 0600). The JSON stores the file path, not the key. `x-region` and `x-onebrain-host: cursor` are in that header file. A Dock launch reads the file; it does not need `ONEBRAIN_API_KEY` in the GUI environment.
 
 ```bash
 curl -fsSL https://onebrain.apxlbz.com/agent-install.sh | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- cursor
@@ -35,7 +35,7 @@ Dev:
 curl -fsSL https://onebrain-dev.apxlbz.com/agent-install.sh | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- cursor
 ```
 
-Export `ONEBRAIN_API_KEY` in the environment that launches Cursor. A Cursor process started from the dock does not see a variable that exists only in `~/.bashrc`.
+`npx` must be on `PATH` in the shell that runs the command. The saved launch command is that `npx` binary, so opening Cursor from the Dock still starts the server with the header file.
 
 Production MCP: `https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/mcp`
 Production API base: `https://qlpfjeciekaqzribxlnp.supabase.co/functions/v1/api`

@@ -595,8 +595,12 @@ claude mcp login onebrain</pre>
       from an explicit <code>remember</code> call by a connected agent, hook,
       or the import tool. A background worker (pg_cron, every 30s) only
       self-heals writes whose enrichment didn&rsquo;t finish.</li>
-    <li><b>Billing.</b> Free / Pro / Team plans are prepaid platform credit;
-      usage is metered per model call.</li>
+    <li><b>Billing.</b> Free, Pro, and Team are sized around facts and agents.
+      Free is $0 and holds 500 facts and 2 agents. Pro is $12 a month and
+      Team is $15 per seat per month; both lift those limits. Calling
+      <code>recall</code> and <code>remember</code> is included on every
+      plan. API calls are not metered. The same numbers are on the
+      <a href="./pricing.html">pricing page</a>.</li>
   </ul>
   <p class="muted">Deeper design history, including diagrams, lives in the
     repository&rsquo;s <code>docs/</code> directory for anyone with access to
@@ -736,9 +740,11 @@ claude mcp login onebrain</pre>
     dashboard. Deletion is permanent and cascades to everything derived from
     that input.</p>
   <h3>What does it cost?</h3>
-  <p>Free includes 500 facts and 2 connected agents. Pro and Team add higher
-    limits and per-seat pricing; both run on prepaid platform credit metered
-    per model call. See Settings &rarr; Billing for current numbers.</p>
+  <p>Free is $0 and holds 500 facts and 2 agents. Pro is $12 a month with
+    unlimited facts and agents. Team is $15 per seat per month. Calling
+    <code>recall</code> and <code>remember</code> is included on every plan.
+    API calls are not metered. The same numbers are on the
+    <a href="./pricing.html">pricing page</a>.</p>
   <h3>Can I self-host OneBrain?</h3>
   <p>Not currently. It runs on a managed Supabase project; there is no
     self-hosted or on-prem edition.</p>

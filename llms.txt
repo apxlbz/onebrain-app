@@ -26,7 +26,7 @@ Hosts, last argument of the install script: claude-code, cursor, codex, mcp, res
 ## Per-host examples
 
 - [Claude Code](https://onebrain.apxlbz.com/examples/claude-code.md): ~/.claude.json, header Bearer ${ONEBRAIN_API_KEY}.
-- [Cursor](https://onebrain.apxlbz.com/examples/cursor.md): ~/.cursor/mcp.json, header Bearer ${env:ONEBRAIN_API_KEY}.
+- [Cursor](https://onebrain.apxlbz.com/examples/cursor.md): ~/.cursor/mcp.json launches mcp-remote; the key is in a mode-0600 header file, not in the JSON, so a Dock launch still sends it.
 - [Codex](https://onebrain.apxlbz.com/examples/codex.md): ~/.codex/config.toml, bearer_token_env_var ONEBRAIN_API_KEY.
 - [Generic MCP](https://onebrain.apxlbz.com/examples/mcp.md): ~/.config/onebrain/mcp.json for any other MCP client.
 - [REST](https://onebrain.apxlbz.com/examples/rest.md): ~/.config/onebrain/rest.env, then POST /v1/remember and /v1/recall.
