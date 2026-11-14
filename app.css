@@ -1,72 +1,42 @@
 /* OneBrain dashboard.
  *
- * Visual system: the Dub design language (styles.refero.design) — a near-white
- * canvas held together by HAIRLINE BORDERS rather than elevation. The one rule
- * everything else follows from: containers are defined by a 1px #e5e5e5 border
- * and a radius, never by a drop shadow. Shadow is reserved for things that
- * genuinely float above the page (the drawer, the palette), because that is the
- * only place depth carries information.
- *
- * Systems, so nothing is decided ad hoc at the call site:
- *   colour   monochrome neutrals + exactly ONE accent per surface. Chromatic
- *            colour is reserved for meaning — retrieval arm, node type,
- *            severity — and never used as a surface fill.
- *   radius   a closed four-tier vocabulary: input 6, button 8, card 12,
- *            large 16, pill 9999. Nothing outside it.
- *   type     Inter-class UI face, 4px-based scale, 14px canonical for dense
- *            data (this is a data product, not a marketing page).
- *   space    4px base unit; 16px card padding; 8px element gap.
- *   motion   ease-out for enter/exit, nothing over 200ms, and never bare
- *            ease-in — it delays the first frame, the moment the eye is on it.
- *
- * LIGHT ONLY, deliberately. The landing page and onboarding are parchment with
- * no dark variant, so a dark-mode dashboard meant a viewer whose OS is dark went
- * light -> light -> dark walking into the product. One surface, one scheme; the
- * palette parity tests keep the graph, the sign-in pages and the product shot on
- * it too.
+ * Same ink-on-paper world as the public stack: black, white, stipple, pixel
+ * titles. Layout stays a product dashboard (rail, topbar, tables, inputs).
+ * Memory results are the one signature: fixed-proportion cards that dissolve
+ * into the detail drawer. Red, amber, and green appear only on health and
+ * destructive actions.
  */
 
 :root {
-  /* Neutral ramp — the whole system is built out of these.
-     WARM, not grey: these are the Monad parchment values the landing page and
-     onboarding already use, so signing up, setting up and using the product are
-     one continuous surface instead of three. Only the ramp moved; every
-     semantic alias below still points at it, so the structure — border-first,
-     no elevation, chroma reserved for meaning — is untouched. */
-  --white:#f6f3f1;      /* canvas, card surfaces (parchment) */
-  --mist:#efeae7;       /* nested surfaces, hover fills */
-  --ash:#cecac8;        /* THE structural hairline */
-  --smoke:#b9b4b1;      /* emphasis borders, secondary outlines */
-  --silver:#9a9694;     /* light dividers, disabled icons */
-  --fog:#797776;        /* placeholder, disabled text */
-  --steel:#4e4d4d;      /* muted body text, helper labels */
-  --graphite:#3a3938;   /* secondary text, icon strokes */
-  --charcoal:#242424;   /* body text, headings, button fills */
+  --white:#fff;
+  --mist:#f2f2f2;
+  --ash:#000;
+  --smoke:#000;
+  --silver:#555;
+  --fog:#333;
+  --steel:#1a1a1a;
+  --graphite:#111;
+  --charcoal:#000;
 
-  /* semantic aliases — views reference these, never the ramp directly */
   --bg:var(--white); --panel:var(--white); --sunk:var(--mist);
   --ink:var(--charcoal); --muted:var(--steel); --faint:var(--fog);
   --line:var(--ash); --line-strong:var(--smoke); --hair:var(--mist);
 
-  /* the single accent — highlight only (links, focus, active nav), never a
-     surface fill. Data bars are deliberately monochrome: a full-width blue bar
-     IS a large fill, and the system reserves chroma for meaning. */
-  --accent:#2b59d1;     /* Lake Blue — the one action colour, shared with /home */
-  --focus:#2b59d1;
-  --chart:#4e4d4d;
+  --accent:#000;
+  --focus:#000;
+  --chart:#000;
 
-  /* meaning — one per component, never a surface fill. Shared with /graph so
-     a node keeps its colour across the two views. */
-  --fact:#737373; --entity:#7c3aed; --product:#16a34a; --system:#ea580c;
-  --topic:#ca8a04; --tag:#db2777; --source:#2563eb;
-  --ok:#16a34a; --warn:#ea580c; --err:#dc2626;
-  --tint-ok:#dcfce7; --tint-info:#dbeafe; --tint-warn:#ffedd5; --tint-err:#fee2e2;
+  /* Node kinds stay distinguishable by value, not hue. */
+  --fact:#000; --entity:#4a4a4a; --product:#666; --system:#222;
+  --topic:#888; --tag:#333; --source:#555;
+  --ok:#137333; --warn:#8a4b08; --err:#b00020;
+  --tint-ok:#e7f5ec; --tint-info:#f2f2f2; --tint-warn:#f8efe3; --tint-err:#fde8ea;
 
   /* space — 4px base */
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s8:32px;
 
-  /* radius — closed vocabulary */
-  --r-input:6px; --r-btn:8px; --r-card:12px; --r-lg:16px; --r-pill:9999px;
+  /* radius — square, like the painted cards */
+  --r-input:2px; --r-btn:2px; --r-card:2px; --r-lg:2px; --r-pill:2px;
 
   --rail:224px; --top:52px; --measure:1200px;
 
@@ -83,12 +53,8 @@
 * { box-sizing:border-box; }
 html, body { margin:0; height:100%; }
 body {
-  background:var(--bg); color:var(--ink);
-  /* Inter is the system's UI face; it is used when installed and degrades to
-     the platform UI font otherwise. Nothing is fetched — a dashboard must not
-     block first paint on a font request, and the CSP forbids external hosts. */
-  font-family:Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-              "Helvetica Neue", sans-serif;
+  background:#fff; color:var(--ink);
+  font-family: var(--font-reading), "DejaVu Sans", sans-serif;
   font-size:14px; line-height:1.43;
   -webkit-font-smoothing:antialiased;
   touch-action:manipulation;
@@ -103,14 +69,14 @@ body, table, .num, .tn, input, kbd { font-variant-numeric:tabular-nums; }
    system stays at 400/500 body weights. */
 /* Serif display, weight 400 — the landing page's voice, at dashboard scale.
    Hierarchy comes from size and tracking, never weight. */
-h1 { font-family:ui-serif, Georgia, Cambria, "Times New Roman", serif;
-     font-size:27px; font-weight:400; line-height:1.28; letter-spacing:-.02em;
-     margin:0 0 var(--s1); text-wrap:balance; }
-.sec { font-family:"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-       font-size:11px; font-weight:400; letter-spacing:.08em;
-       text-transform:uppercase; color:var(--faint); margin:0 0 var(--s3); }
+h1 { font-family: var(--font-display), sans-serif;
+     font-size:22px; font-weight:400; font-synthesis:none; line-height:1.35; letter-spacing:0;
+     margin:0 0 var(--s3); text-wrap:balance; }
+.sec { font-family: var(--font-display), sans-serif;
+       font-size:16px; font-weight:400; font-synthesis:none; letter-spacing:0;
+       text-transform:none; color:var(--ink); margin:0 0 var(--s2); }
 .grow { flex:1; }
-.mono { font-family:"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+.mono { font-family: var(--font-mono), "DejaVu Sans Mono", ui-monospace, monospace;
         font-size:12px; }
 .dim { color:var(--muted); }
 .faint { color:var(--faint); }
@@ -143,11 +109,12 @@ h1 { font-family:ui-serif, Georgia, Cambria, "Times New Roman", serif;
 
 #rail {
   position:fixed; left:0; top:0; bottom:0; width:var(--rail); z-index:6;
-  background:var(--bg); border-right:1px solid var(--line);
+  background:#fff; border-right:2px solid #000;
   display:flex; flex-direction:column; padding-bottom:var(--s3);
 }
 .brand { display:flex; align-items:center; gap:var(--s2); height:var(--top);
-  padding:0 var(--s4); font-size:15px; font-weight:500; letter-spacing:-.01em; }
+  padding:0 var(--s4); font-family: var(--font-display), sans-serif;
+  font-size:16px; font-weight:400; font-synthesis:none; letter-spacing:0; }
 /* Keyed to --ink/--bg rather than the fixed ramp so the mark inverts with the
    theme; --charcoal on a #0a0a0a canvas is invisible. */
 .brand .mark { width:18px; height:18px; border-radius:var(--r-input); flex:none;
@@ -155,17 +122,20 @@ h1 { font-family:ui-serif, Georgia, Cambria, "Times New Roman", serif;
 .brand .mark::after { content:""; position:absolute; inset:5px;
   border-radius:50%; background:var(--bg); }
 .navgroup { padding:var(--s3) var(--s2) var(--s1); }
-.navlabel { font-size:11px; font-weight:500; letter-spacing:.04em;
-  text-transform:uppercase; color:var(--faint); margin:0; padding:0 var(--s2) 6px; }
+.navlabel { font-family: var(--font-display), sans-serif;
+  font-size:14px; font-weight:400; font-synthesis:none; letter-spacing:0;
+  text-transform:none; color:var(--ink); margin:0; padding:0 var(--s2) 6px; }
 .navitem {
   display:flex; align-items:center; gap:var(--s2); height:32px; padding:0 var(--s2);
   border-radius:var(--r-btn); color:var(--muted); font-size:14px; cursor:pointer;
   transition:background-color var(--t-hover) ease, color var(--t-hover) ease;
 }
-.navitem .ni { width:15px; text-align:center; font-size:12px; opacity:.65; }
+.navitem .ni { width:16px; height:16px; display:grid; place-items:center; flex:none; opacity:.85; }
+.navitem .ni svg { display:block; }
+.navitem[aria-current="page"] .ni { opacity:1; }
 .navitem:hover { background:var(--hair); color:var(--ink); }
-.navitem[aria-current="page"] { background:var(--tint-info); color:var(--ink);
-  font-weight:500; }
+.navitem[aria-current="page"] { background:#000; color:#fff;
+  font-weight:700; }
 .navitem[aria-current="page"] .ni { opacity:1; }
 .railfoot { margin-top:auto; padding:var(--s3) var(--s4) 0;
   border-top:1px solid var(--line); font-size:13px; }
@@ -180,9 +150,8 @@ h1 { font-family:ui-serif, Georgia, Cambria, "Times New Roman", serif;
 #topbar {
   position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:var(--s2);
   height:var(--top); padding:0 var(--s6);
-  background:color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter:saturate(180%) blur(12px);
-  border-bottom:1px solid var(--line);
+  background:#fff;
+  border-bottom:2px solid #000;
 }
 .crumb { font-size:14px; font-weight:500; }
 .view { flex:1; padding:var(--s6); max-width:var(--measure); width:100%; }
@@ -214,9 +183,17 @@ button.ghost { border-color:transparent; background:none; color:var(--muted);
 button.ghost:hover { background:var(--hair); color:var(--ink); }
 /* Exactly one filled action per surface. Keyed to --ink/--bg so it inverts
    with the theme instead of needing a dark-mode override. */
-button.primary, .btn.primary, .btnlink.primary { background:var(--ink);
-  color:var(--bg); border-color:var(--ink); }
-button.primary:hover, .btn.primary:hover, .btnlink.primary:hover { opacity:.88; }
+button.primary, .btn.primary, .btnlink.primary {
+  background:#000; color:#fff; border:2px solid #000; border-radius:0;
+  box-shadow: inset -2px -2px 0 #fff, inset 2px 2px 0 #000, 2px 2px 0 #000;
+  font-family: var(--font-display), sans-serif;
+  font-weight:400; font-synthesis:none; letter-spacing:0; height:34px;
+}
+button.primary:hover, .btn.primary:hover, .btnlink.primary:hover { background:#000; color:#fff; }
+button.primary:active, .btn.primary:active, .btnlink.primary:active {
+  background:#fff; color:#000; transform:none;
+  box-shadow: inset 2px 2px 0 #000, inset -2px -2px 0 #fff;
+}
 
 input, select, textarea {
   height:32px; padding:0 10px; border:1px solid var(--line);
@@ -240,7 +217,7 @@ label.field { display:flex; flex-direction:column; gap:var(--s1); font-size:11px
 @media (max-width:900px) { .split { grid-template-columns:1fr; } }
 
 .pill { display:inline-flex; align-items:center; gap:5px; height:20px; padding:0 8px;
-  border-radius:var(--r-pill); background:var(--hair); color:var(--muted);
+  border-radius:2px; background:#fff; color:#000; border:1px solid #000;
   font-size:11px; white-space:nowrap; }
 .pill .dot { width:6px; height:6px; border-radius:50%; flex:none; }
 .chip { display:inline-flex; align-items:center; gap:5px; height:28px; padding:0 12px;
@@ -335,26 +312,47 @@ table.t td.tight { white-space:nowrap; color:var(--muted); font-size:13px; }
 .knobs .field input, .knobs .field select { height:28px; background:var(--panel); }
 .knobs .toggles { display:flex; gap:var(--s2); flex-wrap:wrap; }
 
-.hit { border-top:1px solid var(--line); padding:var(--s3) var(--s2) var(--s3) 2px;
-  border-radius:var(--r-input); cursor:pointer;
-  transition:background-color var(--t-hover) ease; }
-.hit:first-of-type { border-top:none; }
-.hit:hover { background:var(--hair); }
-.hit .hrank { float:left; width:26px; color:var(--faint); font-size:13px; padding-top:1px; }
-.hit .hbody { margin-left:26px; min-width:0; }
-.hit .hc { line-height:1.5; text-wrap:pretty; }
+.mgrid, #sout:has(.hit), .hits {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+  gap:12px; align-items:start;
+}
+.hit {
+  /* 512:342 is the preferred card. Content is allowed to make it taller
+     so score chips stay inside the border. */
+  aspect-ratio:512 / 342;
+  min-height:fit-content;
+  height:auto;
+  border:3px solid #000;
+  background-color:#fff;
+  background-image: var(--hatch);
+  padding:10px; overflow:hidden; cursor:pointer;
+  box-shadow: 4px 4px 0 #000;
+  display:flex; flex-direction:column;
+}
+.hit .hbody { display:flex; flex-direction:column; gap:8px; min-height:0; }
+.hit .hm { margin-top:auto; }
+.hit:hover { background-color:#f7f7f7; }
+.hit.is-dissolving { animation: hc-out 480ms steps(8, end) both; }
+section.card .hit { width: min(100%, 280px); }
+.hit .hrank { font-family: var(--font-display), sans-serif;
+  font-size:16px; font-weight:400; font-synthesis:none; margin-bottom:6px;
+  background:#000; color:#fff; align-self:flex-start; padding:1px 6px; }
+.hit .hbody { min-width:0; }
+.hit .hc { line-height:1.3; text-wrap:pretty; font-family: var(--font-display), sans-serif;
+  font-size:16px; font-synthesis:none; background:#fff; border:2px solid #000;
+  box-shadow: inset 2px 2px 0 #000; padding:8px; }
 .hit .hm { margin-top:var(--s2); display:flex; gap:5px; flex-wrap:wrap;
   align-items:center; }
 .hit .hsum { margin-top:6px; font-size:12px; }
 
 /* Each chip gets exactly one accent — the arm that earned it. */
-.arm { font-size:11px; line-height:19px; padding:0 8px; border-radius:var(--r-pill);
-  border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
-.arm.semantic { border-color:var(--entity);  color:var(--entity); }
-.arm.lexical  { border-color:var(--product); color:var(--product); }
-.arm.graph    { border-color:var(--system);  color:var(--system); }
-.arm.edge     { border-color:var(--topic);   color:var(--topic); }
-.arm.moved    { border-color:var(--accent);  color:var(--accent); }
+.arm { font-size:11px; line-height:19px; padding:0 8px; border-radius:2px;
+  border:1px solid #000; color:#000; background:#fff; white-space:nowrap; }
+.arm.semantic { border-style:solid; }
+.arm.lexical  { border-style:dashed; }
+.arm.graph    { border-style:dotted; }
+.arm.edge     { background:#000; color:#fff; }
+.arm.moved    { border-width:2px; font-weight:700; }
 
 /* ------------------------------------------------------------------ drawer */
 
@@ -363,10 +361,11 @@ table.t td.tight { white-space:nowrap; color:var(--muted); font-size:13px; }
 .drawer .dpanel {
   position:absolute; right:0; top:0; bottom:0; width:min(600px,92vw);
   background:var(--panel); border-left:1px solid var(--line);
-  box-shadow:var(--shadow-lg);
+  box-shadow:none;
   overflow:auto; overscroll-behavior:contain;   /* no scroll chaining to the page */
   padding:var(--s6) var(--s6) 40px;
-  animation:slide-in var(--t-enter) var(--ease-out);
+  border-left:3px solid #000;
+  animation: hc-in 480ms steps(8, end);
 }
 .dx { position:absolute; right:var(--s3); top:var(--s3); }
 .dsec { margin-top:var(--s6); }
@@ -377,7 +376,7 @@ table.t td.tight { white-space:nowrap; color:var(--muted); font-size:13px; }
 .raw { background:var(--sunk); border:1px solid var(--line);
   border-radius:var(--r-card); padding:var(--s3);
   white-space:pre-wrap; overflow-wrap:anywhere;
-  font-family:"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono), "DejaVu Sans Mono", ui-monospace, monospace;
   font-size:12px; line-height:1.5; max-height:280px; overflow:auto;
   overscroll-behavior:contain; }
 

@@ -11,8 +11,8 @@
   transition:border-color 200ms ease, box-shadow 200ms var(--ease-out);
 }
 .imp-text:hover { border-color:var(--line-strong); }
-.imp-text:focus { outline:none; border-color:var(--color-electric-iris);
-  box-shadow:0 0 0 4px rgba(43,89,209,.12); }
+.imp-text:focus { outline: 2px solid #000; outline-offset: 2px; border-color: #000;
+  box-shadow: none; }
 .imp-text:disabled { opacity:.6; }
 .imp-meta { font-size:11px; letter-spacing:.08em; text-transform:uppercase;
   color:var(--color-ash-gray); margin-top:8px; min-height:1.4em; }
@@ -25,7 +25,7 @@
 .imp-card .fl { margin-top:0; }
 .imp-bar { height:6px; border-radius:3px; background:var(--color-ash-line);
   overflow:hidden; }
-.imp-bar i { display:block; height:100%; width:0; background:var(--color-electric-iris);
+.imp-bar i { display:block; height:100%; width:0; background:#000;
   transition:width 200ms var(--ease-out); }
 .imp-stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--u4);
   margin:0 0 var(--u4); }

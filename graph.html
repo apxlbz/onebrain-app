@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>OneBrain — knowledge graph</title>
+<link rel="stylesheet" href="./fonts.css?v=2" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"
   integrity="sha384-su5kReKyYlIFrI62mbQRKXHzFobMa7BHp1cK6julLPbnYcCW9NIZKJiTODjLPeDh"
   crossorigin="anonymous"></script>
@@ -12,17 +13,17 @@
      embedded in the Graph tab, so a second palette would read as a second
      product. Border-first, monochrome chrome, chroma reserved for node type. */
   :root {
-    --bg:#f6f3f1; --panel:#f6f3f1; --sunk:#efeae7;
-    --ink:#242424; --muted:#4e4d4d; --faint:#797776;
-    --line:#cecac8; --line-strong:#b9b4b1; --hair:#efeae7;
-    --accent:#2b59d1; --tint-info:#dbeafe; --chart:#4e4d4d;
-    --fact:#737373; --entity:#7c3aed; --product:#16a34a; --system:#ea580c;
-    --topic:#ca8a04; --tag:#db2777; --source:#2563eb;
-    --r-input:6px; --r-btn:8px; --r-card:12px; --r-pill:9999px;
+    --bg:#fff; --panel:#fff; --sunk:#f2f2f2;
+    --ink:#000; --muted:#1a1a1a; --faint:#333;
+    --line:#000; --line-strong:#000; --hair:#f2f2f2;
+    --accent:#000; --tint-info:#f2f2f2; --chart:#000;
+    --fact:#000; --entity:#4a4a4a; --product:#666; --system:#222;
+    --topic:#888; --tag:#333; --source:#555;
+    --r-input:2px; --r-btn:2px; --r-card:2px; --r-pill:2px;
   }
   * { box-sizing:border-box; }
   html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); overflow:hidden;
-    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    font-family:"DejaVu Sans", Geneva, sans-serif;
     font-size:13px; }
   #bar { position:absolute; top:0; left:0; right:0; height:46px; display:flex; align-items:center; gap:10px;
     padding:0 14px; border-bottom:1px solid var(--line); }
@@ -37,7 +38,7 @@
     font-weight:500; text-decoration:none; }
   .gbtn:hover { border-color:var(--muted); }
   .gbtn .gg { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%;
-    background:#fff; color:#4285F4; font-weight:700; font-size:12px; font-family:Arial,sans-serif; }
+    background:#fff; color:#000; font-weight:700; font-size:12px; font-family:"DejaVu Sans",sans-serif; border:1px solid #000; }
   input { height:30px; padding:0 10px; border:1px solid var(--line); border-radius:var(--r-input); background:var(--panel); color:var(--ink); font-size:13px; }
   button { height:30px; padding:0 12px; border:1px solid var(--line); border-radius:var(--r-btn); background:var(--panel); color:var(--ink); font-size:13px;
     font-weight:500; cursor:pointer; }
@@ -179,7 +180,7 @@
       <div id="ctl">
         <span class="chip" data-type="fact" data-on="0"><i class="dot" style="background:var(--fact)"></i>facts</span>
         <span class="chip" data-type="entity" data-on="1"><i class="dot" style="background:var(--entity)"></i>people</span>
-        <span class="chip" data-type="company" data-on="1"><i class="dot" style="background:#0e7490"></i>companies</span>
+        <span class="chip" data-type="company" data-on="1"><i class="dot" style="background:#1a1a1a"></i>companies</span>
         <span class="chip" data-type="product" data-on="1"><i class="dot" style="background:var(--product)"></i>products</span>
         <span class="chip" data-type="system" data-on="1"><i class="dot" style="background:var(--system)"></i>systems</span>
         <span class="chip" data-type="topic" data-on="1"><i class="dot" style="background:var(--topic)"></i>topics</span>

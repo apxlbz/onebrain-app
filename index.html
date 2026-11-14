@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
-<meta name="theme-color" content="#f6f3f1" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 30 27H2Z' fill='%232b59d1'/%3E%3C/svg%3E" />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='8' width='18' height='20' fill='%23fff' stroke='%23000' stroke-width='2'/%3E%3Crect x='10' y='4' width='18' height='20' fill='%23fff' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://onebrain.apxlbz.com/" />
 <meta property="og:title" content="OneBrain — one memory shared across your agents" />
@@ -20,412 +20,289 @@
 <meta name="twitter:image" content="https://onebrain.apxlbz.com/og-image.png" />
 <title>OneBrain — one memory shared across your agents</title>
 <meta name="description" content="A private memory every AI agent you use can remember and recall. Shared spaces are opt-in." />
-<link rel="stylesheet" href="./app.css?v=3" />
-<link rel="stylesheet" href="./home.css?v=3" />
-<style>
-  /* The Google data-use disclosure Google's branding review requires. Set
-     as a hairline table inside the "Your data" band, in that band's voice. */
-  .gdata { margin-top:var(--u6); padding-top:var(--u5);
-    border-top:1px solid var(--color-ash-line); }
-  .gdata h3 { font-size:22px; font-weight:400; margin:0 0 6px; }
-  .gdata .lede { margin-bottom:var(--u3); }
-  .gdata dl { margin:0; display:grid; grid-template-columns:max-content 1fr;
-    gap:12px var(--u4); font-size:15px; font-weight:200; line-height:1.55; }
-  .gdata dt { font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size:11px; letter-spacing:.08em; text-transform:uppercase;
-    color:var(--color-ash-gray); padding-top:4px; white-space:nowrap; }
-  .gdata dd { margin:0; color:var(--color-silver-mist); }
-  .limited { font-size:13px; line-height:1.55; color:var(--color-silver-mist);
-    border-left:2px solid var(--color-electric-iris); padding:2px 0 2px 14px;
-    margin:var(--u4) 0 0; max-width:60ch; }
-  .foot .copy { margin-left:0; }
-  @media (max-width:640px) { .gdata dl { grid-template-columns:1fr; gap:4px; }
-    .gdata dd { margin-bottom:10px; } }
-</style>
+<link rel="stylesheet" href="./fonts.css?v=2" />
+<link rel="stylesheet" href="./home.css?v=6" />
+<script nonce="__NONCE__">document.documentElement.classList.add("js");</script>
 </head>
-<body class="home">
+<body class="home stack">
 
-<a class="skip" href="#ask">Skip to content</a>
+<a class="skip" href="#hero-h">Skip to content</a>
 
-<canvas id="ambient" aria-hidden="true"></canvas>
+<div class="desk">
+<div class="window" id="stack">
+  <header class="menubar">
+    <a class="menubrand" href="./index.html" data-go="welcome">
+      <svg width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><rect x="1" y="4" width="12" height="11" fill="#fff" stroke="#000" stroke-width="1.5"/><rect x="5" y="1" width="12" height="11" fill="#fff" stroke="#000" stroke-width="1.5"/></svg>
+      OneBrain
+    </a>
+    <nav aria-label="Stack">
+      <a href="#proof" data-go="proof">Why it answered</a>
+      <a href="#how" data-go="how">How it works</a>
+      <a href="#data" data-go="data">Your data</a>
+      <a href="#agents" data-go="agents">Wire it up</a>
+      <a href="./pricing.html">Pricing</a>
+      <a class="paint solid" href="./app.html" data-signin>Sign in</a>
+    </nav>
+  </header>
 
-<header class="nav">
-  <a class="navbrand" href="./index.html" translate="no">
-    <span class="mark" aria-hidden="true"></span>
-    <span>OneBrain</span>
-  </a>
-  <nav class="navlinks" aria-label="Page sections">
-    <span class="navpill" aria-hidden="true"></span>
-    <a href="#proof">Why it answered</a>
-    <a href="#how">How it works</a>
-    <a href="#data">Your data</a>
-    <a href="#agents">Wire it up</a>
-    <a href="./pricing.html">Pricing</a>
-  </nav>
-  <a class="cta" href="./app.html" data-signin>Sign in</a>
-</header>
+  <div class="stage">
 
-<!-- Hero ------------------------------------------------------------------ -->
-<section class="hero" aria-labelledby="hero-h">
-  <div class="herotext">
-    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Memory across your agents</p>
-    <h1 id="hero-h">One memory for<br />every agent<br />you&nbsp;use.</h1>
-    <p class="sub">
-      Remember a decision in one agent. Recall it from another. The memory
-      is private to you, and a shared space is opt-in.
-    </p>
-    <div class="herocta">
-      <a class="btn primary lg" href="./app.html" data-signin>Sign in with Google</a>
-      <a class="textlink" href="#proof"><span class="tl">See an example answer</span><span class="tlarrow" aria-hidden="true">&rarr;</span></a>
-    </div>
-    <p class="note">A fresh sign-in is a private personal memory. Shared spaces are opt-in.</p>
-  </div>
-  <canvas id="brain" aria-hidden="true"></canvas>
-</section>
-
-<!-- What it is actually for ------------------------------------------------ -->
-<section class="band" id="ask" aria-labelledby="ask-h">
-  <div class="wrap">
-    <p class="eyebrow">Sound familiar</p>
-    <h2 data-words id="ask-h">The questions that keep coming back.</h2>
-    <div class="asks">
-      <div class="reveal">
-        <p class="askhead">Decisions</p>
-        <ul>
-          <li>Why did we pick Supabase over RDS?</li>
-          <li>What did we settle on for Q4 pricing?</li>
-          <li>Did we ever agree to support Windows?</li>
-        </ul>
-        <p class="asksrc">from a fact you asked an agent to remember</p>
-      </div>
-      <div class="reveal">
-        <p class="askhead">Meetings</p>
-        <ul>
-          <li>What did we agree in the board call?</li>
-          <li>What were Tuesday&rsquo;s action items?</li>
-          <li>What did the customer actually ask for?</li>
-        </ul>
-        <p class="asksrc">from what one agent remembered for the next</p>
-      </div>
-      <div class="reveal">
-        <p class="askhead">People</p>
-        <ul>
-          <li>Who knows about the Stripe integration?</li>
-          <li>Who owns the SOC&nbsp;2 evidence?</li>
-          <li>Who last wrote down the launch date?</li>
-        </ul>
-        <p class="asksrc">from facts your agents were asked to remember</p>
-      </div>
-    </div>
-    <p class="lede askfoot">Every one of these was answered once already.
-      The next agent you open can recall it.</p>
-  </div>
-</section>
-
-<!-- The differentiator, shown ---------------------------------------------- -->
-<section class="band" id="proof" aria-labelledby="proof-h">
-  <div class="wrap zig">
-    <div class="zigtext">
-      <p class="eyebrow">Why it answered</p>
-      <h2 data-words id="proof-h">Every answer shows its work.</h2>
-      <p class="lede">Other tools hand you ten results and let you guess.
-        OneBrain shows which search found each one, where it ranked, and what
-        moved it &mdash; so you can tell a real match from a lucky one.</p>
-      <ul class="ticks">
-        <li>Which search found it, and where it ranked</li>
-        <li>What the reranker moved, and by how much</li>
-        <li>Every weighting that touched the score</li>
-      </ul>
-    </div>
-    <figure class="mock reveal" aria-hidden="true">
-      <div class="shot">
-        <div class="shotbar">
-          <span class="dots"><i></i><i></i><i></i></span>
-          <span class="shoturl">onebrain.app/#search</span>
-        </div>
-        <div class="shotbody">
-          <div class="fauxrow">
-            <div class="fauxinput">why did we not adopt cognee</div>
-            <span class="fauxgo">Search</span>
+    <article class="hc-card is-on" data-stack-card="welcome" id="welcome" aria-labelledby="hero-h">
+      <div class="cardbody welcome-body">
+        <div class="cardtitle"><span>Welcome</span></div>
+        <div class="offer">
+          <h1 class="field" id="hero-h">One memory for every agent you use.</h1>
+          <p class="field sub">Remember a decision in one agent. Recall it from another. The memory is private to you, and a shared space is opt-in.</p>
+          <div class="herocta">
+            <a class="paint solid" href="./app.html" data-signin>Sign in with Google</a>
+            <a class="paint" href="#proof" data-go="proof">See an example answer</a>
           </div>
-          <p class="dim" style="margin:0 0 6px;font-size:13px">8 results in 1.2&nbsp;s</p>
+          <p class="field note">A fresh sign-in is a private personal memory. Shared spaces are opt-in.</p>
+        </div>
+        <button type="button" class="peek" data-go="proof">
+          <span class="cardbar">Kept by Cursor</span>
+          <span class="peekbody">
+            <span class="syn">Synthetic example</span>
+            On 2026-08-08 the team decided not to adopt Cognee, keeping the in-house retrieval engine.
+            <span class="syn">Another agent can recall this, and show why it matched.</span>
+          </span>
+        </button>
+      </div>
+    </article>
 
-          <div class="hit">
-            <div class="hrank num">1</div>
-            <div class="hbody">
-              <div class="hc">On 2026-08-08 the team decided not to adopt Cognee,
-                keeping the in-house retrieval engine.</div>
-              <div class="hm">
-                <span class="pill">note</span>
-                <span class="arm semantic">semantic&nbsp;#1</span>
-                <span class="arm lexical">lexical&nbsp;#1</span>
-                <span class="arm edge">edge&nbsp;#1</span>
-                <span class="arm">+3.0% recency</span>
+    <article class="hc-card" data-stack-card="proof" id="proof" aria-labelledby="proof-h">
+      <div class="cardbody">
+        <h2 id="proof-h">Every answer shows its work.</h2>
+        <p class="lede">Other tools hand you ten results and let you guess. OneBrain shows which search found each one, where it ranked, and what moved it &mdash; so you can tell a real match from a lucky one.</p>
+        <div class="shot">
+          <div class="shotbar"><span>Recall</span><span class="syn" style="margin:0 0 0 auto">Synthetic example</span></div>
+          <div class="shotbody">
+            <div class="fauxrow">
+              <div class="fauxinput">why did we not adopt cognee</div>
+              <span class="fauxgo">Search</span>
+            </div>
+            <p class="note" style="margin:0 0 8px">2 results in 1.2&nbsp;s</p>
+            <div class="hitex">
+              <div class="hrank">1</div>
+              <div>
+                <p class="hc">On 2026-08-08 the team decided not to adopt Cognee, keeping the in-house retrieval engine.</p>
+                <div class="hm">
+                  <span class="pill">note</span>
+                  <span class="arm semantic">semantic&nbsp;#1</span>
+                  <span class="arm lexical">lexical&nbsp;#1</span>
+                  <span class="arm edge">edge&nbsp;#1</span>
+                  <span class="arm">+3.0% recency</span>
+                </div>
+                <p class="hsum">score = (1/(36+1) + 1/(36+1) + 1/(36+1)) &times; 1.030 = 0.0835</p>
               </div>
-              <div class="faint mono hsum">score = (1/(36+1) + 1/(36+1) + 1/(36+1)) &times; 1.030 = 0.0835</div>
             </div>
-          </div>
-
-          <div class="hit">
-            <div class="hrank num">2</div>
-            <div class="hbody">
-              <div class="hc">Cognee has no transaction-time supersession, cited
-                as a design limitation.</div>
-              <div class="hm">
-                <span class="pill">note</span>
-                <span class="arm semantic">semantic&nbsp;#3</span>
-                <span class="arm moved">reranked&nbsp;13&rarr;2</span>
+            <div class="hitex">
+              <div class="hrank">2</div>
+              <div>
+                <p class="hc">Cognee has no transaction-time supersession, cited as a design limitation.</p>
+                <div class="hm">
+                  <span class="pill">note</span>
+                  <span class="arm semantic">semantic&nbsp;#3</span>
+                  <span class="arm moved">reranked 13 to 2</span>
+                </div>
+                <p class="hsum">score = 1/(36+3) = 0.0256</p>
               </div>
-              <div class="faint mono hsum">score = 1/(36+3) = 0.0256</div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:16px"><a class="paint" href="#change" data-go="change">When a fact changes</a></p>
+      </div>
+    </article>
+
+    <article class="hc-card" data-stack-card="ask" id="ask" aria-labelledby="ask-h">
+      <div class="cardbody">
+        <h2 id="ask-h">The questions that keep coming back.</h2>
+        <div class="asks">
+          <div>
+            <h3>Decisions</h3>
+            <ul>
+              <li>Why did we pick Supabase over RDS?</li>
+              <li>What did we settle on for Q4 pricing?</li>
+              <li>Did we ever agree to support Windows?</li>
+            </ul>
+            <p class="asksrc">from a fact you asked an agent to remember</p>
+          </div>
+          <div>
+            <h3>Meetings</h3>
+            <ul>
+              <li>What did we agree in the board call?</li>
+              <li>What were Tuesday&rsquo;s action items?</li>
+              <li>What did the customer actually ask for?</li>
+            </ul>
+            <p class="asksrc">from what one agent remembered for the next</p>
+          </div>
+          <div>
+            <h3>People</h3>
+            <ul>
+              <li>Who knows about the Stripe integration?</li>
+              <li>Who owns the SOC&nbsp;2 evidence?</li>
+              <li>Who last wrote down the launch date?</li>
+            </ul>
+            <p class="asksrc">from facts your agents were asked to remember</p>
+          </div>
+        </div>
+        <p class="lede" style="margin-top:18px">Every one of these was answered once already. The next agent you open can recall it.</p>
+      </div>
+    </article>
+
+    <article class="hc-card" data-stack-card="change" id="change" aria-labelledby="change-h">
+      <div class="cardbody">
+        <h2 id="change-h">It forgets on purpose.</h2>
+        <p class="lede">Change a price, a plan or an owner and the old fact is <em>retired</em> — search stops returning it, instead of leaving it one row below the new one waiting to mislead somebody.</p>
+        <p class="lede">Nothing is lost: you keep the trail of what it said, when it changed, and what replaced it.</p>
+        <div class="shot">
+          <div class="shotbar"><span>History</span><span class="syn" style="margin:0 0 0 auto">Synthetic example</span></div>
+          <div class="shotbody">
+            <span class="pill">decision</span>
+            <p>Pricing for the Atlas tier was set at $49/seat/month, effective Q4.</p>
+            <div class="timeline">
+              <div class="tnode past">
+                <div class="tc">Pricing for Atlas was set at $39/seat/month.</div>
+                <div class="tw">recorded 30 Jun &middot; replaced by this fact</div>
+              </div>
+              <div class="tnode now">
+                <div class="tc"><b>Pricing for the Atlas tier was set at $49/seat/month, effective Q4.</b></div>
+                <div class="tw">recorded 7h ago &middot; current</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </figure>
-  </div>
-</section>
+    </article>
 
-<!-- Supersession ----------------------------------------------------------- -->
-<section class="band" id="change" aria-labelledby="change-h">
-  <div class="wrap zig flip">
-    <div class="zigtext">
-      <p class="eyebrow">When it changes</p>
-      <h2 data-words id="change-h">It forgets on purpose.</h2>
-      <p class="lede">Change a price, a plan or an owner and the old fact is
-        <em>retired</em> — search stops returning it, instead of leaving it one
-        row below the new one waiting to mislead somebody.</p>
-      <p class="lede">Nothing is lost: you keep the trail of what it said, when
-        it changed, and what replaced it.</p>
-    </div>
-    <figure class="mock reveal" aria-hidden="true">
-      <div class="shot">
-        <div class="shotbar">
-          <span class="dots"><i></i><i></i><i></i></span>
-          <span class="shoturl">onebrain.app/#memories</span>
-        </div>
-        <div class="shotbody">
-          <div class="pill" style="margin-bottom:9px">decision</div>
-          <div style="font-size:15px;line-height:1.55;margin-bottom:4px">Pricing
-            for the Atlas tier was set at $49/seat/month, effective Q4.</div>
-          <h4 style="margin-top:20px">History</h4>
-          <div class="timeline">
-            <div class="tnode past">
-              <div class="tc">Pricing for Atlas was set at $39/seat/month.</div>
-              <div class="tw">recorded 30 Jun &middot; replaced by this fact</div>
-            </div>
-            <div class="tnode now">
-              <div class="tc"><b>Pricing for the Atlas tier was set at
-                $49/seat/month, effective Q4.</b></div>
-              <div class="tw">recorded 7h ago &middot; current</div>
-            </div>
+    <article class="hc-card" data-stack-card="how" id="how" aria-labelledby="how-h">
+      <div class="cardbody">
+        <h2 id="how-h">Three steps. You choose what is kept.</h2>
+        <figure class="pipe" role="img" aria-label="Claude, Cursor, ChatGPT, Codex, scripts and hooks remember into one private memory, which you and your other agents recall.">
+          <svg viewBox="0 0 960 220" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="#000" stroke-width="2">
+              <rect x="24" y="24" width="150" height="28"/><rect x="24" y="60" width="150" height="28"/>
+              <rect x="24" y="96" width="150" height="28"/><rect x="24" y="132" width="150" height="28"/>
+              <rect x="24" y="168" width="150" height="28"/>
+              <path d="M174 38 H250 V110 H390"/><path d="M174 74 H250 V110"/>
+              <path d="M174 110 H390"/><path d="M174 146 H250 V110"/><path d="M174 182 H250 V110"/>
+              <rect x="390" y="78" width="180" height="64"/>
+              <path d="M570 98 H700 V40 H760"/><path d="M570 122 H700 V180 H760"/>
+              <rect x="760" y="22" width="176" height="40"/><rect x="760" y="158" width="176" height="40"/>
+            </g>
+            <g fill="#000" font-family="DejaVu Sans, sans-serif" font-size="13">
+              <text x="36" y="43">Claude</text><text x="36" y="79">Cursor</text>
+              <text x="36" y="115">ChatGPT</text><text x="36" y="151">Codex</text>
+              <text x="36" y="187">A script or hook</text>
+              <text x="408" y="106">One memory</text>
+              <text x="408" y="126">private, when asked</text>
+              <text x="776" y="46">You, searching</text>
+              <text x="776" y="182">Your other agents</text>
+            </g>
+          </svg>
+        </figure>
+        <ol class="steps">
+          <li>
+            <h3>Remember</h3>
+            <p>You, or an agent you connected, explicitly stores a preference, decision, or fact. Automatic ingestion is off: Gmail, Meet, Calendar, and Trello are not read on their own. The note is kept as you sent it.</p>
+          </li>
+          <li>
+            <h3>Distil</h3>
+            <p>Each note becomes single facts, tied to the people and projects they name. API keys and passwords are stripped before anything is saved.</p>
+          </li>
+          <li>
+            <h3>Recall</h3>
+            <p>Ask in the browser, or let another agent ask. Same private memory either way, with the same explanation attached.</p>
+          </li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="hc-card" data-stack-card="data" id="data" aria-labelledby="data-h">
+      <div class="cardbody">
+        <h2 id="data-h">You can take it all back.</h2>
+        <p class="lede">You are about to keep a memory your agents can read. The first question is what happens to it, so here is the answer.</p>
+        <ul class="ticks">
+          <li><b>Leaving takes one click.</b> Export the whole thing as JSON, or delete anything by id, by source, or by what it says.</li>
+          <li><b>Secrets never get written.</b> API keys, passwords and tokens are stripped on the way in, before the first row is saved.</li>
+          <li><b>Private by default.</b> A fresh sign-in is a personal memory only you and the agents you connect can read. A shared space is opt-in, and only an existing member can open it.</li>
+          <li><b>Every fact traces back.</b> The note you remembered is kept unchanged, so you can always read what was stored.</li>
+        </ul>
+        <section class="gdata" id="google-data">
+          <h3>Google user data disclosure</h3>
+          <p class="lede">This block is the disclosure for Google API access. It is not a product feature. Automatic ingestion is off: OneBrain does not read Gmail, Drive, or Calendar on its own. If a Google connection is authorized, including a legacy grant, access is read-only, limited to that member, and revocable from the Google account.</p>
+          <dl>
+            <dt>Gmail</dt>
+            <dd>Authorized access is read-only and limited to recent work mail (promotions and social excluded), for decisions and commitments made over email. Message content is processed into short factual notes. Mailboxes are never shared between members.</dd>
+            <dt>Google Drive</dt>
+            <dd>Authorized access is read-only and limited to Google Meet notes and transcripts stored in Drive.</dd>
+            <dt>Google Calendar</dt>
+            <dd>Authorized access is read-only and limited to events, attendees, and dates.</dd>
+          </dl>
+          <p class="limited">OneBrain&rsquo;s use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener" target="_blank">Google API Services User Data Policy</a>, including the Limited Use requirements. We never sell your data or use it for advertising.</p>
+        </section>
+      </div>
+    </article>
+
+    <article class="hc-card" data-stack-card="agents" id="agents" aria-labelledby="agents-h">
+      <div class="cardbody">
+        <h2 id="agents-h">One line, wherever you work.</h2>
+        <p class="lede">Mint one token, then one line. Point an agent here and it can recall what you already remembered &mdash; the terminal, the editor, or a job running at 3am.</p>
+        <div class="term">
+          <div class="termbar" role="tablist" aria-label="Setup target">
+            <button class="tterm" role="tab" id="t-cc" aria-controls="p-cc" aria-selected="true">Claude Code</button>
+            <button class="tterm" role="tab" id="t-cursor" aria-controls="p-cursor" aria-selected="false">Cursor &amp; other MCP</button>
+            <button class="tterm" role="tab" id="t-rest" aria-controls="p-rest" aria-selected="false">Remote agents</button>
+            <span class="grow"></span>
+            <button class="copy" type="button">Copy</button>
           </div>
-        </div>
-      </div>
-    </figure>
-  </div>
-</section>
-
-<!-- How -------------------------------------------------------------------- -->
-<section class="band" id="how" aria-labelledby="how-h">
-  <div class="wrap">
-    <p class="eyebrow">How it works</p>
-    <h2 data-words id="how-h">Three steps. You choose what is kept.</h2>
-    <figure class="pipe reveal" role="img"
-      aria-label="Claude, Cursor, ChatGPT, Codex, scripts and hooks remember into one private memory, which you and your other agents recall.">
-      <svg viewBox="0 0 960 400" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <radialGradient id="hubglow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#a0b5eb" stop-opacity=".55"/>
-            <stop offset="100%" stop-color="#a0b5eb" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-
-        <!-- connectors first, so pills sit on top -->
-        <g class="pipe-links">
-          <g class="pl"><path d="M 190 48  C 330 48, 350 160, 462 188"/></g>
-          <g class="pl"><path d="M 190 110 C 320 110, 350 172, 462 194"/></g>
-          <g class="pl"><path d="M 190 172 C 320 172, 350 190, 462 200"/></g>
-          <g class="pl"><path d="M 190 234 C 320 234, 350 212, 462 206"/></g>
-          <g class="pl"><path d="M 190 296 C 320 296, 350 226, 462 212"/></g>
-          <g class="pl"><path d="M 190 358 C 330 358, 350 240, 462 218"/></g>
-          <g class="pl out"><path d="M 570 190 C 660 170, 680 120, 760 104"/></g>
-          <g class="pl out"><path d="M 570 214 C 660 234, 680 284, 760 300"/></g>
-        </g>
-
-        <!-- sources -->
-        <g class="pipe-src">
-          <g class="pn"><rect x="40" y="30"  width="150" height="36" rx="18"/><circle cx="62" cy="48" r="3" fill="#5b8cff"/><text x="76" y="53">CLAUDE</text></g>
-          <g class="pn"><rect x="40" y="92"  width="150" height="36" rx="18"/><circle cx="62" cy="110" r="3" fill="#22c55e"/><text x="76" y="115">CURSOR</text></g>
-          <g class="pn"><rect x="40" y="154" width="150" height="36" rx="18"/><circle cx="62" cy="172" r="3" fill="#eab308"/><text x="76" y="177">CHATGPT</text></g>
-          <g class="pn"><rect x="40" y="216" width="150" height="36" rx="18"/><circle cx="62" cy="234" r="3" fill="#8b5cf6"/><text x="76" y="239">CODEX</text></g>
-          <g class="pn"><rect x="40" y="278" width="150" height="36" rx="18"/><circle cx="62" cy="296" r="3" fill="#f97316"/><text x="76" y="301">A SCRIPT</text></g>
-          <g class="pn"><rect x="40" y="340" width="150" height="36" rx="18"/><circle cx="62" cy="358" r="3" fill="#ff9473"/><text x="76" y="363">A HOOK</text></g>
-        </g>
-
-        <!-- the hub -->
-        <g class="pipe-hub">
-          <circle cx="516" cy="202" r="95" fill="url(#hubglow)"/>
-          <rect x="446" y="176" width="140" height="52" rx="26"/>
-          <text x="516" y="198" text-anchor="middle" class="hub-t1">ONE MEMORY</text>
-          <text x="516" y="215" text-anchor="middle" class="hub-t2">private &#183; remembered &#183; current</text>
-        </g>
-
-        <!-- consumers -->
-        <g class="pipe-dst">
-          <g class="pn"><rect x="762" y="82"  width="158" height="44" rx="22"/><text x="841" y="101" text-anchor="middle">YOU</text><text x="841" y="116" text-anchor="middle" class="pn-sub">dashboard search</text></g>
-          <g class="pn"><rect x="762" y="278" width="158" height="44" rx="22"/><text x="841" y="297" text-anchor="middle">YOUR AGENTS</text><text x="841" y="312" text-anchor="middle" class="pn-sub">recall from any harness</text></g>
-        </g>
-      </svg>
-    </figure>
-
-    <ol class="steps">
-      <li class="reveal">
-        <span class="num">01</span>
-        <h3>Remember</h3>
-        <p>You, or an agent you connected, explicitly stores a preference,
-          decision, or fact. Automatic ingestion is off: Gmail, Meet,
-          Calendar, and Trello are not read on their own. The note is kept
-          as you sent it.</p>
-      </li>
-      <li class="reveal">
-        <span class="num">02</span>
-        <h3>Distil</h3>
-        <p>Each note becomes single facts, tied to the people and projects they
-          name. API keys and passwords are stripped before anything is saved.</p>
-      </li>
-      <li class="reveal">
-        <span class="num">03</span>
-        <h3>Recall</h3>
-        <p>Ask in the browser, or let another agent ask. Same private memory
-          either way, with the same explanation attached.</p>
-      </li>
-    </ol>
-  </div>
-</section>
-
-<!-- Objections: the first question anyone asks of this ---------------------- -->
-<section class="band" id="data" aria-labelledby="data-h">
-  <div class="wrap zig">
-    <div class="zigtext">
-      <p class="eyebrow">Your data</p>
-      <h2 data-words id="data-h">You can take it all back.</h2>
-      <p class="lede">You are about to keep a memory your agents can read.
-        The first question is what happens to it, so here is the answer.</p>
-    </div>
-    <ul class="ticks big">
-      <li><b>Leaving takes one click.</b> Export the whole thing as JSON, or
-        delete anything by id, by source, or by what it says.</li>
-      <li><b>Secrets never get written.</b> API keys, passwords and tokens are
-        stripped on the way in, before the first row is saved.</li>
-      <li><b>Private by default.</b> A fresh sign-in is a personal memory only
-        you and the agents you connect can read. A shared space is opt-in, and
-        only an existing member can open it.</li>
-      <li><b>Every fact traces back.</b> The note you remembered is kept
-        unchanged, so you can always read what was stored.</li>
-    </ul>
-  </div>
-  <div class="wrap gdata reveal" id="google-data">
-    <h3>Google user data disclosure</h3>
-    <p class="lede">This block is the disclosure for Google API access. It is
-      not a product feature. Automatic ingestion is off: OneBrain does not read
-      Gmail, Drive, or Calendar on its own. If a Google connection is
-      authorized, including a legacy grant, access is read-only, limited to
-      that member, and revocable from the Google account.</p>
-    <dl>
-      <dt>Gmail</dt>
-      <dd>Authorized access is read-only and limited to recent work mail
-        (promotions and social excluded), for decisions and commitments made
-        over email. Message content is processed into short factual notes.
-        Mailboxes are never shared between members.</dd>
-      <dt>Google Drive</dt>
-      <dd>Authorized access is read-only and limited to Google Meet notes and
-        transcripts stored in Drive.</dd>
-      <dt>Google Calendar</dt>
-      <dd>Authorized access is read-only and limited to events, attendees, and
-        dates.</dd>
-    </dl>
-    <p class="limited">OneBrain&rsquo;s use and transfer of information received from
-      Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy"
-      rel="noopener" target="_blank">Google API Services User Data Policy</a>,
-      including the Limited Use requirements. We never sell your data or use it
-      for advertising.</p>
-  </div>
-</section>
-
-<!-- Setup: two audiences, local people and remote agents ------------------ -->
-<section class="band" id="agents" aria-labelledby="agents-h">
-  <div class="wrap narrow center">
-    <p class="eyebrow">Wire it up</p>
-    <h2 data-words id="agents-h">One line, wherever you work.</h2>
-    <p class="lede">Mint one token, then one line. Point an agent here and it
-      can recall what you already remembered &mdash; the terminal, the editor,
-      or a job running at 3am.</p>
-
-    <div class="term">
-      <div class="termbar" role="tablist" aria-label="Setup target">
-        <button class="tterm" role="tab" id="t-cc" aria-controls="p-cc"
-          aria-selected="true">Claude Code</button>
-        <button class="tterm" role="tab" id="t-cursor" aria-controls="p-cursor"
-          aria-selected="false">Cursor &amp; other MCP</button>
-        <button class="tterm" role="tab" id="t-rest" aria-controls="p-rest"
-          aria-selected="false">Remote agents</button>
-        <span class="grow"></span>
-        <button class="copy" type="button">Copy</button>
-      </div>
-
-      <div class="termpane" id="p-cc" role="tabpanel" aria-labelledby="t-cc"
-        data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- claude-code'>
+          <div class="termpane" id="p-cc" role="tabpanel" aria-labelledby="t-cc" data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- claude-code'>
 <pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> curl -fsSL <span data-install-sh>__INSTALL_SH__</span> | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- claude-code</code></pre>
-        <p class="termnote">Mint the token in Settings &rarr; Connect your tools
-          and export it as <span class="mono" translate="no">ONEBRAIN_API_KEY</span>.
-          Production is <span class="mono" translate="no">https://onebrain.apxlbz.com/agent-install.sh</span>.
-          Dev is the same command from
-          <span class="mono" translate="no">https://onebrain-dev.apxlbz.com/agent-install.sh</span>.</p>
-      </div>
-
-      <div class="termpane" id="p-cursor" role="tabpanel" aria-labelledby="t-cursor" hidden
-        data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- cursor'>
+            <p class="termnote">Mint the token in Settings &rarr; Connect your tools and export it as <span class="mono" translate="no">ONEBRAIN_API_KEY</span>. Production is <span class="mono" translate="no">https://onebrain.apxlbz.com/agent-install.sh</span>. Dev is the same command from <span class="mono" translate="no">https://onebrain-dev.apxlbz.com/agent-install.sh</span>.</p>
+          </div>
+          <div class="termpane" id="p-cursor" role="tabpanel" aria-labelledby="t-cursor" hidden data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- cursor'>
 <pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> curl -fsSL <span data-install-sh>__INSTALL_SH__</span> | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- cursor</code></pre>
-        <p class="termnote">Same script. <span class="mono" translate="no">codex</span>
-          and <span class="mono" translate="no">mcp</span> are the other hosts.</p>
-      </div>
-
-      <div class="termpane" id="p-rest" role="tabpanel" aria-labelledby="t-rest" hidden
-        data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- rest'>
+            <p class="termnote">Same script. <span class="mono" translate="no">codex</span> and <span class="mono" translate="no">mcp</span> are the other hosts.</p>
+          </div>
+          <div class="termpane" id="p-rest" role="tabpanel" aria-labelledby="t-rest" hidden data-copy='curl -fsSL __INSTALL_SH__ | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- rest'>
 <pre class="snippet" tabindex="0"><code translate="no"><span class="prompt">$</span> curl -fsSL <span data-install-sh>__INSTALL_SH__</span> | ONEBRAIN_API_KEY="$ONEBRAIN_API_KEY" bash -s -- rest</code></pre>
-        <p class="termnote">For agents that never touch a laptop &mdash; CI jobs,
-          cron, a service in your cluster. The key stays in the environment.</p>
+            <p class="termnote">For agents that never touch a laptop &mdash; CI jobs, cron, a service in your cluster. The key stays in the environment.</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </article>
+
+    <article class="hc-card" data-stack-card="close" id="close" aria-labelledby="close-h">
+      <div class="cardbody">
+        <h2 id="close-h">Tell one agent. The others can recall it.</h2>
+        <p class="lede">A fresh sign-in is a private personal memory. Shared spaces are opt-in.</p>
+        <a class="paint solid" href="./app.html" data-signin>Sign in with Google</a>
+      </div>
+    </article>
+
   </div>
-</section>
 
-<!-- Close ------------------------------------------------------------------ -->
-<section class="closing" aria-labelledby="close-h">
-  <div class="wrap narrow">
-    <h2 data-words id="close-h">Tell one agent. The others can recall it.</h2>
-    <a class="btn primary lg" href="./app.html" data-signin>Sign in with Google</a>
-    <p class="note" style="margin-top:18px">A fresh sign-in is a private personal
-      memory. Shared spaces are opt-in.</p>
-  </div>
-</section>
+  <footer class="statusbar">
+    <button type="button" class="paint" data-back disabled>Back</button>
+    <span id="card-label" data-card-label>Welcome</span>
+    <span data-card-count>1 of 8</span>
+    <span class="grow"></span>
+    <a href="./docs.html">Docs</a>
+    <a href="./llms.txt">llms.txt</a>
+    <a href="./install.html">Install</a>
+    <a href="./pricing.html">Pricing</a>
+    <a href="./changelog.html">Changelog</a>
+    <a href="./terms.html">Terms</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="mailto:or@apxlbz.com">Contact</a>
+    <span>&copy; 2026 ApexLabs</span>
+  </footer>
+</div>
+</div>
 
-<footer class="foot">
-  <span translate="no">OneBrain</span>
-  <span class="dim">One private memory, shared across every AI agent you use.</span>
-  <span class="grow"></span>
-  <a href="./docs.html">Docs</a>
-  <a href="./llms.txt">llms.txt</a>
-  <a href="./install.html">Install</a>
-  <a href="./pricing.html">Pricing</a>
-  <a href="./changelog.html">Changelog</a>
-  <a href="./terms.html">Terms</a>
-  <a href="./privacy.html">Privacy</a>
-  <a href="mailto:or@apxlbz.com">Contact</a>
-  <span class="dim">&copy; 2026 ApexLabs</span>
-</footer>
+<p id="stack-live" class="visually-hidden" role="status" aria-live="polite"></p>
 
-<script src="./home.js?v=1"></script>
+<script src="./home.js?v=4"></script>
 <script type="module" src="./home-auth.js?v=2"></script>
 </body>
 </html>

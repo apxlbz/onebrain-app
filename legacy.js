@@ -191,13 +191,13 @@ async function viewOverview(root) {
       <section class="card" aria-labelledby="h-recent">
         <h2 class="sec" id="h-recent">Latest knowledge</h2>
         ${recent.length
-          ? `<table class="t"><tbody>${recent.map((f) => `
-              <tr data-goto="memories" tabindex="0" role="button"
+          ? `<div class="mgrid">${recent.map((f) => `
+              <div class="hit" data-goto="memories" tabindex="0" role="button"
                   aria-label="Open Knowledge">
-                <td>${clip(f.content, 96)}</td>
-                <td class="tight"><span class="pill">${esc(f.type || 'fact')}</span></td>
-                <td class="tight">${ago(f.created_at)}</td>
-              </tr>`).join('')}</tbody></table>`
+                <div class="hc">${clip(f.content, 96)}</div>
+                <div class="hm"><span class="pill">${esc(f.type || 'fact')}</span>
+                  <span class="faint">${ago(f.created_at)}</span></div>
+              </div>`).join('')}</div>`
           : '<p class="dim">Nothing yet — mint a token in Settings and install a host, or call remember().</p>'}
       </section>
       <section class="card" aria-labelledby="h-src">
@@ -305,25 +305,22 @@ async function viewMemories(root, params) {
 
     const to = Math.min(data.offset + data.items.length, data.total);
     list.innerHTML = `
-      <table class="t"><thead><tr>
-        <th style="width:50%">Fact</th><th style="width:13%">Source</th><th style="width:13%">Written by</th>
-        <th style="width:11%">Type</th><th style="width:15%">About</th>
-        <th style="width:11%">When</th>
-      </tr></thead><tbody>
+      <div class="mgrid">
       ${data.items.map((f) => `
-        <tr data-id="${esc(f.id)}" tabindex="0" role="button"
+        <article class="hit" data-id="${esc(f.id)}" tabindex="0" role="button"
             aria-label="Open details for this fact">
-          <td><span class="clamp2">${esc(f.content)}</span>${f.is_current ? ''
-            : ' <span class="pill" title="A newer fact replaced this">superseded</span>'}</td>
-          <td class="tight">${esc(f.source)}</td>
-          <td class="tight">${badgeHTML({ source: f.source, metadata: f.memory_raw && f.memory_raw.metadata }, esc)}</td>
-          <td class="tight">${esc(f.type)}</td>
-          <td class="tight">${esc([f.entity, f.product, f.topic, f.system]
-            .filter(Boolean)[0] || '—')}</td>
-          <td class="tight" title="${esc(exact(f.happened_at || f.created_at))}">${
-            ago(f.happened_at || f.created_at)}</td>
-        </tr>`).join('')}
-      </tbody></table>
+          <div class="hc clamp2">${esc(f.content)}</div>
+          <div class="hm">
+            <span class="pill">${esc(f.source)}</span>
+            ${badgeHTML({ source: f.source, metadata: f.memory_raw && f.memory_raw.metadata }, esc)}
+            <span class="pill">${esc(f.type)}</span>
+            ${f.is_current ? '' : '<span class="pill" title="A newer fact replaced this">superseded</span>'}
+          </div>
+          <div class="faint" title="${esc(exact(f.happened_at || f.created_at))}">${
+            esc([f.entity, f.product, f.topic, f.system].filter(Boolean)[0] || '')}
+            ${ago(f.happened_at || f.created_at)}</div>
+        </article>`).join('')}
+      </div>
       <div class="row" style="margin-top:14px">
         <span class="dim num">${data.offset + 1}–${to} of ${n(data.total)}</span>
         <span class="grow"></span>
@@ -331,7 +328,7 @@ async function viewMemories(root, params) {
         <button id="mnext" ${to < data.total ? '' : 'disabled'}>Next</button>
       </div>`;
 
-    list.querySelectorAll('tr[data-id]').forEach((tr) =>
+    list.querySelectorAll('[data-id]').forEach((tr) =>
       activate(tr, () => openFact(tr.dataset.id, tr)));
     const page = (delta) => {
       MEM.offset = Math.max(0, MEM.offset + delta);
@@ -375,6 +372,7 @@ function openModal(el, firstFocus) {
 }
 function closeModal(el) {
   if (el.hidden) return;
+  document.querySelectorAll('.is-dissolving').forEach((n) => n.classList.remove('is-dissolving'));
   el.hidden = true;
   const back = modalReturn.get(el);
   modalReturn.delete(el);
@@ -394,6 +392,7 @@ function trapTab(el, e) {
 }
 
 async function openFact(id, opener) {
+  if (opener) opener.classList.add('is-dissolving');
   const body = $('dbody');
   body.innerHTML = '<div class="spin">Loading…</div>';
   openModal($('drawer'), $('dclose'));
@@ -630,7 +629,7 @@ function hitHTML(r, i) {
 
   const moved = x.reranked && x.fused_rank
     ? `<span class="arm moved" title="The cross-encoder reordered this">reranked ${
-        x.fused_rank}→${x.final_rank}</span>`
+        x.fused_rank} to ${x.final_rank}</span>`
     : '';
   let sum = (x.terms || []).map((t) =>
     `1/(${x.rrf_k}+${t.rank})${t.weight !== 1 ? `×${t.weight}` : ''}`).join(' + ');

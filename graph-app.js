@@ -1,6 +1,6 @@
 // Extracted from graph.html (F8: inline scripts moved out for strict CSP).
 // Kept in lockstep with the :root tokens above and with web/app.css.
-const COL={fact:"#737373",entity:"#7c3aed",company:"#0e7490",product:"#16a34a",system:"#ea580c",topic:"#ca8a04",tag:"#db2777",source:"#2563eb"};
+const COL={fact:"#000000",entity:"#4a4a4a",company:"#1a1a1a",product:"#666666",system:"#222222",topic:"#888888",tag:"#333333",source:"#555555"};
 const TYPE_LABEL={fact:"Facts",entity:"People",company:"Companies",product:"Products",system:"Systems",topic:"Topics",tag:"Tags",source:"Sources"};
 const HUB=new Set(["entity","company","product","system","topic","tag"]);
 const $=id=>document.getElementById(id);
@@ -231,7 +231,7 @@ function draw(){
   $("status").textContent=nodes.length+" nodes · "+links.length+(factMode?" edges (detailed)":" co-occurrence links (map)"+(SPARSE?" · early memory — links firm up as facts accumulate":""));
 
   linkSel=gLink.selectAll("line").data(links,d=>d.source+"|"+d.target+"|"+d.rel).join("line")
-    .attr("stroke",d=>d.rel==="similar"?"#16a34a":d.rel==="from"?"#2563eb":"var(--line-strong)")
+    .attr("stroke",d=>d.rel==="similar"?"#000":d.rel==="from"?"#555":"var(--line-strong)")
     .attr("stroke-dasharray",d=>d.rel==="similar"?"4 3":d.rel==="from"?"1 3":null)
     .attr("stroke-width",d=>d.rel==="cooccur"?Math.min(4,0.6+d.w*0.5):d.rel==="mentions"?0.8:1.2);
 

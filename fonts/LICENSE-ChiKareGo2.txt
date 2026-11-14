@@ -1,0 +1,19 @@
+ChiKareGo2
+Copyright Giles Booth
+
+License: Creative Commons Attribution
+Source: https://www.pentacom.jp/pentacom/bitfontmaker2/gallery/?id=3780
+
+The author's gallery page for this font states:
+"ChiKareGo2 by Giles Booth" and "license : (Creative Commons Attribution)".
+
+Creative Commons Attribution lets you reproduce, share, and use the font,
+including commercially and as a self-hosted webfont, as long as you credit
+Giles Booth, link the license, and note changes.
+
+This copy is a Latin subset in WOFF2 made for self-hosting. No glyphs were
+redrawn. The subsetter dropped the FFTM table. Glyphs the source font does
+not contain are not in this file.
+
+Attribution: ChiKareGo2 by Giles Booth, Creative Commons Attribution.
+https://www.pentacom.jp/pentacom/bitfontmaker2/gallery/?id=3780

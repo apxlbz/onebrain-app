@@ -79,7 +79,7 @@ const ICON = {
     <path fill="#1A73E8" d="M3 5.5A2.5 2.5 0 0 1 5.5 3H8v4H3z"/>
     <path fill="#EA4335" d="M16 3h2.5A2.5 2.5 0 0 1 21 5.5V7h-5z"/>
     <text x="12" y="16.6" text-anchor="middle" font-size="8.5"
-          font-family="Inter, system-ui, sans-serif" fill="#1A73E8">31</text></svg>`,
+          font-family="DejaVu Sans, sans-serif" fill="#1A73E8">31</text></svg>`,
 };
 
 let state = { step: 0, ob: null, conns: [], imported: 0 };

@@ -67,10 +67,8 @@
 .ob h1 { font-size:clamp(34px, 4.4vw, 58px); margin:0 0 var(--u4); }
 
 /* Steps swap by opacity+transform only, so nothing reflows mid-transition. */
-.js .step[data-anim="in"] { animation:obin 280ms var(--ease-out) both; }
-.js .step[data-anim="out"] { animation:obout 160ms var(--ease-out) both; }
-@keyframes obin  { from { opacity:0; transform:translateY(14px); } }
-@keyframes obout { to   { opacity:0; transform:translateY(-10px); } }
+.js .step[data-anim="in"] { animation: hc-in 440ms steps(8, end) both; }
+.js .step[data-anim="out"] { animation: hc-out 280ms steps(6, end) both; }
 
 /* -------------------------------------------------------------- welcome
 
@@ -123,8 +121,8 @@
   transition:border-color 200ms ease, box-shadow 200ms var(--ease-out);
 }
 .fi:hover { border-color:var(--line-strong); }
-.fi:focus { outline:none; border-color:var(--color-electric-iris);
-  box-shadow:0 0 0 4px rgba(43,89,209,.12); }
+.fi:focus { outline: 2px solid #000; outline-offset: 2px; border-color: #000;
+  box-shadow: none; }
 textarea.fi { height:auto; min-height:180px; padding:14px 18px; line-height:1.5;
   font-family:var(--font-mono, ui-monospace, monospace); font-size:13px; resize:vertical; }
 select.fi { appearance:none; cursor:pointer;
@@ -221,7 +219,7 @@ button.textlink { background:none; border:none; cursor:pointer; padding:0; }
 /* The logo carries recognition, so the status dot moves to the end of the row
    rather than competing with it for the leading position. */
 .srcicon { width:22px; height:22px; flex:none; display:block; }
-.srcicon svg { width:100%; height:100%; display:block; }
+.srcicon svg { width:100%; height:100%; display:block; filter: grayscale(1) contrast(1.4); }
 /* Registry servers get a monogram tile in the product's colour — a square
    with an initial reads as "a product" without shipping anyone's logo. */
 .srcicon.tile { display:grid; place-items:center; border-radius:6px;
@@ -405,6 +403,33 @@ a.ghostpill { text-decoration:none; }
 .wsteps { border:1px solid var(--color-ash-line); border-radius:24px;
   padding:var(--u4); margin-top:var(--u3); }
 .wsteps:focus, .wsteps:focus-visible { outline:none; }  /* reveal target, not a control */
+
+/* Ink, square controls, pixel titles. The wizard layout stays. */
+.ob { background-color: #fff; background-image: var(--stipple-soft); }
+.obnav { background: #fff; border-bottom: 2px solid #000; }
+.ob .navbrand { font-family: var(--font-display); font-weight: 700; }
+.ob .navbrand .mark { border-radius: 1px; background: #000; }
+.ob .navbrand .mark::after { border-radius: 0; }
+.obrail { font-family: var(--font-display); letter-spacing: 0; text-transform: none; font-size: 12px; }
+.rdot, .sd, .donemark { border-radius: 0; }
+.ob h1, .ob h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0; }
+.fl { font-family: var(--font-body); letter-spacing: 0; text-transform: none; font-size: 14px; font-weight: 700; color: #000; }
+.welh { font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none; color: #000; margin: 32px 0 10px; }
+.fi, .ghostpill, .srccard, .vpanel, .wsteps, .catfilter, .manual, .snip, .term, .imp-text, .imp-card {
+  border-radius: 2px !important; border-color: #000;
+}
+.srcicon.tile { background: #fff !important; color: #000 !important; border: 1px solid #000; border-radius: 1px; }
+.srcicon.logo img { filter: grayscale(1) contrast(1.3); }
+.obskip:hover, .ghostpill:hover, .manual summary:hover { color: #000; }
+#stepmain {
+  background: #fff;
+  border-width: 2px 3px 3px 2px;
+  border-style: solid;
+  border-color: #000;
+  margin-top: 28px;
+  margin-bottom: 28px;
+  padding-top: 36px;
+}
 .wsteps h2 { font-size:22px; margin:0 0 var(--u2); }
 .wlist { list-style:none; counter-reset:wstep; margin:var(--u3) 0 0; padding:0; }
 .wlist > li { counter-increment:wstep; position:relative;

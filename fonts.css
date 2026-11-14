@@ -1,0 +1,99 @@
+/* Self-hosted faces.
+   ChiKareGo2 (Giles Booth, Creative Commons Attribution) is the mixed-case
+   Chicago-like bitmap for menus, titles, buttons, and card text.
+   DejaVu Sans (Bitstream Vera) is for long legal and docs passages.
+   DejaVu Sans Mono is for install lines, scores, and identifiers.
+   Licenses: fonts/LICENSE-ChiKareGo2.txt and fonts/LICENSE-DejaVu.txt. */
+
+@font-face {
+  font-family: "ChiKareGo2";
+  src: url("./fonts/chikarego2.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ChiKareGo2";
+  src: url("./fonts/chikarego2.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DejaVu Sans";
+  src: url("./fonts/dejavu-sans.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DejaVu Sans";
+  src: url("./fonts/dejavu-sans-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DejaVu Sans Mono";
+  src: url("./fonts/dejavu-sans-mono.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ink: #000;
+  --paper: #fff;
+  --muted: #1a1a1a;
+  --faint: #333;
+  --line: #000;
+  --font-display: "ChiKareGo2", "DejaVu Sans", sans-serif;
+  --font-body: "ChiKareGo2", "DejaVu Sans", sans-serif;
+  --font-reading: "DejaVu Sans", "Geneva", sans-serif;
+  --font-mono: "DejaVu Sans Mono", ui-monospace, monospace;
+  --desk: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2'><rect width='2' height='2' fill='%23fff'/><rect width='1' height='1' fill='%23000'/><rect x='1' y='1' width='1' height='1' fill='%23000'/></svg>");
+  --stipple: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'><rect width='4' height='4' fill='%23fff'/><rect width='1' height='1' fill='%23000'/></svg>");
+  --stipple-soft: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'><rect width='4' height='4' fill='%23fff'/><rect width='1' height='1' fill='%23000'/></svg>");
+  --hatch: repeating-linear-gradient(-45deg, #000 0 1px, transparent 1px 7px);
+  --stripes: repeating-linear-gradient(to bottom, #000 0 1px, transparent 1px 3px);
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --t-press: 110ms;
+}
+
+* { box-sizing: border-box; }
+html { height: 100%; }
+body { margin: 0; }
+::selection { background: #000; color: #fff; }
+input, textarea { caret-color: #000; }
+html { scrollbar-color: #000 #fff; }
+::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar-track { background: #fff; background-image: var(--stipple); }
+::-webkit-scrollbar-thumb { background: #000; border: 2px solid #fff; }
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@keyframes hc-in {
+  from { opacity: 0; filter: blur(6px); }
+  to { opacity: 1; filter: blur(0); }
+}
+@keyframes hc-out {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
