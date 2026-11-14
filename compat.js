@@ -148,9 +148,9 @@ async function ops(days) {
   };
 }
 
-/* Usage page: raw metered events read via PostgREST (RLS scopes them to the
- * member's org), aggregated here exactly like /v1/ops — the server already
- * priced each row at read time through the usage_priced view. */
+/* Billing page payload. Plan, facts, and agents are what the page shows.
+ * The priced rows stay available for internal cost checks; they are not a
+ * per-call bill. RLS scopes the reads to the member's org. */
 async function usageSummary() {
   needAuth();
   const since = new Date(Date.now() - 30 * 864e5).toISOString();

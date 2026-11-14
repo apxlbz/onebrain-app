@@ -1201,62 +1201,39 @@ async function viewUsage(root) {
   root.innerHTML = '<div class="spin">Loading…</div>';
   let u;
   try { u = await api('/v1/usage'); } catch (e) { return fail(root, e); }
-  // Sub-cent amounts get the decimals they need — a row reading $0.0000
-  // under a non-zero total is a lie of precision.
-  const usd = (x, d = 2) => {
-    const v = Number(x || 0);
-    return `$${v.toFixed(v && Math.abs(v) < 0.01 ? 6 : d)}`;
-  };
-  const mt = (t) => (t >= 1e6 ? `${(t / 1e6).toFixed(2)}M` : n(t));
-  const REASON = { trial: 'Trial credit', allowance: 'Plan allowance',
-    purchase: 'Purchase', promo: 'Promo', adjustment: 'Adjustment' };
-  const breakdown = (rows, name, key) => rows.length
-    ? `<table class="t"><tbody>${rows.map((r) => `<tr>
-        <td>${esc(r[key])}</td>
-        <td class="tight num">${mt(r.tokens)}</td>
-        <td class="tight num">${usd(r.usd, 4)}</td></tr>`).join('')}</tbody></table>`
-    : `<p class="dim">No ${name} yet.</p>`;
-
   const planActive = u.plan && u.plan.status === 'active';
+  const planName = planActive ? u.plan.name : 'Free';
+  const planPrice = !planActive ? '$0'
+    : `$${Number(u.plan.usd_month)}${u.plan.per_seat ? '/seat' : ''}/mo`;
+  const factTile = u.free_tier?.active
+    ? tile(`${n(u.free_tier.facts)} / ${n(u.free_tier.max_facts)}`, 'facts', 'stored on Free')
+    : tile('Unlimited', 'facts', 'included');
+  const agentTile = u.free_tier?.active
+    ? tile(String(u.free_tier.max_agents), 'agents', 'connected on Free')
+    : tile('Unlimited', 'agents', 'included');
   root.innerHTML = `
     <h1>Billing</h1>
     ${u.free_tier?.active ? `<p class="lede" style="font-weight:600">
       ${n(u.free_tier.facts)} of ${n(u.free_tier.max_facts)} facts stored on
       Free — connect up to ${n(u.free_tier.max_agents)} agents.</p>` : ''}
-    <p class="lede">What the platform engine has thought on your behalf — every
-      call metered as it happened, priced per token. An org running on its own
-      API keys spends there, not here.</p>
+    <p class="lede">You are billed on facts and connected agents. Calling
+      recall and remember is included. API calls are not metered. A fair-use
+      cap can pause a runaway writer. It is not a charge.</p>
     ${planActive ? `<p class="dim" style="margin:-4px 0 14px">If we raise
       prices later, you keep today&rsquo;s rate for as long as you stay
       subscribed.</p>` : ''}
 
     <div class="tiles" style="margin-bottom:14px">
-      ${tile(usd(u.balance_usd), 'balance', 'prepaid — rolls over')}
-      ${tile(u.plan ? esc(u.plan.name) : '—', 'plan',
-             u.plan ? `${usd(u.plan.usd_month, 0)}/mo · ${esc(u.plan.status)}`
-                    : 'not chosen yet')}
-      ${tile(mt(u.month_tokens), 'tokens this month', `${usd(u.month_spend_usd, 4)} spent`)}
-      ${tile(n(u.events), 'metered calls', `last ${u.days} days`)}
+      ${tile(esc(planName), 'plan', planPrice)}
+      ${factTile}
+      ${agentTile}
     </div>
 
     <p style="margin:-4px 0 14px">
       <button class="ghost" id="bill-act">${
-        u.plan && u.plan.status === 'active' ? 'Manage billing' : 'Activate billing'}</button>
+        planActive ? 'Manage billing' : 'Activate billing'}</button>
       <span class="dim" id="bill-out" role="status" style="margin-left:10px"></span>
     </p>
-
-    <section class="card" style="margin-bottom:12px" aria-labelledby="h-ud">
-      <h2 class="sec" id="h-ud">Tokens per day</h2>
-      ${spark(u.daily, u.days, 'tokens')}
-    </section>
-
-    <section class="card" aria-labelledby="h-uop">
-      <h2 class="sec" id="h-uop">By operation</h2>
-      <p class="dim" style="margin:-4px 0 10px">Where the thinking goes:
-        enrichment turns raw inputs into facts; embeddings make them findable;
-        recall answers questions.</p>
-      ${breakdown(u.by_op, 'operations', 'operation')}
-    </section>
 
     <section class="card" style="margin-top:12px;margin-bottom:12px" aria-labelledby="h-um">
       <h2 class="sec" id="h-um">By member</h2>
@@ -1266,16 +1243,7 @@ async function viewUsage(root) {
       <div id="umembers"><div class="spin">Loading…</div></div>
     </section>
 
-    <section class="card" style="margin-top:12px" aria-labelledby="h-ul">
-      <h2 class="sec" id="h-ul">Credits</h2>
-      ${u.ledger.length
-        ? `<table class="t"><tbody>${u.ledger.map((r) => `<tr>
-            <td>${ago(r.at)}</td>
-            <td>${esc(REASON[r.reason] || r.reason)}</td>
-            <td class="tight num">${Number(r.delta_usd) >= 0 ? '+' : ''}${usd(r.delta_usd)}</td>
-          </tr>`).join('')}</tbody></table>`
-        : '<p class="dim">No credits yet — the trial lands when the memory is created.</p>'}
-    </section>`;
+    `;
 
   $('bill-act').addEventListener('click', async () => {
     const b = $('bill-act'); const out = $('bill-out');

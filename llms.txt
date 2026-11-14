@@ -31,6 +31,10 @@ Hosts, last argument of the install script: claude-code, cursor, codex, mcp, res
 - [Generic MCP](https://onebrain.apxlbz.com/examples/mcp.md): ~/.config/onebrain/mcp.json for any other MCP client.
 - [REST](https://onebrain.apxlbz.com/examples/rest.md): ~/.config/onebrain/rest.env, then POST /v1/remember and /v1/recall.
 
+## Pricing
+
+Free is $0: 500 facts and 2 agents. Pro is $12 a month: unlimited facts and agents. Team is $15 per seat per month. Enterprise is contact us. Billing is on facts and connected agents. `recall` and `remember` calls are never metered or billed. A fair-use cap can pause a runaway writer. It is not a charge.
+
 ## Also
 
 - [Install page](https://onebrain.apxlbz.com/install.html): the same lines, plus browser sign-in for clients that open Google themselves.

@@ -22,7 +22,7 @@
 </header>
 <main id="content" class="doc">
   <h1>Privacy Policy</h1>
-  <p class="muted">OneBrain, by Apex Labs · Last updated 8 November 2026 ·
+  <p class="muted">OneBrain, by Apex Labs · Last updated 14 November 2026 ·
     Contact: <a href="mailto:or@apxlbz.com">or@apxlbz.com</a></p>
 
   <p>OneBrain is a private memory for one person, shared across the AI agents
@@ -65,12 +65,14 @@
       Anthropic or Voyage API keys your organization supplies, are stored in
       Supabase Vault. Personal API tokens (<code>ob_…</code>) are stored only
       as SHA-256 hashes; we can't read them back.</li>
-    <li><b>Billing data.</b> Your plan, credit balance and ledger, and the
-      Stripe customer and subscription IDs for your organization. Payment
-      card details go to Stripe and never touch our servers.</li>
-    <li><b>Usage metering.</b> For every model call made on your
+    <li><b>Billing data.</b> Your plan and the Stripe customer and
+      subscription IDs for your organization. Payment card details go to
+      Stripe and never touch our servers. An internal cost ledger is kept
+      so a runaway writer can be paused. It is not a per-call bill, and a
+      zero balance does not stop recall or remember.</li>
+    <li><b>Usage records.</b> For every model call made on your
       organization's behalf: the operation, provider, model and token counts
-      (not the content), used for billing and capacity limits.</li>
+      (not the content), used for that fair-use cap, not billed per call.</li>
     <li><b>Activity records.</b> A <code>forget_audit</code> row for every
       forget request (who asked, which surface, the selector they typed, the
       ids removed — never the deleted content), recall events (used to rank

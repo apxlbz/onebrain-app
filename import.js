@@ -113,8 +113,12 @@ function showResult(t, error, notTried, stopped) {
   $('r-fail').textContent = t.failed + notTried;
   let msg;
   if (error) {
-    msg = /credit|quota|payment/i.test(error)
-      ? 'Your organization is out of credit, so the import stopped. Add credit and retry the rest.'
+    msg = /free-tier fact limit/i.test(error)
+      ? 'Free holds 500 facts. Upgrade in Billing, or forget facts you no longer need, then retry the rest.'
+      : /free-tier agent limit/i.test(error)
+      ? 'Free connects 2 agents. Upgrade in Billing, then retry the rest.'
+      : /rate limit|spend ceiling/i.test(error)
+      ? 'A fair-use cap paused new writes. It is not a charge. Retry the rest later.'
       : `The import stopped (${error}). ${notTried} not attempted. What was saved stays saved; retry the rest below.`;
   } else if (stopped) msg = `Stopped. ${notTried} not attempted.`;
   else if (t.failed) msg = `Imported with ${t.failed} failure${t.failed === 1 ? '' : 's'}. Press Import again to retry; repeats are skipped.`;

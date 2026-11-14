@@ -112,6 +112,10 @@ ONEBRAIN_API_KEY is required. The shell that ran the script did not have the var
 
 ONEBRAIN_API_KEY must be a single token with no whitespace. Re-export ONEBRAIN_API_KEY='ob_…' with no spaces and no extra line, then re-run.
 
+## Pricing
+
+Free is $0: 500 facts and 2 agents. Pro is $12 a month: unlimited facts and agents. Team is $15 per seat per month. Enterprise is contact us. Billing is on facts and connected agents. recall and remember calls are never metered or billed. A fair-use cap can pause a runaway writer. It is not a charge. A zero credit balance does not refuse a call.
+
 ## Not this path
 
 Do not look for a wizard, onboard.html, or a /v1/onboarding call. Google sign-in is only how a person creates the session that mints the first token. After that, agents use ONEBRAIN_API_KEY.

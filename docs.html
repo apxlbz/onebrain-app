@@ -244,7 +244,7 @@ claude mcp login onebrain</pre>
     <tr><td><code>query</code></td><td>string</td><td>Yes</td>
       <td>Search text. Empty, or made only of stopwords
         (&ldquo;the&rdquo;, &ldquo;what&rdquo;, &hellip;), short-circuits to
-        <code>{ results: [], degraded: [] }</code> without spending credit.</td></tr>
+        <code>{ results: [], degraded: [] }</code> without a model call.</td></tr>
     <tr><td><code>limit</code></td><td>integer</td><td>No &mdash; default 5</td>
       <td>Max facts returned, capped at 50 regardless of what is sent.</td></tr>
     <tr><td><code>source</code></td><td>string</td><td>No</td>
@@ -413,7 +413,7 @@ claude mcp login onebrain</pre>
   <p class="muted">A quick durability check runs before any of this: trivial
     or one-off chatter (&ldquo;ok thanks&rdquo;) is gated and reported, not
     stored &mdash; <code>{ "stored": false, "gated": true, "knowledge_items": 0 }</code>,
-    with nothing written and no credit spent.</p>
+    with nothing written.</p>
 
   <h3><code>POST /v1/handoff</code></h3>
   <p>Record a handoff for a task: one whole note &mdash; unlike
@@ -592,7 +592,7 @@ claude mcp login onebrain</pre>
       Free is $0 and holds 500 facts and 2 agents. Pro is $12 a month and
       Team is $15 per seat per month; both lift those limits. Calling
       <code>recall</code> and <code>remember</code> is included on every
-      plan. API calls are not metered. The same numbers are on the
+      plan. API calls are not metered. A fair-use cap can pause a runaway writer. It is not a charge. The same numbers are on the
       <a href="./pricing.html">pricing page</a>.</li>
   </ul>
   <p class="muted">Deeper design history, including diagrams, lives in the
@@ -736,7 +736,7 @@ claude mcp login onebrain</pre>
   <p>Free is $0 and holds 500 facts and 2 agents. Pro is $12 a month with
     unlimited facts and agents. Team is $15 per seat per month. Calling
     <code>recall</code> and <code>remember</code> is included on every plan.
-    API calls are not metered. The same numbers are on the
+    API calls are not metered. A fair-use cap can pause a runaway writer. It is not a charge. The same numbers are on the
     <a href="./pricing.html">pricing page</a>.</p>
   <h3>Can I self-host OneBrain?</h3>
   <p>Not currently. It runs on a managed Supabase project; there is no
@@ -802,8 +802,6 @@ claude mcp login onebrain</pre>
         <code>Authorization: Bearer $ONEBRAIN_SESSION_JWT</code>,
         or use Settings &rarr; Connect your tools &rarr; Mint my token.
         Minting again replaces the previous token.</td></tr>
-    <tr><td>402</td><td><code>out of platform credits &hellip;</code></td>
-      <td>Choose a plan or top up credit in Settings &rarr; Billing.</td></tr>
     <tr><td>402</td><td><code>free-tier fact limit reached &hellip;</code></td>
       <td>Upgrade your plan, or <code>forget</code> facts you no longer
         need.</td></tr>
@@ -831,8 +829,12 @@ claude mcp login onebrain</pre>
       <td>Send less text at once &mdash; split the <code>remember</code>
         call.</td></tr>
     <tr><td>429</td><td><code>write rate limit reached &hellip;</code></td>
-      <td>Slow down: wait out the stated window (per minute/day, per
-        organization) before retrying.</td></tr>
+      <td>A fair-use cap, not a charge. Wait out the stated window (per
+        minute or per day, per organization) before retrying.</td></tr>
+    <tr><td>429</td><td><code>per-org daily LLM-spend ceiling reached &hellip;</code></td>
+      <td>The same fair-use cap, counted in model spend over a rolling day.
+        New writes wait. <code>recall</code> keeps answering. It is not a
+        charge.</td></tr>
     <tr><td>429</td><td><code>&hellip; embedding backend busy &hellip;</code> /
       <code>platform engine busy &hellip;</code></td>
       <td>A transient upstream overload &mdash; retry after a few seconds;
